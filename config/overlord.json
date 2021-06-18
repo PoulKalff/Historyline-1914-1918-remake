@@ -1,0 +1,92 @@
+{
+   "host": "overlord",
+   "backupPath": "/home/klf/gitProjects/backupTools/overlord.backup",
+   "configFiles": [
+      [
+         "/etc/apache2/apache2.conf",
+         "Apache configuration file"
+      ],
+      [
+         "/etc/apache2/sites-available/majestic.conf",
+         "Website configuration file"
+      ],
+      [
+         "/etc/crontab",
+         "Cron jobs started"
+      ],
+      [
+         "/etc/exports",
+         "NFS configuration file"
+      ],
+      [
+         "/etc/fstab",
+         "List of mounts"
+      ],
+      [
+         "/etc/hosts",
+         "ghHosts known to system"
+      ],
+      [
+         "/etc/mysql/my.cnf",
+         "mySQL configuration file"
+      ],
+      [
+         "/etc/nanorc",
+         "Nano editor configuration"
+      ],
+      [
+         "/etc/postgresql/9.3/main/pg_hba.conf",
+         "postGreSQL configuration file"
+      ],
+      [
+         "/etc/rc.local",
+         "Locally started processes"
+      ],
+      [
+         "/etc/samba/smb.conf",
+         "Samba configuration file"
+      ],
+      [
+         "/home/dockerVolume",
+         "Configuration for the docker-files Sonarr, Radarr and Jackett"
+      ],
+      [
+         "/home/klf/.bashrc",
+         "Bash configuration file"
+      ],
+      [
+         "/initrd.img",
+         "ffsdfsdf"
+      ],
+      [
+         "/opt",
+         "-"
+      ],
+      [
+         "/test.txt",
+         "ghgh-"
+      ]
+   ],
+   "aptPackages": [
+      [
+         "bluemon",
+         "-"
+      ],
+      [
+         "fruit",
+         "dfdf-"
+      ],
+      [
+         "mc",
+         "-"
+      ],
+      [
+         "monotone",
+         "-"
+      ],
+      [
+         "openssh-server",
+         "dfdfsdfsdfsdfs fasdf asdf -"
+      ]
+   ]
+}
