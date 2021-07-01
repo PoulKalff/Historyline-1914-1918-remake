@@ -19,7 +19,7 @@ code = locale.getpreferredencoding()
 
 # --- Variables -----------------------------------------------------------------------------------
 
-version = "v0.90"   # completed Version2
+version = "v0.91"   # moved config-files to subdir, moved backed up files to path outside self-dir
 
 statusArray = { 1 : ["Directory", 3], 2 : ["Installing..", 4], 3 : ["<= Different =>", 1], 4 : ["OK", 2], 5 : ["Missing =>", 1], 
 				6 : ["<= Missing", 1], 7 : ["<= Missing =>", 1],  8 : ["Missing", 1], 9 : ["Installed", 2] }
