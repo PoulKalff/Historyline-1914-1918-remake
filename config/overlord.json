@@ -1,6 +1,6 @@
 {
    "host": "overlord",
-   "backupPath": "/home/klf/gitProjects/backupTools/overlord.backup",
+   "backupPath": "/mnt/3tb_hdd/backup/overlord.backup/",
    "configFiles": [
       [
          "/etc/apache2/apache2.conf",
@@ -86,7 +86,7 @@
       ],
       [
          "openssh-server",
-         "dfdfsdfsdfsdfs fasdf asdf -"
+         "Third Description"
       ]
    ]
 }

@@ -786,7 +786,7 @@ class BackupTools:
 
 	def writeToFile(self): 
 		""" Writes back the modified data to the xml-file """
-		fh = open(self.cfgFilename, 'w') 
+		fh = open(self.configFilePath, 'w') 
 		dataToWrite = { 'host' : self.hostname, 'backupPath' : self.backupPath, 'configFiles' : [], "aptPackages": [] }
 		for item in range(0, len(self.view.objects[10].content)):
 			dataToWrite['configFiles'].append([self.view.objects[10].content[item].text, self.view.objects[8].content[item].text])
