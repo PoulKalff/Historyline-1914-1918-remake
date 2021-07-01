@@ -334,6 +334,8 @@ class BackupTools:
 	def addPackage(self):
 		""" Shows systems' installed packages, loops to install """
 		self.view.drawStack.pop()
+		# unzip all .gz - files in /var/lib/apt, so we can read them
+		commandGunzip = "sudo gunzip history.log*.gz -f"
 		installedPackages = [ item.text for item in self.view.objects[11].content ]
 		commandGetAvailable = "grep ^Package /var/lib/apt/lists/* | awk '{print $2}' | sort -u"
 		reply = poktools.runExternal(commandGetAvailable)
@@ -342,7 +344,7 @@ class BackupTools:
 			packages.pop(0)
 		self.ajaxLists[0] = packages
 		self.ajaxLists[1] = packages[:10]
-		commandGetInstalled = "cat /var/log/apt/history.log* | grep 'Commandline: apt install' | sed 's/Commandline: apt install //g'"
+		commandGetInstalled = "cat /var/log/apt/history.log* | grep -v .gz | grep 'Commandline: apt install' | sed 's/Commandline: apt install //g'"
 		reply = poktools.runExternal(commandGetInstalled)
 		packages = reply.split('\n')
 		packages2 = []
@@ -350,7 +352,8 @@ class BackupTools:
 			if '-y' in p:
 				p = p.replace('-y', '')
 				p = p.strip()
-			packages2.append(p.strip())
+			if not p.startswith('-f') and not p.startswith('linux-image') and not p.startswith('linux-headers'):
+				packages2.append(p.strip())
 		packagesString = " ".join(packages2)
 		packages3 = list(set(packagesString.split()))
 		packages3.sort()
@@ -358,6 +361,9 @@ class BackupTools:
 			if p in packages3:
 				packages3.remove(p)
 		running = True
+		# check if package list is empty
+		if packages3 == []:
+			packages3 = ['(none found)']
 		# run loop while adding packages
 		while running:
 			superString = ''
@@ -368,7 +374,7 @@ class BackupTools:
 			chunks = [superString[i:i + 30] for i in range(0, len(superString), 30)]
 			lines = ["".join(chunks[i:i+6]) + '\n' for i in range(0, len(chunks), 6) ]
 			# add labels
-			xCord =	int( (self.view.width - len(lines[0])) / 2  )
+			xCord = int( (self.view.width - len(lines[0])) / 2  )
 			bigFrameId = self.view.addFrame(xCord - 1, 10, len(lines[0]), len(lines), self.view.borderColor, False)
 			self.view.drawStack.append(bigFrameId)
 			# label to hide shrinking bigFrame
