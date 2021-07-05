@@ -21,7 +21,7 @@ code = locale.getpreferredencoding()
 
 version = "v0.91"   # moved config-files to subdir, moved backed up files to path outside self-dir
 
-statusArray = { 1 : ["Directory", 3], 2 : ["Installing..", 4], 3 : ["<= Different =>", 1], 4 : ["OK", 2], 5 : ["Missing =>", 1], 
+statusArray = { 1 : ["Directory", 3], 2 : ["Installing..", 4], 3 : ["<= Different =>", 1], 4 : ["OK", 2], 5 : ["Missing =>", 1],
 				6 : ["<= Missing", 1], 7 : ["<= Missing =>", 1],  8 : ["Missing", 1], 9 : ["Installed", 2] }
 
 actionMenuArray = [
@@ -254,7 +254,7 @@ class BackupTools:
 		else:
 			self.view.drawStack.append(12)
 			self.view.objects[12].highlight(0)
-		self.view.status = centralMenuStatusArray[self.viewMode][self.view.objects[self.view.drawStack[-1]].pointer.get()] 
+		self.view.status = centralMenuStatusArray[self.viewMode][self.view.objects[self.view.drawStack[-1]].pointer.get()]
 		return 1
 
 
@@ -267,9 +267,9 @@ class BackupTools:
 			if menuID == 10 or menuID == 11:	# primary menus
 				self.view.status = 'Select an item'
 			elif menuID == 12 or menuID == 13:	# central menus
-				self.view.status = centralMenuStatusArray[self.viewMode][activeObject.pointer.get()] 
+				self.view.status = centralMenuStatusArray[self.viewMode][activeObject.pointer.get()]
 			elif menuID == 14:	# selection menu
-				pass 
+				pass
 		elif keyCode == 260:							# Key LEFT
 			if menuID == 14 or menuID == 15:	# only register if selectionMenu
 				self.view.drawStack.pop()
@@ -446,7 +446,7 @@ class BackupTools:
 
 
 	def removeMenuItem(self):
-		""" Removes an item and its backup file, if any 
+		""" Removes an item and its backup file, if any
 				NB: any backup of the item is deliberately not removed """
 		index, menuItem = self.getHighlightedMenuItem()
 		menuId = 11 if self.viewMode else 10
@@ -538,7 +538,7 @@ class BackupTools:
 		obj = self.view.objects[20]
 		obj.answer = None
 		while obj.answer == None:
-			self.view.render() 
+			self.view.render()
 			key = self.view.getInput()
 			obj.updateKeys(key)
 		self.view.drawStack.pop()
@@ -633,7 +633,7 @@ class BackupTools:
 		compareItemsRunning = True
 		focus = [0, 0]		# Horisontal Focus, Vertical Focus
 		self.view.exitKey = 255		# set exitkey above ASCII table to disable key while compare is running
-		inFocusLeft = False; inFocusRight = False	# this is to prevent error if inFocusLeft or inFocusRight has no value 
+		inFocusLeft = False; inFocusRight = False	# this is to prevent error if inFocusLeft or inFocusRight has no value
 		cmpWindowHeight = self.view.height - 6
 		cmpWindowWidth = self.view.hcenter - 3
 		# redrawing loop, update window
@@ -699,7 +699,7 @@ class BackupTools:
 				self.view.objects[6].pointer.incMax(False)
 				self.view.objects[8].pointer.incMax(False)
 				self.view.objects[10].pointer.incMax(False)
-				self.writeToFile() 
+				self.writeToFile()
 				self.view.updateStatus("Item(s) added succesfully")
 		return 1
 
@@ -756,7 +756,7 @@ class BackupTools:
 				fh.writelines(basicConfigFile % (self.hostname, self.rootPath))
 				fh.close()
 				os.chmod(self.configFilePath, 0o777)
-				sys.exit('    Configuration file created! Please notice that backuppath is set to root path\n' + 
+				sys.exit('    Configuration file created! Please notice that backuppath is set to root path\n' +
 					     '      which is not optimal. Plase set it to your prefered location in the confiuration file:\n' +
 					     '        "' + self.configFilePath + '"\n' +
 					     '      and restart program\n')
@@ -790,9 +790,9 @@ class BackupTools:
 		return listOfItems
 
 
-	def writeToFile(self): 
+	def writeToFile(self):
 		""" Writes back the modified data to the xml-file """
-		fh = open(self.configFilePath, 'w') 
+		fh = open(self.configFilePath, 'w')
 		dataToWrite = { 'host' : self.hostname, 'backupPath' : self.backupPath, 'configFiles' : [], "aptPackages": [] }
 		for item in range(0, len(self.view.objects[10].content)):
 			dataToWrite['configFiles'].append([self.view.objects[10].content[item].text, self.view.objects[8].content[item].text])
@@ -825,7 +825,7 @@ else:
 
 
 # --- TODO ---------------------------------------------------------------------------------------
-# - 
+# -
 
 
 

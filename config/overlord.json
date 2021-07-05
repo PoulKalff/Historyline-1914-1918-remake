@@ -49,27 +49,63 @@
     [
       "/home/klf/.bashrc",
       "Bash configuration file"
+    ],
+    [
+      "/home/dockerVolume/bazarr/config/config.ini",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/jackett/config/Jackett/ServerConfig.json",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/radarr/config/config.xml",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/radarr/config/moveFilm.py",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/radarr/config/radarr.db",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/sonarr/config/config.xml",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/sonarr/config/sonarr.db",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/transmission/config/openvpn-credentials.txt",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/transmission/config/transmission-credentials.txt",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/tvheadend/config/config",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/grafana/grafana.db",
+      "-"
     ]
   ],
   "aptPackages": [
+    [
+      "bind9",
+      "-"
+    ],
     [
       "bluemon",
       "-"
     ],
     [
-      "mc",
-      "-"
-    ],
-    [
-      "openssh-server",
-      "Third Description"
-    ],
-    [
-      "nmap",
-      "-"
-    ],
-    [
-      "bind9",
+      "docker-ce",
       "-"
     ],
     [
@@ -77,19 +113,27 @@
       "-"
     ],
     [
-      "npm",
-      "-"
-    ],
-    [
-      "python3-nmap",
-      "-"
-    ],
-    [
       "hddtemp",
       "-"
     ],
     [
-      "docker-ce",
+      "mc",
+      "-"
+    ],
+    [
+      "nmap",
+      "-"
+    ],
+    [
+      "npm",
+      "-"
+    ],
+    [
+      "openssh-server",
+      "Third Description"
+    ],
+    [
+      "python3-nmap",
       "-"
     ]
   ]
