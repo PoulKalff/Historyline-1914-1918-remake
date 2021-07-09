@@ -19,9 +19,9 @@ code = locale.getpreferredencoding()
 
 # --- Variables -----------------------------------------------------------------------------------
 
-version = "v0.90"   # completed Version2
+version = "v0.91"   # moved config-files to subdir, moved backed up files to path outside self-dir
 
-statusArray = { 1 : ["Directory", 3], 2 : ["Installing..", 4], 3 : ["<= Different =>", 1], 4 : ["OK", 2], 5 : ["Missing =>", 1], 
+statusArray = { 1 : ["Directory", 3], 2 : ["Installing..", 4], 3 : ["<= Different =>", 1], 4 : ["OK", 2], 5 : ["Missing =>", 1],
 				6 : ["<= Missing", 1], 7 : ["<= Missing =>", 1],  8 : ["Missing", 1], 9 : ["Installed", 2] }
 
 actionMenuArray = [
@@ -254,7 +254,7 @@ class BackupTools:
 		else:
 			self.view.drawStack.append(12)
 			self.view.objects[12].highlight(0)
-		self.view.status = centralMenuStatusArray[self.viewMode][self.view.objects[self.view.drawStack[-1]].pointer.get()] 
+		self.view.status = centralMenuStatusArray[self.viewMode][self.view.objects[self.view.drawStack[-1]].pointer.get()]
 		return 1
 
 
@@ -267,9 +267,9 @@ class BackupTools:
 			if menuID == 10 or menuID == 11:	# primary menus
 				self.view.status = 'Select an item'
 			elif menuID == 12 or menuID == 13:	# central menus
-				self.view.status = centralMenuStatusArray[self.viewMode][activeObject.pointer.get()] 
+				self.view.status = centralMenuStatusArray[self.viewMode][activeObject.pointer.get()]
 			elif menuID == 14:	# selection menu
-				pass 
+				pass
 		elif keyCode == 260:							# Key LEFT
 			if menuID == 14 or menuID == 15:	# only register if selectionMenu
 				self.view.drawStack.pop()
@@ -334,6 +334,8 @@ class BackupTools:
 	def addPackage(self):
 		""" Shows systems' installed packages, loops to install """
 		self.view.drawStack.pop()
+		# unzip all .gz - files in /var/lib/apt, so we can read them
+		commandGunzip = "sudo gunzip history.log*.gz -f"
 		installedPackages = [ item.text for item in self.view.objects[11].content ]
 		commandGetAvailable = "grep ^Package /var/lib/apt/lists/* | awk '{print $2}' | sort -u"
 		reply = poktools.runExternal(commandGetAvailable)
@@ -342,7 +344,7 @@ class BackupTools:
 			packages.pop(0)
 		self.ajaxLists[0] = packages
 		self.ajaxLists[1] = packages[:10]
-		commandGetInstalled = "cat /var/log/apt/history.log* | grep 'Commandline: apt install' | sed 's/Commandline: apt install //g'"
+		commandGetInstalled = "cat /var/log/apt/history.log* | grep -v .gz | grep 'Commandline: apt install' | sed 's/Commandline: apt install //g'"
 		reply = poktools.runExternal(commandGetInstalled)
 		packages = reply.split('\n')
 		packages2 = []
@@ -350,7 +352,8 @@ class BackupTools:
 			if '-y' in p:
 				p = p.replace('-y', '')
 				p = p.strip()
-			packages2.append(p.strip())
+			if not p.startswith('-f') and not p.startswith('linux-image') and not p.startswith('linux-headers'):
+				packages2.append(p.strip())
 		packagesString = " ".join(packages2)
 		packages3 = list(set(packagesString.split()))
 		packages3.sort()
@@ -358,6 +361,9 @@ class BackupTools:
 			if p in packages3:
 				packages3.remove(p)
 		running = True
+		# check if package list is empty
+		if packages3 == []:
+			packages3 = ['(none found)']
 		# run loop while adding packages
 		while running:
 			superString = ''
@@ -368,7 +374,7 @@ class BackupTools:
 			chunks = [superString[i:i + 30] for i in range(0, len(superString), 30)]
 			lines = ["".join(chunks[i:i+6]) + '\n' for i in range(0, len(chunks), 6) ]
 			# add labels
-			xCord =	int( (self.view.width - len(lines[0])) / 2  )
+			xCord = int( (self.view.width - len(lines[0])) / 2  )
 			bigFrameId = self.view.addFrame(xCord - 1, 10, len(lines[0]), len(lines), self.view.borderColor, False)
 			self.view.drawStack.append(bigFrameId)
 			# label to hide shrinking bigFrame
@@ -440,7 +446,7 @@ class BackupTools:
 
 
 	def removeMenuItem(self):
-		""" Removes an item and its backup file, if any 
+		""" Removes an item and its backup file, if any
 				NB: any backup of the item is deliberately not removed """
 		index, menuItem = self.getHighlightedMenuItem()
 		menuId = 11 if self.viewMode else 10
@@ -532,7 +538,7 @@ class BackupTools:
 		obj = self.view.objects[20]
 		obj.answer = None
 		while obj.answer == None:
-			self.view.render() 
+			self.view.render()
 			key = self.view.getInput()
 			obj.updateKeys(key)
 		self.view.drawStack.pop()
@@ -627,7 +633,7 @@ class BackupTools:
 		compareItemsRunning = True
 		focus = [0, 0]		# Horisontal Focus, Vertical Focus
 		self.view.exitKey = 255		# set exitkey above ASCII table to disable key while compare is running
-		inFocusLeft = False; inFocusRight = False	# this is to prevent error if inFocusLeft or inFocusRight has no value 
+		inFocusLeft = False; inFocusRight = False	# this is to prevent error if inFocusLeft or inFocusRight has no value
 		cmpWindowHeight = self.view.height - 6
 		cmpWindowWidth = self.view.hcenter - 3
 		# redrawing loop, update window
@@ -693,7 +699,7 @@ class BackupTools:
 				self.view.objects[6].pointer.incMax(False)
 				self.view.objects[8].pointer.incMax(False)
 				self.view.objects[10].pointer.incMax(False)
-				self.writeToFile() 
+				self.writeToFile()
 				self.view.updateStatus("Item(s) added succesfully")
 		return 1
 
@@ -750,7 +756,7 @@ class BackupTools:
 				fh.writelines(basicConfigFile % (self.hostname, self.rootPath))
 				fh.close()
 				os.chmod(self.configFilePath, 0o777)
-				sys.exit('    Configuration file created! Please notice that backuppath is set to root path\n' + 
+				sys.exit('    Configuration file created! Please notice that backuppath is set to root path\n' +
 					     '      which is not optimal. Plase set it to your prefered location in the confiuration file:\n' +
 					     '        "' + self.configFilePath + '"\n' +
 					     '      and restart program\n')
@@ -784,9 +790,9 @@ class BackupTools:
 		return listOfItems
 
 
-	def writeToFile(self): 
+	def writeToFile(self):
 		""" Writes back the modified data to the xml-file """
-		fh = open(self.configFilePath, 'w') 
+		fh = open(self.configFilePath, 'w')
 		dataToWrite = { 'host' : self.hostname, 'backupPath' : self.backupPath, 'configFiles' : [], "aptPackages": [] }
 		for item in range(0, len(self.view.objects[10].content)):
 			dataToWrite['configFiles'].append([self.view.objects[10].content[item].text, self.view.objects[8].content[item].text])
@@ -819,7 +825,7 @@ else:
 
 
 # --- TODO ---------------------------------------------------------------------------------------
-# - 
+# -
 
 
 

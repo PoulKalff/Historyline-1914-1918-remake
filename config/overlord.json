@@ -1,92 +1,140 @@
 {
-   "host": "overlord",
-   "backupPath": "/mnt/3tb_hdd/backup/overlord.backup/",
-   "configFiles": [
-      [
-         "/etc/apache2/apache2.conf",
-         "Apache configuration file"
-      ],
-      [
-         "/etc/apache2/sites-available/majestic.conf",
-         "Website configuration file"
-      ],
-      [
-         "/etc/crontab",
-         "Cron jobs started"
-      ],
-      [
-         "/etc/exports",
-         "NFS configuration file"
-      ],
-      [
-         "/etc/fstab",
-         "List of mounts"
-      ],
-      [
-         "/etc/hosts",
-         "ghHosts known to system"
-      ],
-      [
-         "/etc/mysql/my.cnf",
-         "mySQL configuration file"
-      ],
-      [
-         "/etc/nanorc",
-         "Nano editor configuration"
-      ],
-      [
-         "/etc/postgresql/9.3/main/pg_hba.conf",
-         "postGreSQL configuration file"
-      ],
-      [
-         "/etc/rc.local",
-         "Locally started processes"
-      ],
-      [
-         "/etc/samba/smb.conf",
-         "Samba configuration file"
-      ],
-      [
-         "/home/dockerVolume",
-         "Configuration for the docker-files Sonarr, Radarr and Jackett"
-      ],
-      [
-         "/home/klf/.bashrc",
-         "Bash configuration file"
-      ],
-      [
-         "/initrd.img",
-         "ffsdfsdf"
-      ],
-      [
-         "/opt",
-         "-"
-      ],
-      [
-         "/test.txt",
-         "ghgh-"
-      ]
-   ],
-   "aptPackages": [
-      [
-         "bluemon",
-         "-"
-      ],
-      [
-         "fruit",
-         "dfdf-"
-      ],
-      [
-         "mc",
-         "-"
-      ],
-      [
-         "monotone",
-         "-"
-      ],
-      [
-         "openssh-server",
-         "Third Description"
-      ]
-   ]
+  "host": "overlord",
+  "backupPath": "/mnt/3tb_hdd/backup/overlord.backup/",
+  "configFiles": [
+    [
+      "/etc/apache2/apache2.conf",
+      "Apache configuration file"
+    ],
+    [
+      "/etc/apache2/sites-available/majestic.conf",
+      "Website configuration file"
+    ],
+    [
+      "/etc/crontab",
+      "Cron jobs started"
+    ],
+    [
+      "/etc/exports",
+      "NFS configuration file"
+    ],
+    [
+      "/etc/fstab",
+      "List of mounts"
+    ],
+    [
+      "/etc/hosts",
+      "ghHosts known to system"
+    ],
+    [
+      "/etc/mysql/my.cnf",
+      "mySQL configuration file"
+    ],
+    [
+      "/etc/nanorc",
+      "Nano editor configuration"
+    ],
+    [
+      "/etc/postgresql/9.3/main/pg_hba.conf",
+      "postGreSQL configuration file"
+    ],
+    [
+      "/etc/rc.local",
+      "Locally started processes"
+    ],
+    [
+      "/etc/samba/smb.conf",
+      "Samba configuration file"
+    ],
+    [
+      "/home/klf/.bashrc",
+      "Bash configuration file"
+    ],
+    [
+      "/home/dockerVolume/bazarr/config/config.ini",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/jackett/config/Jackett/ServerConfig.json",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/radarr/config/config.xml",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/radarr/config/moveFilm.py",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/radarr/config/radarr.db",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/sonarr/config/config.xml",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/sonarr/config/sonarr.db",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/transmission/config/openvpn-credentials.txt",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/transmission/config/transmission-credentials.txt",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/tvheadend/config/config",
+      "-"
+    ],
+    [
+      "/home/dockerVolume/grafana/grafana.db",
+      "-"
+    ]
+  ],
+  "aptPackages": [
+    [
+      "bind9",
+      "-"
+    ],
+    [
+      "bluemon",
+      "-"
+    ],
+    [
+      "docker-ce",
+      "-"
+    ],
+    [
+      "docker-compose",
+      "-"
+    ],
+    [
+      "hddtemp",
+      "-"
+    ],
+    [
+      "mc",
+      "-"
+    ],
+    [
+      "nmap",
+      "-"
+    ],
+    [
+      "npm",
+      "-"
+    ],
+    [
+      "openssh-server",
+      "Third Description"
+    ],
+    [
+      "python3-nmap",
+      "-"
+    ]
+  ]
 }
