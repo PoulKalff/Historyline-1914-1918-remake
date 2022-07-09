@@ -15,12 +15,12 @@
       "Bash configuration file"
     ],
     [
-      "/home/klf/.config/gtk-3.0/bookmarks",
-      "Aner ikke hvad det er"
-    ],
-    [
       "/home/klf/.config/user-dirs.dirs",
       "Standard directories"
+    ],
+    [
+      "/home/klf/.local/share/applications/secDisk.desktop",
+      "Desktop icon for secondary drive"
     ],
     [
       "/home/klf/.local/share/applications/vlc_radio.desktop",
@@ -31,47 +31,11 @@
       "Desktop Wallpaper"
     ],
     [
-      "/usr/share/icons/Humanity/devices/64/1tb_hdd.desktop",
-      "Desktop Icon configuration file"
-    ],
-    [
-      "/usr/share/icons/Humanity/devices/64/6tb_hdd.desktop",
-      "Desktop Icon Configuration File"
-    ],
-    [
-      "/usr/share/icons/Humanity/devices/64/data.desktop",
-      "Desktop Icon configuration file"
-    ],
-    [
-      "/usr/share/icons/Humanity/devices/64/harddrive-data.svg",
-      "Desktop Icon file"
-    ],
-    [
-      "/usr/share/icons/Humanity/devices/64/harddrive-hdd_1tb.svg",
-      "Desktop Icon file"
-    ],
-    [
-      "/usr/share/icons/Humanity/devices/64/harddrive-hdd_3tb.svg",
-      "Desktop Icon file"
-    ],
-    [
       "/usr/share/icons/Humanity/devices/64/harddrive-hdd_6tb.svg",
       "Desktop Icon File"
     ]
   ],
   "aptPackages": [
-    [
-      "ansible",
-      "-"
-    ],
-    [
-      "audacity",
-      "-"
-    ],
-    [
-      "blabel",
-      "-"
-    ],
     [
       "build-essential",
       "-"
@@ -81,23 +45,11 @@
       "-"
     ],
     [
-      "cmake",
-      "-"
-    ],
-    [
       "cpu-x",
       "-"
     ],
     [
       "curl",
-      "-"
-    ],
-    [
-      "docker-ce",
-      "-"
-    ],
-    [
-      "docker-ce-cli",
       "-"
     ],
     [
@@ -110,10 +62,6 @@
     ],
     [
       "fping",
-      "-"
-    ],
-    [
-      "freecad",
       "-"
     ],
     [
@@ -145,14 +93,6 @@
       "-"
     ],
     [
-      "joystick",
-      "-"
-    ],
-    [
-      "jstest-gtk",
-      "-"
-    ],
-    [
       "kodi",
       "-"
     ],
@@ -181,23 +121,11 @@
       "-"
     ],
     [
-      "mame",
-      "Emulatoren over dem alle"
-    ],
-    [
-      "mame-data",
-      "-"
-    ],
-    [
       "mc",
       "-"
     ],
     [
       "mediainfo",
-      "-"
-    ],
-    [
-      "mediainfo-gui",
       "-"
     ],
     [
@@ -221,10 +149,6 @@
       "-"
     ],
     [
-      "plymouth-themes",
-      "-"
-    ],
-    [
       "progress",
       "-"
     ],
@@ -245,23 +169,11 @@
       "-"
     ],
     [
-      "sshfs",
-      "-"
-    ],
-    [
       "transmission-gtk",
       "-"
     ],
     [
       "tree",
-      "-"
-    ],
-    [
-      "vice",
-      "-"
-    ],
-    [
-      "virtualbox",
       "-"
     ],
     [
