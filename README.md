@@ -1,2 +1,2 @@
 # HLR
-A remake of the a classical amiga game 
+A remake of a classical amiga game 
