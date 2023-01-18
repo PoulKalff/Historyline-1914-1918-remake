@@ -40,8 +40,6 @@ class Main():
 		self.time_down = 0.0
 		self.time_elapsed = 0.0
 		self.develop = False
-	#	self.backgroundMusic = pygame.mixer.Sound("sfx/level1_theme.mp3")
-	#	self.backgroundMusic.set_volume(0.1)
 		pygame.init()
 		pygame.display.set_caption('HLR')
 		self.display = pygame.display.set_mode((self.width, self.height))
@@ -89,9 +87,10 @@ class Main():
 		while self.running:
 			self.checkInput()
 			self.level.update()
-			self.renderList.sort(key=lambda x: x.priority)
-			for obj in self.renderList:
-				self.display.blit(obj.frame, obj.coordinate)
+
+			print('looping')
+
+
 			pygame.display.update()
 			self.renderList = []
 		pygame.quit()
