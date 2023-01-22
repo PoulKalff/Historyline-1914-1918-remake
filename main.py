@@ -43,7 +43,7 @@ class Main():
 		pygame.init()
 		pygame.display.set_caption('HLR')
 		self.display = pygame.display.set_mode((self.width, self.height))
-		self.viewDsp = [0,0]
+		self.viewDsp = [10,10]
 
 
 	def run(self):
@@ -69,23 +69,17 @@ class Main():
 		elif keysPressed[pygame.K_ESCAPE]:
 			self.running = False
 		elif keysPressed[pygame.K_LEFT]:
-			self.viewDsp[0] += 10
-			print('LEFT pressed')
+			if self.viewDsp[0] <= 0:
+				self.viewDsp[0] += 10
 		elif keysPressed[pygame.K_RIGHT]:
-			if self.viewDsp[0] >= 10:
+			if self.width - self.viewDsp[0] <= self.level.mapWidth - 40:
 				self.viewDsp[0] -= 10 
-			print('RIGHT pressed')
 		elif keysPressed[pygame.K_UP]:
-			self.viewDsp[1] += 10
-			print('UP pressed')
+			if self.viewDsp[1] <= 0:
+				self.viewDsp[1] += 10
 		elif keysPressed[pygame.K_DOWN]:
-			if self.viewDsp[1] >= 10:
+			if self.height - self.viewDsp[1] <= self.level.mapHeight + 40:
 				self.viewDsp[1] -= 10
-			print('DOWN pressed')
-
-
-
-
 
 
 	def loop(self):

@@ -7,11 +7,11 @@
 				"2":  ["grass", "grass", "forest", "forest", "forest", "forest", "grass", "forest"],
 				"3":  ["grass", "grass", "grass", "forest", "forest", "house", "grass"],
 				"4":  ["forest", "grass", "grass", "forest", "hills", "grass", "grass", "forest"],
-				"5":  ["hqDoor", "grass", "grass", "grass", "hills", "grass", "forest"],
+				"5":  ["hqN", "grass", "grass", "grass", "hills", "grass", "forest"],
 				"6":  ["hqNW", "hqNE", "grass", "grass", "grass", "hills", "grass", "forest"],
 				"7":  ["hqC", "grass", "grass", "grass", "forest", "grass", "forest"],
 				"8":  ["hqSW", "hqSE", "grass", "grass", "grass", "grass", "grass", "forest"],
-				"9":  ["grass", "grass", "grass", "grass",  "grass", "grass", "hills"],
+				"9":  ["hqS", "grass", "grass", "grass",  "grass", "grass", "hills"],
 				"10": ["grass", "grass", "grass", "grass",  "grass",  "grass", "grass", "forest"],
 				"11": ["grass", "grass", "mud", "grass",  "hills", "grass", "grass"],
 				"12": ["grass", "grass", "mud", "mud",  "grass",  "grass", "grass", "grass"],
@@ -43,10 +43,10 @@
 				"38": ["forest", "house", "stone", "hills", "hills", "grass", "grass", "hills"],
 				"39": ["hills", "hills", "stone", "grass", "mud", "grass", "stone"],
 				"40": ["forest", "stone", "stone", "stone", "mud", "mud", "grass", "grass"],
-				"41": ["forest", "forest", "grass", "grass", "mud", "hqDoor", "grass"],
+				"41": ["forest", "forest", "grass", "grass", "mud", "hqN", "grass"],
 				"42": ["mountain", "forest", "forest", "grass", "hills", "hqNW", "hqNE", "grass"],
 				"43": ["mountN", "forest", "hills", "hills", "hills", "hqC", "house"],
 				"44": ["mountW", "mountE", "forest", "forest", "hills", "hqSW", "hqSE", "hills"],
-				"45": ["mountS", "forest", "forest", "mountain", "hills", "forest", "hills"]
+				"45": ["mountS", "forest", "forest", "mountain", "hills", "hqS", "hills"]
 				}
 }

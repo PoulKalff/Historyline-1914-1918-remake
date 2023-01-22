@@ -18,7 +18,8 @@ class Level():
 						'stone'  	: 	pygame.image.load('gfx/hexTypes/hex_stone.png'),
 						'mountain'  : 	pygame.image.load('gfx/hexTypes/hex_mountain.png'),
 						'water'  	: 	pygame.image.load('gfx/hexTypes/hex_water.png'),
-						'hqDoor'  	: 	pygame.image.load('gfx/hexTypes/hex_hqDoor.png'),
+						'hqN'	  	: 	pygame.image.load('gfx/hexTypes/hex_hqN.png'),
+						'hqS'  		: 	pygame.image.load('gfx/hexTypes/hex_hqS.png'),
 						'hqC'  		: 	pygame.image.load('gfx/hexTypes/hex_hqC.png'),
 						'hqNE'  	: 	pygame.image.load('gfx/hexTypes/hex_hqNE.png'),
 						'hqNW'  	: 	pygame.image.load('gfx/hexTypes/hex_hqNW.png'),
@@ -32,10 +33,15 @@ class Level():
 						'mountS'  	: 	pygame.image.load('gfx/hexTypes/hex_mountainS.png'),
 						'mountE'  	: 	pygame.image.load('gfx/hexTypes/hex_mountainE.png'),
 						'mountW'  	: 	pygame.image.load('gfx/hexTypes/hex_mountainW.png')
-		 }
+		}
 		# read data
 		with open('level' + str(levelNo) + '.json') as json_file:
 			self.levelData = json.load(json_file)
+		self.mapWidth = len(self.levelData["tiles"]["0"]) * 142
+		self.mapHeight = len(self.levelData["tiles"]) * 40
+
+#		import sys
+#		sys.exit(str(self.mapWidth) + '          ' + str(self.mapHeight))
 
 
 	def update(self):
