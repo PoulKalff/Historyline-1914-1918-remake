@@ -4,6 +4,17 @@ import pygame
 
 from helperFunctions import *
 
+
+class HexSquare():
+	""" Representation of one hex """
+
+	def __init__(self, background):
+		self.background = background	 	# The fundamental type of hex, e.g. Forest
+		self.changeable = None				# one of 1) Road, 2) Railroad 3) Trenches 	(overlay gfx)
+		self.unit = None					# any unit occupying the square, e.g. Infantry
+		self.fogofwar = None				# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
+
+
 class Level():
 	""" Representation of the background """
 
