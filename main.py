@@ -87,10 +87,6 @@ class Main():
 		while self.running:
 			self.checkInput()
 			self.level.update()
-
-			print('looping')
-
-
 			pygame.display.update()
 			self.renderList = []
 		pygame.quit()
