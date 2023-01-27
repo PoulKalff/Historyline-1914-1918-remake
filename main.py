@@ -90,7 +90,7 @@ class Main():
 			pygame.display.update()
 			self.renderList = []
 		pygame.quit()
-		print('\n  Game terminated gracefully')
+		print('\n  Game terminated gracefully\n')
 
 
 # --- Main  ---------------------------------------------------------------------------------------
