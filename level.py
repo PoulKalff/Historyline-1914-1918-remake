@@ -3,38 +3,74 @@ import time
 import pygame
 from helperFunctions import *
 
-bgTiles = 	{	'forest' 	:	pygame.image.load('gfx/hexTypes/hex_forest.png'),
-				'grass' 	:	pygame.image.load('gfx/hexTypes/hex_grass.png'),
-				'hills' 	:	pygame.image.load('gfx/hexTypes/hex_hills.png'),
-				'house' 	:	pygame.image.load('gfx/hexTypes/hex_house.png'),
-				'mud' 		:	pygame.image.load('gfx/hexTypes/hex_mud.png'),
-				'test'	  	: 	pygame.image.load('gfx/hexTypes/hex_test.png'),
-				'stone'  	: 	pygame.image.load('gfx/hexTypes/hex_stone.png'),
-				'mountain'  : 	pygame.image.load('gfx/hexTypes/hex_mountain.png'),
-				'water'  	: 	pygame.image.load('gfx/hexTypes/hex_water.png'),
-				'hqN'	  	: 	pygame.image.load('gfx/hexTypes/hex_hqN.png'),
-				'hqS'  		: 	pygame.image.load('gfx/hexTypes/hex_hqS.png'),
-				'hqC'  		: 	pygame.image.load('gfx/hexTypes/hex_hqC.png'),
-				'hqNE'  	: 	pygame.image.load('gfx/hexTypes/hex_hqNE.png'),
-				'hqNW'  	: 	pygame.image.load('gfx/hexTypes/hex_hqNW.png'),
-				'hqSE'  	: 	pygame.image.load('gfx/hexTypes/hex_hqSE.png'),
-				'hqSW'  	: 	pygame.image.load('gfx/hexTypes/hex_hqSW.png'),
-				'cmpN'  	: 	pygame.image.load('gfx/hexTypes/hex_campN.png'),
-				'cmpS'  	: 	pygame.image.load('gfx/hexTypes/hex_campS.png'),
-				'cmpE'  	: 	pygame.image.load('gfx/hexTypes/hex_campE.png'),
-				'cmpW'  	: 	pygame.image.load('gfx/hexTypes/hex_campW.png'),
-				'mountN'  	: 	pygame.image.load('gfx/hexTypes/hex_mountainN.png'),
-				'mountS'  	: 	pygame.image.load('gfx/hexTypes/hex_mountainS.png'),
-				'mountE'  	: 	pygame.image.load('gfx/hexTypes/hex_mountainE.png'),
-				'mountW'  	: 	pygame.image.load('gfx/hexTypes/hex_mountainW.png')
+developerMode = False
+
+bgTiles = 	{	'forest'	 	:	pygame.image.load('gfx/hexTypes/hex_forest.png'),
+				'grass' 		:	pygame.image.load('gfx/hexTypes/hex_grass.png'),
+				'hills' 		:	pygame.image.load('gfx/hexTypes/hex_hills.png'),
+				'house' 		:	pygame.image.load('gfx/hexTypes/hex_house.png'),
+				'mud' 			:	pygame.image.load('gfx/hexTypes/hex_mud.png'),
+				'test'	 	 	: 	pygame.image.load('gfx/hexTypes/hex_test.png'),
+				'stone'  		: 	pygame.image.load('gfx/hexTypes/hex_stone.png'),
+				'mountain'		: 	pygame.image.load('gfx/hexTypes/hex_mountain.png'),
+				'water'  		: 	pygame.image.load('gfx/hexTypes/hex_water.png'),
+				'waterStones'	: 	pygame.image.load('gfx/hexTypes/hex_waterStones.png'),
+				'hqN'	  		: 	pygame.image.load('gfx/hexTypes/hex_hqN.png'),
+				'hqS'  			: 	pygame.image.load('gfx/hexTypes/hex_hqS.png'),
+				'hqC'  			: 	pygame.image.load('gfx/hexTypes/hex_hqC.png'),
+				'hqNE'  		: 	pygame.image.load('gfx/hexTypes/hex_hqNE.png'),
+				'hqNW'  		: 	pygame.image.load('gfx/hexTypes/hex_hqNW.png'),
+				'hqSE'  		: 	pygame.image.load('gfx/hexTypes/hex_hqSE.png'),
+				'hqSW'  		: 	pygame.image.load('gfx/hexTypes/hex_hqSW.png'),
+				'cmpN'  		: 	pygame.image.load('gfx/hexTypes/hex_campN.png'),
+				'cmpS'  		: 	pygame.image.load('gfx/hexTypes/hex_campS.png'),
+				'cmpE'  		: 	pygame.image.load('gfx/hexTypes/hex_campE.png'),
+				'cmpW'  		: 	pygame.image.load('gfx/hexTypes/hex_campW.png'),
+				'mountN'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainN.png'),
+				'mountS'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainS.png'),
+				'mountE'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainE.png'),
+				'mountW'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainW.png'),
+				'stream35' 		: 	pygame.image.load('gfx/hexTypes/hex_stream35.png'),
+				'stream46' 		: 	pygame.image.load('gfx/hexTypes/hex_stream46.png'),
+				'stream14' 		: 	pygame.image.load('gfx/hexTypes/hex_stream14.png'),
+				'stream13' 		: 	pygame.image.load('gfx/hexTypes/hex_stream13.png'),
+				'stream15' 		: 	pygame.image.load('gfx/hexTypes/hex_stream15.png'),
+				'stream24' 		: 	pygame.image.load('gfx/hexTypes/hex_stream24.png'),
+				'stream25' 		: 	pygame.image.load('gfx/hexTypes/hex_stream25.png'),
+				'stream26' 		: 	pygame.image.load('gfx/hexTypes/hex_stream26.png'),
+				'stream36'		: 	pygame.image.load('gfx/hexTypes/hex_stream36.png'),
+				'lakeside12'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside12.png'),
+				'lakeside16'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside16.png'),
+				'lakeside23'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside23.png'),
+				'lakeside34'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside34.png'),
+				'lakeside56'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside56.png'),
+				'lakeside123'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside123.png'),
+				'lakeside126'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside126.png'),
+				'lakeside156'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside156.png'),
+				'lakeside3456'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside3456.png')
+
 			}
 
 
-infraIcons = 	{	'' 				:	None,
-					'roadDiagUL'	:	pygame.image.load('gfx/infrastructure/roadDiagonalUpLeft.png'),
-					'roadDUL' 		:	pygame.image.load('gfx/infrastructure/roadDownULeft.png'),
-					'roadDUR' 		:	pygame.image.load('gfx/infrastructure/roadDownURight.png'),
-					'roadCross1'	:	pygame.image.load('gfx/infrastructure/roadCross1.png')
+infraIcons = 	{	'' 			:	None,
+					'road13' 	:	pygame.image.load('gfx/infrastructure/road13.png'),
+					'road14' 	:	pygame.image.load('gfx/infrastructure/road14.png'),
+					'road15' 	:	pygame.image.load('gfx/infrastructure/road15.png'),
+					'road25'	:	pygame.image.load('gfx/infrastructure/road25.png'),
+					'road35' 	:	pygame.image.load('gfx/infrastructure/road35.png'),
+					'road36' 	:	pygame.image.load('gfx/infrastructure/road36.png'),
+					'road46' 	:	pygame.image.load('gfx/infrastructure/road46.png'),
+					'road124'	:	pygame.image.load('gfx/infrastructure/road124.png'),
+					'road236' 	:	pygame.image.load('gfx/infrastructure/road236.png'),
+					'road346' 	:	pygame.image.load('gfx/infrastructure/road346.png'),
+					'road14' 	:	pygame.image.load('gfx/infrastructure/road14.png'),
+					'path13' 	:	pygame.image.load('gfx/infrastructure/path13.png'),
+					'path14' 	:	pygame.image.load('gfx/infrastructure/path14.png'),
+					'path25' 	:	pygame.image.load('gfx/infrastructure/path25.png'),
+					'path36' 	:	pygame.image.load('gfx/infrastructure/path36.png'),
+					'path46' 	:	pygame.image.load('gfx/infrastructure/path46.png'),
+					'bridge25' 	:	pygame.image.load('gfx/infrastructure/bridge25.png'),
+					'bridge36' 	:	pygame.image.load('gfx/infrastructure/bridge36.png')
 				}
 
 
@@ -96,6 +132,13 @@ class Level():
 				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.unit:		self.parent.display.blit(square.unit, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+				if developerMode:
+					text = self.parent.devModeFont.render(str(x + 1) + '/' + str(y + 1), True, (255,0,0))
+					image = pygame.Surface((96, 80), pygame.SRCALPHA)
+					textRect = text.get_rect()
+					textRect.topleft = (20, 20)
+					image.blit(text, textRect)
+					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 
 
 

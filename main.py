@@ -35,12 +35,13 @@ class Main():
 	""" get data from API and display it """
 
 	def __init__(self):
-		self.width = 900
-		self.height = 700
+		self.width = 1110	# 1110 minimum,as it is smallest map
+		self.height = 900
 		self.time_down = 0.0
 		self.time_elapsed = 0.0
 		self.develop = False
 		pygame.init()
+		self.devModeFont = pygame.font.Font('freesansbold.ttf', 32)
 		pygame.display.set_caption('HLR')
 		self.display = pygame.display.set_mode((self.width, self.height))
 		self.viewDsp = [10,10]
@@ -80,6 +81,10 @@ class Main():
 		elif keysPressed[pygame.K_DOWN]:
 			if self.height - self.viewDsp[1] <= self.level.mapHeight + 40:
 				self.viewDsp[1] -= 10
+		elif keysPressed[pygame.K_PAGEUP]:
+			self.viewDsp[1] = 10
+		elif keysPressed[pygame.K_PAGEDOWN]:
+			self.viewDsp[1] = -990
 
 
 	def loop(self):
