@@ -94,11 +94,25 @@ unitsIcons = 	{	'' 				:	None,
 				}
 
 
+class Unit():
+	""" Representation of one unit
+		'type' defines the unit and the graphic icon of the unit
+	"""
+
+	def __init__(self, unitType):
+		self.mapIcon =  unitsIcons[unitType]
+
+
+
+
+
+
+
 
 class HexSquare():
 	""" Representation of one hex """
 
-	def __init__(self, background, infrastructure, unit):
+	def __init__(self, background, infrastructure, unit=None):
 		self.background = background	 						# The fundamental type of hex, e.g. Forest
 		self.infra = infrastructure if infrastructure else None	# one of 1) Road, 2) Railroad 3) Trenches 	(overlay gfx)
 		self.unit = unit if unit else None						# any unit occupying the square, e.g. Infantry
@@ -115,13 +129,30 @@ class Level():
 			jsonLevelData = json.load(json_file)
 		self.mapWidth = len(jsonLevelData["tiles"]["line1"]) * 142
 		self.mapHeight = len(jsonLevelData["tiles"]) * 40
+		self.cursorGfx = pygame.image.load('gfx/cursor.png')
+		self.cursorPos = [10,10]
 		self.map = []
 		# build up level
 		for value in jsonLevelData['tiles'].values():
 			line = []
 			for square in value:
-					line.append(HexSquare(bgTiles[square[0]], infraIcons[square[1]], unitsIcons[square[2]]))
+				if square[2]:
+					line.append(HexSquare(bgTiles[square[0]], infraIcons[square[1]], Unit(square[2])))
+				else:
+					line.append(HexSquare(bgTiles[square[0]], infraIcons[square[1]]))
 			self.map.append(line)
+
+
+	def visualize(self):
+		""" Exits the program and shows the map as text """
+		for line in self.map:
+			for l in line:
+				print('x', end="")
+			print()
+		import sys
+		sys.exit()
+
+
 
 
 	def update(self):
@@ -131,7 +162,17 @@ class Level():
 				forskydning = 71 if (x % 2) != 0 else 0
 				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-				if square.unit:		self.parent.display.blit(square.unit, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+				if square.unit:		self.parent.display.blit(square.unit.mapIcon, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+				# paint cursor
+				self.parent.display.blit(self.cursorGfx, self.cursorPos)
+
+
+
+
+				# create map of all hexes and refer to these, both on cursor and on map creation
+
+
+
 				if developerMode:
 					text = self.parent.devModeFont.render(str(x + 1) + '/' + str(y + 1), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)

@@ -85,6 +85,8 @@ class Main():
 			self.viewDsp[1] = 10
 		elif keysPressed[pygame.K_PAGEDOWN]:
 			self.viewDsp[1] = -990
+		elif keysPressed[pygame.K_SPACE]:
+			self.level.visualize()
 
 
 	def loop(self):
@@ -95,7 +97,7 @@ class Main():
 			pygame.display.update()
 			self.renderList = []
 		pygame.quit()
-		print('\n  Game terminated gracefully\n')
+		print('\n  Game terminated gracefully')
 
 
 # --- Main  ---------------------------------------------------------------------------------------
