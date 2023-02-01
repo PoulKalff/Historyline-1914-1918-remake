@@ -94,6 +94,7 @@ unitsIcons = 	{	'' 				:	None,
 				}
 
 
+
 class Unit():
 	""" Representation of one unit
 		'type' defines the unit and the graphic icon of the unit
@@ -101,11 +102,6 @@ class Unit():
 
 	def __init__(self, unitType):
 		self.mapIcon =  unitsIcons[unitType]
-
-
-
-
-
 
 
 
@@ -119,7 +115,8 @@ class HexSquare():
 		self.fogofwar = None									# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
 
 
-class Level():
+
+class Map(list):
 	""" Representation of the background """
 
 	def __init__(self, parent, levelNo):
@@ -127,12 +124,13 @@ class Level():
 		# read data
 		with open('levels/level' + str(levelNo) + '.json') as json_file:
 			jsonLevelData = json.load(json_file)
-		self.mapWidth = len(jsonLevelData["tiles"]["line1"]) * 142
-		self.mapHeight = len(jsonLevelData["tiles"]) * 40
+		self.squareWidth = len(jsonLevelData["tiles"]["line1"])
+		self.squareHeight = len(jsonLevelData["tiles"])
+		self.pixelWidth = self.squareWidth * 142
+		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
-		self.cursorPos = [10,10]
-		self.map = []
-		# build up level
+		self.cursorPos = [0,0]									# x,y index of cursor position on map
+		self.cursorVector = 1
 		for value in jsonLevelData['tiles'].values():
 			line = []
 			for square in value:
@@ -140,39 +138,18 @@ class Level():
 					line.append(HexSquare(bgTiles[square[0]], infraIcons[square[1]], Unit(square[2])))
 				else:
 					line.append(HexSquare(bgTiles[square[0]], infraIcons[square[1]]))
-			self.map.append(line)
-
-
-	def visualize(self):
-		""" Exits the program and shows the map as text """
-		for line in self.map:
-			for l in line:
-				print('x', end="")
-			print()
-		import sys
-		sys.exit()
+			self.append(line)
 
 
 
-
-	def update(self):
+	def draw(self):
 		self.parent.display.fill([68,136,77])
-		for x, line in enumerate(self.map):
+		for x, line in enumerate(self):
 			for y, square in enumerate(line):
 				forskydning = 71 if (x % 2) != 0 else 0
 				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.unit:		self.parent.display.blit(square.unit.mapIcon, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-				# paint cursor
-				self.parent.display.blit(self.cursorGfx, self.cursorPos)
-
-
-
-
-				# create map of all hexes and refer to these, both on cursor and on map creation
-
-
-
 				if developerMode:
 					text = self.parent.devModeFont.render(str(x + 1) + '/' + str(y + 1), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
@@ -180,6 +157,44 @@ class Level():
 					textRect.topleft = (20, 20)
 					image.blit(text, textRect)
 					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+		self.parent.display.blit(self.cursorGfx, [10 + (self.cursorPos[0] * 71), 10 + (self.cursorPos[1] * 80)]) 
+
+
+
+	def cursorMove(self, direction):
+		""" Values are left, right, up, down """
+		if direction == 'Up':
+			if self.cursorPos[1] > 0:
+				self.cursorPos[1] -= 1
+				if self.cursorPos[0] == 7:
+					self.cursorPos[0] = 6
+		elif direction == 'Down':
+			if self.cursorPos[1] < self.squareHeight - 1:
+				self.cursorPos[1] += 1
+				if self.cursorPos[0] == 7:
+					self.cursorPos[0] = 6
+		elif direction == 'Left':
+			if self.cursorPos[0] > 0:
+				self.cursorPos[0] -= 1
+				if self.cursorVector:
+					self.cursorPos[1] += 1
+				else:
+					self.cursorPos[1] -= 1
+				self.cursorVector = not self.cursorVector
+		elif direction == 'Right':
+			if self.cursorPos[0] < 14: # len(self[self.cursorPos[1]]) - 1:
+				self.cursorPos[0] += 1
+				if self.cursorVector:
+					self.cursorPos[1] += 1
+				else:
+					self.cursorPos[1] -= 1
+				self.cursorVector = not self.cursorVector
+		# make sure cursor does not get outside map
+		if self.cursorPos[1] == 0: self.cursorVector = True
+		if self.cursorPos[1] == self.squareHeight - 1: self.cursorVector = False
+
+
+		print(self.cursorPos, self.cursorVector)
 
 
 
@@ -187,12 +202,32 @@ class Level():
 
 
 
+#			if self.viewDsp[0] <= 0:
+#				self.viewDsp[0] += 10
 
+#			if self.cursorPos[0] > 0:
+#				self.cursorPos[0] -= 1
 
+#			if self.width - self.viewDsp[0] <= self.level.mapWidth - 40:
+#				self.viewDsp[0] -= 10 
 
+#			if self.cursorPos[0] < len(self.level.map[self.cursorPos[1]]) - 1:
+#				self.cursorPos[0] += 1
 
+#			if self.viewDsp[1] <= 0:
+#				self.viewDsp[1] += 80
 
+#			if self.cursorPos[1] > 0:
+#				self.cursorPos[1] -= 1
+#				if self.cursorPos[0] == 7:
+#					self.cursorPos[0] = 6
 
+#			if self.height - self.viewDsp[1] <= self.level.mapHeight + 40:
+#				self.viewDsp[1] -= 80
 
+#			if self.cursorPos[1] < len(self.level.map):
+#				self.cursorPos[1] += 1
+#				if self.cursorPos[0] == 7:
+#					self.cursorPos[0] = 6
 
 

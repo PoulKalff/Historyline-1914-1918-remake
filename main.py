@@ -18,7 +18,7 @@ from io import BytesIO
 #from PIL import Image
 
 from helperFunctions import *
-from level import Level
+from level import Map
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
@@ -37,8 +37,6 @@ class Main():
 	def __init__(self):
 		self.width = 1110	# 1110 minimum,as it is smallest map
 		self.height = 900
-		self.time_down = 0.0
-		self.time_elapsed = 0.0
 		self.develop = False
 		pygame.init()
 		self.devModeFont = pygame.font.Font('freesansbold.ttf', 32)
@@ -54,7 +52,7 @@ class Main():
 
 	def initGame(self):
 		self.running = True
-		self.level = Level(self, 1)
+		self.map = Map(self, 1)
 
 
 
@@ -70,30 +68,25 @@ class Main():
 		elif keysPressed[pygame.K_ESCAPE]:
 			self.running = False
 		elif keysPressed[pygame.K_LEFT]:
-			if self.viewDsp[0] <= 0:
-				self.viewDsp[0] += 10
+			self.map.cursorMove('Left')
 		elif keysPressed[pygame.K_RIGHT]:
-			if self.width - self.viewDsp[0] <= self.level.mapWidth - 40:
-				self.viewDsp[0] -= 10 
+			self.map.cursorMove('Right')
 		elif keysPressed[pygame.K_UP]:
-			if self.viewDsp[1] <= 0:
-				self.viewDsp[1] += 10
+			self.map.cursorMove('Up')
 		elif keysPressed[pygame.K_DOWN]:
-			if self.height - self.viewDsp[1] <= self.level.mapHeight + 40:
-				self.viewDsp[1] -= 10
+			self.map.cursorMove('Down')
 		elif keysPressed[pygame.K_PAGEUP]:
 			self.viewDsp[1] = 10
 		elif keysPressed[pygame.K_PAGEDOWN]:
 			self.viewDsp[1] = -990
-		elif keysPressed[pygame.K_SPACE]:
-			self.level.visualize()
+
 
 
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
 			self.checkInput()
-			self.level.update()
+			self.map.draw()
 			pygame.display.update()
 			self.renderList = []
 		pygame.quit()
