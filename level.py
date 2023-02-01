@@ -157,7 +157,11 @@ class Map(list):
 					textRect.topleft = (20, 20)
 					image.blit(text, textRect)
 					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-		self.parent.display.blit(self.cursorGfx, [10 + (self.cursorPos[0] * 71), 10 + (self.cursorPos[1] * 80)]) 
+
+
+		self.parent.display.blit(self.cursorGfx, [10 + (self.cursorPos[0] * 71), 10 + (self.cursorPos[1] * 40)]) 
+
+
 
 
 
@@ -192,42 +196,8 @@ class Map(list):
 		# make sure cursor does not get outside map
 		if self.cursorPos[1] == 0: self.cursorVector = True
 		if self.cursorPos[1] == self.squareHeight - 1: self.cursorVector = False
-
-
 		print(self.cursorPos, self.cursorVector)
 
 
-
-
-
-
-
-#			if self.viewDsp[0] <= 0:
-#				self.viewDsp[0] += 10
-
-#			if self.cursorPos[0] > 0:
-#				self.cursorPos[0] -= 1
-
-#			if self.width - self.viewDsp[0] <= self.level.mapWidth - 40:
-#				self.viewDsp[0] -= 10 
-
-#			if self.cursorPos[0] < len(self.level.map[self.cursorPos[1]]) - 1:
-#				self.cursorPos[0] += 1
-
-#			if self.viewDsp[1] <= 0:
-#				self.viewDsp[1] += 80
-
-#			if self.cursorPos[1] > 0:
-#				self.cursorPos[1] -= 1
-#				if self.cursorPos[0] == 7:
-#					self.cursorPos[0] = 6
-
-#			if self.height - self.viewDsp[1] <= self.level.mapHeight + 40:
-#				self.viewDsp[1] -= 80
-
-#			if self.cursorPos[1] < len(self.level.map):
-#				self.cursorPos[1] += 1
-#				if self.cursorPos[0] == 7:
-#					self.cursorPos[0] = 6
 
 
