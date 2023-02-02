@@ -130,7 +130,6 @@ class Map(list):
 		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.cursorPos = [0,0]									# x,y index of cursor position on map
-		self.cursorVector = 1
 		for value in jsonLevelData['tiles'].values():
 			line = []
 			for square in value:
@@ -143,9 +142,10 @@ class Map(list):
 
 
 	def draw(self):
-		self.parent.display.fill([68,136,77])
-		for x, line in enumerate(self):
-			for y, square in enumerate(line):
+		self.parent.display.fill([49, 48, 33])
+		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
+		for x in range(23):
+			for y, square in enumerate(self[x]):
 				forskydning = 71 if (x % 2) != 0 else 0
 				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
@@ -157,9 +157,7 @@ class Map(list):
 					textRect.topleft = (20, 20)
 					image.blit(text, textRect)
 					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-
-
-		self.parent.display.blit(self.cursorGfx, [10 + (self.cursorPos[0] * 71), 10 + (self.cursorPos[1] * 40)]) 
+		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 71), self.parent.viewDsp[1] + (0 if self.cursorPos[0] % 2 == 0 else 40) + (self.cursorPos[1] * 80)]) 
 
 
 
@@ -180,23 +178,10 @@ class Map(list):
 		elif direction == 'Left':
 			if self.cursorPos[0] > 0:
 				self.cursorPos[0] -= 1
-				if self.cursorVector:
-					self.cursorPos[1] += 1
-				else:
-					self.cursorPos[1] -= 1
-				self.cursorVector = not self.cursorVector
 		elif direction == 'Right':
-			if self.cursorPos[0] < 14: # len(self[self.cursorPos[1]]) - 1:
+			if self.cursorPos[0] < 14:
 				self.cursorPos[0] += 1
-				if self.cursorVector:
-					self.cursorPos[1] += 1
-				else:
-					self.cursorPos[1] -= 1
-				self.cursorVector = not self.cursorVector
-		# make sure cursor does not get outside map
-		if self.cursorPos[1] == 0: self.cursorVector = True
-		if self.cursorPos[1] == self.squareHeight - 1: self.cursorVector = False
-		print(self.cursorPos, self.cursorVector)
+		print(self.cursorPos, self.cursorPos[0] % 2 == 0)
 
 
 

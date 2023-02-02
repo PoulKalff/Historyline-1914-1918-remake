@@ -31,18 +31,38 @@ font60 = pygame.font.Font('freesansbold.ttf', 60)
 
 # --- Classes -------------------------------------------------------------------------------------
 
+class colorList:
+
+	black =				(0, 0, 0)
+	white =				(255, 255, 255)
+	red =				(255, 0, 0)
+	cyan =				(0, 255, 255)
+	green =				(0, 255, 0)
+	grey =				(150, 150, 150)
+	darkGrey =			(50, 50, 50)
+	almostBlack =		(20, 20, 20)
+	orange =			(220, 162, 57)
+	green =				(70, 180, 50)
+	blue =				(80, 120, 250)
+	background =		(55, 55, 55)
+	yellow = 			(255, 255, 0)
+	bi3 =				(68, 136, 77)
+	historylineDark =	(49, 48, 33)
+	historylineLight =	(107, 105, 90)
+
+
 class Main():
 	""" get data from API and display it """
 
 	def __init__(self):
-		self.width = 1110	# 1110 minimum,as it is smallest map
-		self.height = 900
+		self.width = 1800	# 1110 minimum,as it is smallest map
+		self.height = 1000
 		self.develop = False
 		pygame.init()
 		self.devModeFont = pygame.font.Font('freesansbold.ttf', 32)
-		pygame.display.set_caption('HLR')
+		pygame.display.set_caption('Historyline 1914-1918 Remake')
 		self.display = pygame.display.set_mode((self.width, self.height))
-		self.viewDsp = [10,10]
+		self.viewDsp = [19,19]
 
 
 	def run(self):
@@ -82,11 +102,34 @@ class Main():
 
 
 
+
+
+
+	def drawBorders(self):
+		pygame.draw.rect(self.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
+		pygame.draw.rect(self.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border
+
+#		pygame.draw.rect(self.display, colors.almostBlack, (1045, 16,  865, 498), 4)					# right upper border
+#		pygame.draw.rect(self.display, colors.almostBlack, (1045, 535, 865, 498), 4)						# right lower border
+		# hide overflow
+#		pygame.draw.rect(self.display, colors.historylineDark, (15, 983, 1098, 13))										# map bottom
+
+
+
+#		pygame.draw.rect(self.display, colors.background, (0, 0, self.width, 15))							# window top
+#		pygame.draw.rect(self.display, colors.background, (0, 0, 15, self.height))						# window left
+#		pygame.draw.rect(self.display, colors.background, (self.width - 8, 0, 8, self.height))			# window right
+#		pygame.draw.rect(self.display, colors.background, (1035, 0, 5, self.height))						# middle
+		return True
+
+
+
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
 			self.checkInput()
 			self.map.draw()
+			self.drawBorders()
 			pygame.display.update()
 			self.renderList = []
 		pygame.quit()
