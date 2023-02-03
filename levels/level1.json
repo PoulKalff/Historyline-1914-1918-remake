@@ -56,7 +56,8 @@
 					"line43":	[["mountain","",""],["forest","",""],["forest","",""],["grass","",""],["hills","",""],["hqNW","",""],["hqNE","",""],["grass","",""]],
 					"line44":	[["mountN","",""],["forest","",""],["hills","",""],["hills","",""],["hills","",""],["hqC","",""],["house","",""]],
 					"line45":	[["mountW","",""],["mountE","",""],["forest","",""],["forest","",""],["hills","",""],["hqSW","",""],["hqSE","",""],["hills","",""]],
-					"line46":	[["mountS","",""],["forest","",""],["forest","",""],["mountain","",""],["hills","",""],["hqS","",""],["hills","",""]]
+					"line46":	[["mountS","",""],["forest","",""],["forest","",""],["mountain","",""],["hills","",""],["hqS","",""],["hills","",""]],
+					"line47":	[["forest","",""],["forest","",""],["forest","",""],["forest","",""],["forest","",""],["grass","",""],["hills","",""],["hills","",""]]
 				}
 }
 

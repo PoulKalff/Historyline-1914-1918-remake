@@ -101,26 +101,30 @@ class Main():
 			self.viewDsp[1] = -990
 
 
-
-
-
-
 	def drawBorders(self):
 		pygame.draw.rect(self.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
-		pygame.draw.rect(self.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border
-
-#		pygame.draw.rect(self.display, colors.almostBlack, (1045, 16,  865, 498), 4)					# right upper border
-#		pygame.draw.rect(self.display, colors.almostBlack, (1045, 535, 865, 498), 4)						# right lower border
-		# hide overflow
-#		pygame.draw.rect(self.display, colors.historylineDark, (15, 983, 1098, 13))										# map bottom
-
-
-
-#		pygame.draw.rect(self.display, colors.background, (0, 0, self.width, 15))							# window top
-#		pygame.draw.rect(self.display, colors.background, (0, 0, 15, self.height))						# window left
-#		pygame.draw.rect(self.display, colors.background, (self.width - 8, 0, 8, self.height))			# window right
-#		pygame.draw.rect(self.display, colors.background, (1035, 0, 5, self.height))						# middle
+		pygame.draw.rect(self.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
+		pygame.draw.rect(self.display, colors.historylineLight , (1124, 15,  662, 400), 0)					# minimap background
+		pygame.draw.rect(self.display, colors.almostBlack, (1124, 15,  662, 400), 4)							# minimap border
+		pygame.draw.rect(self.display, colors.almostBlack, (1124, 426, 662, 273), 4)							# unused middle window border
+		pygame.draw.rect(self.display, colors.almostBlack, (1124, 710, 662, 273), 4)						# unused lower window border
 		return True
+
+
+	def drawInfo(self):
+		""" fetches cursor position and fills out info on unit and terrain """
+		mapCursor = [self.map.cursorPos[0] + self.map.mapView[0], self.map.cursorPos[1]  + self.map.mapView[1]]
+		square = self.map[mapCursor[1]][mapCursor[0]]
+
+
+		self.display.blit(self.map.cursorGfx, [1250, 600])
+
+
+		self.display.blit(square.background, [1300, 600])
+		if square.infra:	self.display.blit(square.infra, 		[1300, 600])
+		if square.unit:		self.display.blit(square.unit.mapIcon, 	[1300, 600])
+		print('Cursor on Hex:', mapCursor) 
+
 
 
 
@@ -129,6 +133,11 @@ class Main():
 		while self.running:
 			self.checkInput()
 			self.map.draw()
+
+
+			self.drawInfo()
+
+
 			self.drawBorders()
 			pygame.display.update()
 			self.renderList = []

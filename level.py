@@ -1,3 +1,4 @@
+import sys
 import json
 import time
 import pygame
@@ -124,12 +125,13 @@ class Map(list):
 		# read data
 		with open('levels/level' + str(levelNo) + '.json') as json_file:
 			jsonLevelData = json.load(json_file)
-		self.squareWidth = len(jsonLevelData["tiles"]["line1"])
-		self.squareHeight = len(jsonLevelData["tiles"])
+		self.squareWidth = len(jsonLevelData["tiles"]["line1"])			# 8 for level 1
+		self.squareHeight = len(jsonLevelData["tiles"])					# 47 for level 1
 		self.pixelWidth = self.squareWidth * 142
 		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
-		self.cursorPos = [0,0]									# x,y index of cursor position on map
+		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
+		self.mapView = [0, 0]										# the starting coordinates of the map
 		for value in jsonLevelData['tiles'].values():
 			line = []
 			for square in value:
@@ -145,7 +147,8 @@ class Map(list):
 		self.parent.display.fill([49, 48, 33])
 		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
 		for x in range(23):
-			for y, square in enumerate(self[x]):
+			for y in range(len(self[x])):
+				square = self[x + self.mapView[1]][y]
 				forskydning = 71 if (x % 2) != 0 else 0
 				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
@@ -157,7 +160,8 @@ class Map(list):
 					textRect.topleft = (20, 20)
 					image.blit(text, textRect)
 					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 71), self.parent.viewDsp[1] + (0 if self.cursorPos[0] % 2 == 0 else 40) + (self.cursorPos[1] * 80)]) 
+		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
+		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning), self.parent.viewDsp[1] + (self.cursorPos[1] * 40)])
 
 
 
@@ -165,23 +169,44 @@ class Map(list):
 
 	def cursorMove(self, direction):
 		""" Values are left, right, up, down """
+		verticalOdd = self.cursorPos[1] % 2 == 0
 		if direction == 'Up':
-			if self.cursorPos[1] > 0:
-				self.cursorPos[1] -= 1
-				if self.cursorPos[0] == 7:
-					self.cursorPos[0] = 6
+				if self.cursorPos[1] > 1:
+					self.cursorPos[1] -= 2
+				else:
+					if self.mapView[1] > 1:
+						self.mapView[1] -= 2		# NB : ONLY even numbers, as two lines must be drawn as one!
 		elif direction == 'Down':
-			if self.cursorPos[1] < self.squareHeight - 1:
-				self.cursorPos[1] += 1
-				if self.cursorPos[0] == 7:
-					self.cursorPos[0] = 6
+			if self.cursorPos[1] < 21:
+				self.cursorPos[1] += 2
+			else:
+				if self.mapView[1] + 24 < self.squareHeight:
+					self.mapView[1] += 2		# NB : ONLY even numbers, as two lines must be drawn as one!
+
+
+
+
 		elif direction == 'Left':
 			if self.cursorPos[0] > 0:
-				self.cursorPos[0] -= 1
+				if verticalOdd:
+					self.cursorPos[1] += 1
+					self.cursorPos[0] -= 1
+				else:
+					self.cursorPos[1] -= 1
+			else:
+				if self.cursorPos[1] % 2 != 0:
+					self.cursorPos[1] -= 1
 		elif direction == 'Right':
-			if self.cursorPos[0] < 14:
-				self.cursorPos[0] += 1
-		print(self.cursorPos, self.cursorPos[0] % 2 == 0)
+			if self.cursorPos[0] < 7:
+				if verticalOdd:
+					self.cursorPos[1] += 1
+				else:
+					self.cursorPos[0] += 1
+					self.cursorPos[1] -= 1
+		# prevent cursor exiting map
+		if self.cursorPos[0] < 0: self.cursorPos[0] = 0
+		if self.cursorPos[1] < 0: self.cursorPos[1] = 0
+		if self.cursorPos[1] > 22: self.cursorPos[1] = 21
 
 
 
