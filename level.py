@@ -4,96 +4,20 @@ import time
 import pygame
 from helperFunctions import *
 
+# --- Variables / Ressources ----------------------------------------------------------------------
+
+colors = colorList
 developerMode = False
-
-bgTiles = 	{	'forest'	 	:	pygame.image.load('gfx/hexTypes/hex_forest.png'),
-				'grass' 		:	pygame.image.load('gfx/hexTypes/hex_grass.png'),
-				'hills' 		:	pygame.image.load('gfx/hexTypes/hex_hills.png'),
-				'house' 		:	pygame.image.load('gfx/hexTypes/hex_house.png'),
-				'mud' 			:	pygame.image.load('gfx/hexTypes/hex_mud.png'),
-				'test'	 	 	: 	pygame.image.load('gfx/hexTypes/hex_test.png'),
-				'stone'  		: 	pygame.image.load('gfx/hexTypes/hex_stone.png'),
-				'mountain'		: 	pygame.image.load('gfx/hexTypes/hex_mountain.png'),
-				'water'  		: 	pygame.image.load('gfx/hexTypes/hex_water.png'),
-				'waterStones'	: 	pygame.image.load('gfx/hexTypes/hex_waterStones.png'),
-				'hqN'	  		: 	pygame.image.load('gfx/hexTypes/hex_hqN.png'),
-				'hqS'  			: 	pygame.image.load('gfx/hexTypes/hex_hqS.png'),
-				'hqC'  			: 	pygame.image.load('gfx/hexTypes/hex_hqC.png'),
-				'hqNE'  		: 	pygame.image.load('gfx/hexTypes/hex_hqNE.png'),
-				'hqNW'  		: 	pygame.image.load('gfx/hexTypes/hex_hqNW.png'),
-				'hqSE'  		: 	pygame.image.load('gfx/hexTypes/hex_hqSE.png'),
-				'hqSW'  		: 	pygame.image.load('gfx/hexTypes/hex_hqSW.png'),
-				'cmpN'  		: 	pygame.image.load('gfx/hexTypes/hex_campN.png'),
-				'cmpS'  		: 	pygame.image.load('gfx/hexTypes/hex_campS.png'),
-				'cmpE'  		: 	pygame.image.load('gfx/hexTypes/hex_campE.png'),
-				'cmpW'  		: 	pygame.image.load('gfx/hexTypes/hex_campW.png'),
-				'mountN'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainN.png'),
-				'mountS'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainS.png'),
-				'mountE'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainE.png'),
-				'mountW'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainW.png'),
-				'stream35' 		: 	pygame.image.load('gfx/hexTypes/hex_stream35.png'),
-				'stream46' 		: 	pygame.image.load('gfx/hexTypes/hex_stream46.png'),
-				'stream14' 		: 	pygame.image.load('gfx/hexTypes/hex_stream14.png'),
-				'stream13' 		: 	pygame.image.load('gfx/hexTypes/hex_stream13.png'),
-				'stream15' 		: 	pygame.image.load('gfx/hexTypes/hex_stream15.png'),
-				'stream24' 		: 	pygame.image.load('gfx/hexTypes/hex_stream24.png'),
-				'stream25' 		: 	pygame.image.load('gfx/hexTypes/hex_stream25.png'),
-				'stream26' 		: 	pygame.image.load('gfx/hexTypes/hex_stream26.png'),
-				'stream36'		: 	pygame.image.load('gfx/hexTypes/hex_stream36.png'),
-				'lakeside12'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside12.png'),
-				'lakeside16'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside16.png'),
-				'lakeside23'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside23.png'),
-				'lakeside34'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside34.png'),
-				'lakeside56'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside56.png'),
-				'lakeside123'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside123.png'),
-				'lakeside126'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside126.png'),
-				'lakeside156'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside156.png'),
-				'lakeside3456'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside3456.png')
-
-			}
+# texts used on map
+movementModifierText = font30.render('Movement modifier', True, colors.black)
+rMovementModifierText = movementModifierText.get_rect()
+rMovementModifierText.topleft = (1440, 460)
+battleModifierText = font30.render('Battle modifier', True, colors.black)
+rBattleModifierText = battleModifierText.get_rect()
+rBattleModifierText.topleft = (1470, 560)
 
 
-infraIcons = 	{	'' 			:	None,
-					'road13' 	:	pygame.image.load('gfx/infrastructure/road13.png'),
-					'road14' 	:	pygame.image.load('gfx/infrastructure/road14.png'),
-					'road15' 	:	pygame.image.load('gfx/infrastructure/road15.png'),
-					'road25'	:	pygame.image.load('gfx/infrastructure/road25.png'),
-					'road35' 	:	pygame.image.load('gfx/infrastructure/road35.png'),
-					'road36' 	:	pygame.image.load('gfx/infrastructure/road36.png'),
-					'road46' 	:	pygame.image.load('gfx/infrastructure/road46.png'),
-					'road124'	:	pygame.image.load('gfx/infrastructure/road124.png'),
-					'road236' 	:	pygame.image.load('gfx/infrastructure/road236.png'),
-					'road346' 	:	pygame.image.load('gfx/infrastructure/road346.png'),
-					'road14' 	:	pygame.image.load('gfx/infrastructure/road14.png'),
-					'path13' 	:	pygame.image.load('gfx/infrastructure/path13.png'),
-					'path14' 	:	pygame.image.load('gfx/infrastructure/path14.png'),
-					'path25' 	:	pygame.image.load('gfx/infrastructure/path25.png'),
-					'path36' 	:	pygame.image.load('gfx/infrastructure/path36.png'),
-					'path46' 	:	pygame.image.load('gfx/infrastructure/path46.png'),
-					'bridge25' 	:	pygame.image.load('gfx/infrastructure/bridge25.png'),
-					'bridge36' 	:	pygame.image.load('gfx/infrastructure/bridge36.png')
-				}
-
-
-unitsIcons = 	{	'' 				:	None,
-					'infantryG' 	:	pygame.image.load('gfx/units/german_infantry.png'),
-					'eliteInfG'		:	pygame.image.load('gfx/units/german_eliteInfantry.png'),
-					'cavalryG'		:	pygame.image.load('gfx/units/german_cavalry.png'),
-					'lArtilleryG'	:	pygame.image.load('gfx/units/german_lightArtillery.png'),
-					'mArtilleryG'	:	pygame.image.load('gfx/units/german_mediumArtillery.png'),
-					'hArtilleryG'	:	pygame.image.load('gfx/units/german_heavyArtillery.png'),
-					'supplyCarG' 	:	pygame.image.load('gfx/units/german_supplyCar.png'),
-					'bunkerG'	 	:	pygame.image.load('gfx/units/german_bunker.png'),
-					'infantryF'		:	pygame.image.load('gfx/units/french_infantry.png'),
-					'eliteInfF'		:	pygame.image.load('gfx/units/french_eliteInfantry.png'),
-					'cavalryF'		:	pygame.image.load('gfx/units/french_cavalry.png'),
-					'lArtilleryF'	:	pygame.image.load('gfx/units/french_lightArtillery.png'),
-					'mArtilleryF'	:	pygame.image.load('gfx/units/french_mediumArtillery.png'),
-					'hArtilleryF'	:	pygame.image.load('gfx/units/french_heavyArtillery.png'),
-					'supplyCarF' 	:	pygame.image.load('gfx/units/french_supplyCar.png'),
-					'bunkerF'	 	:	pygame.image.load('gfx/units/french_bunker.png')
-				}
-
+# --- Classes -------------------------------------------------------------------------------------
 
 
 class Unit():
@@ -102,19 +26,21 @@ class Unit():
 	"""
 
 	def __init__(self, unitType):
-		self.mapIcon =  unitsIcons[unitType]
+		self.mapIcon = unitsIcons[unitType] if unitType else None
 
 
 
 class HexSquare():
 	""" Representation of one hex """
 
-	def __init__(self, background, infrastructure, unit=None):
-		self.background = background	 						# The fundamental type of hex, e.g. Forest
-		self.infra = infrastructure if infrastructure else None	# one of 1) Road, 2) Railroad 3) Trenches 	(overlay gfx)
-		self.unit = unit if unit else None						# any unit occupying the square, e.g. Infantry
+	def __init__(self, hexType, infrastructure, unit):
+		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
+		self.infra = infraIcons[infrastructure] if infrastructure else None			# one of 1) Road, 2) Railroad 3) Trenches 	(overlay gfx)
+		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
 		self.fogofwar = None									# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
-
+		self.movementModifier = bgTilesModifiers[hexType][0]
+		self.battleModifier = bgTilesModifiers[hexType][1]
+		self.sightModifier = bgTilesModifiers[hexType][2]
 
 
 class Map(list):
@@ -132,13 +58,13 @@ class Map(list):
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
+		# texts
+		self.movementModifierText = [movementModifierText, rMovementModifierText]
+		self.battleModifierText = [battleModifierText, rBattleModifierText]
 		for value in jsonLevelData['tiles'].values():
 			line = []
 			for square in value:
-				if square[2]:
-					line.append(HexSquare(bgTiles[square[0]], infraIcons[square[1]], Unit(square[2])))
-				else:
-					line.append(HexSquare(bgTiles[square[0]], infraIcons[square[1]]))
+				line.append(HexSquare(*square))
 			self.append(line)
 
 
@@ -182,10 +108,6 @@ class Map(list):
 			else:
 				if self.mapView[1] + 24 < self.squareHeight:
 					self.mapView[1] += 2		# NB : ONLY even numbers, as two lines must be drawn as one!
-
-
-
-
 		elif direction == 'Left':
 			if self.cursorPos[0] > 0:
 				if verticalOdd:

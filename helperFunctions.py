@@ -1,20 +1,166 @@
+import pygame
+
+pygame.init()
+font20 = pygame.font.Font('freesansbold.ttf', 20)
+font30 = pygame.font.Font('freesansbold.ttf', 30)
+font50 = pygame.font.Font('freesansbold.ttf', 50)
+font60 = pygame.font.Font('freesansbold.ttf', 60)
+
+
+bgTilesModifiers = 	{	'forest'	 	:	[10, 0, 0],		# movement,  battle, sight
+						'grass' 		:	[0, 20, 0],
+						'hills' 		:	[0, 0, 30],
+						'house' 		:	[0, 0, 0],
+						'mud' 			:	[0, 0, 0],
+						'test'	 	 	: 	[0, 0, 0],
+						'stone'  		: 	[0, 0, 0],
+						'mountain'		: 	[0, 0, 0],
+						'water'  		: 	[0, 0, 0],
+						'waterStones'	: 	[0, 0, 0],
+						'hqN'	  		: 	[0, 0, 0],
+						'hqS'  			: 	[0, 0, 0],
+						'hqC'  			: 	[0, 0, 0],
+						'hqNE'  		: 	[0, 0, 0],
+						'hqNW'  		: 	[0, 0, 0],
+						'hqSE'  		: 	[0, 0, 0],
+						'hqSW'  		: 	[0, 0, 0],
+						'cmpN'  		: 	[0, 0, 0],
+						'cmpS'  		: 	[0, 0, 0],
+						'cmpE'  		: 	[0, 0, 0],
+						'cmpW'  		: 	[0, 0, 0],
+						'mountN'  		: 	[0, 0, 0],
+						'mountS'  		: 	[0, 0, 0],
+						'mountE'  		: 	[0, 0, 0],
+						'mountW'  		: 	[0, 0, 0],
+						'stream35' 		: 	[0, 0, 0],
+						'stream46' 		: 	[0, 0, 0],
+						'stream14' 		: 	[0, 0, 0],
+						'stream13' 		: 	[0, 0, 0],
+						'stream15' 		: 	[0, 0, 0],
+						'stream24' 		: 	[0, 0, 0],
+						'stream25' 		: 	[0, 0, 0],
+						'stream26' 		: 	[0, 0, 0],
+						'stream36'		: 	[0, 0, 0],
+						'lakeside12'	: 	[0, 0, 0],
+						'lakeside16'	: 	[0, 0, 0],
+						'lakeside23'	: 	[0, 0, 0],
+						'lakeside34'	: 	[0, 0, 0],
+						'lakeside56'	: 	[0, 0, 0],
+						'lakeside123'	: 	[0, 0, 0],
+						'lakeside126'	: 	[0, 0, 0],
+						'lakeside156'	: 	[0, 0, 0],
+						'lakeside3456'	: 	[0, 0, 0]
+					}
+
+bgTiles = 	{	'forest'	 	:	pygame.image.load('gfx/hexTypes/hex_forest.png'),
+				'grass' 		:	pygame.image.load('gfx/hexTypes/hex_grass.png'),
+				'hills' 		:	pygame.image.load('gfx/hexTypes/hex_hills.png'),
+				'house' 		:	pygame.image.load('gfx/hexTypes/hex_house.png'),
+				'mud' 			:	pygame.image.load('gfx/hexTypes/hex_mud.png'),
+				'test'	 	 	: 	pygame.image.load('gfx/hexTypes/hex_test.png'),
+				'stone'  		: 	pygame.image.load('gfx/hexTypes/hex_stone.png'),
+				'mountain'		: 	pygame.image.load('gfx/hexTypes/hex_mountain.png'),
+				'water'  		: 	pygame.image.load('gfx/hexTypes/hex_water.png'),
+				'waterStones'	: 	pygame.image.load('gfx/hexTypes/hex_waterStones.png'),
+				'hqN'	  		: 	pygame.image.load('gfx/hexTypes/hex_hqN.png'),
+				'hqS'  			: 	pygame.image.load('gfx/hexTypes/hex_hqS.png'),
+				'hqC'  			: 	pygame.image.load('gfx/hexTypes/hex_hqC.png'),
+				'hqNE'  		: 	pygame.image.load('gfx/hexTypes/hex_hqNE.png'),
+				'hqNW'  		: 	pygame.image.load('gfx/hexTypes/hex_hqNW.png'),
+				'hqSE'  		: 	pygame.image.load('gfx/hexTypes/hex_hqSE.png'),
+				'hqSW'  		: 	pygame.image.load('gfx/hexTypes/hex_hqSW.png'),
+				'cmpN'  		: 	pygame.image.load('gfx/hexTypes/hex_campN.png'),
+				'cmpS'  		: 	pygame.image.load('gfx/hexTypes/hex_campS.png'),
+				'cmpE'  		: 	pygame.image.load('gfx/hexTypes/hex_campE.png'),
+				'cmpW'  		: 	pygame.image.load('gfx/hexTypes/hex_campW.png'),
+				'mountN'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainN.png'),
+				'mountS'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainS.png'),
+				'mountE'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainE.png'),
+				'mountW'  		: 	pygame.image.load('gfx/hexTypes/hex_mountainW.png'),
+				'stream35' 		: 	pygame.image.load('gfx/hexTypes/hex_stream35.png'),
+				'stream46' 		: 	pygame.image.load('gfx/hexTypes/hex_stream46.png'),
+				'stream14' 		: 	pygame.image.load('gfx/hexTypes/hex_stream14.png'),
+				'stream13' 		: 	pygame.image.load('gfx/hexTypes/hex_stream13.png'),
+				'stream15' 		: 	pygame.image.load('gfx/hexTypes/hex_stream15.png'),
+				'stream24' 		: 	pygame.image.load('gfx/hexTypes/hex_stream24.png'),
+				'stream25' 		: 	pygame.image.load('gfx/hexTypes/hex_stream25.png'),
+				'stream26' 		: 	pygame.image.load('gfx/hexTypes/hex_stream26.png'),
+				'stream36'		: 	pygame.image.load('gfx/hexTypes/hex_stream36.png'),
+				'lakeside12'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside12.png'),
+				'lakeside16'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside16.png'),
+				'lakeside23'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside23.png'),
+				'lakeside34'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside34.png'),
+				'lakeside56'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside56.png'),
+				'lakeside123'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside123.png'),
+				'lakeside126'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside126.png'),
+				'lakeside156'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside156.png'),
+				'lakeside3456'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside3456.png')
+
+			}
+
+
+infraIcons = 	{	'' 			:	None,
+					'road13' 	:	pygame.image.load('gfx/infrastructure/road13.png'),
+					'road14' 	:	pygame.image.load('gfx/infrastructure/road14.png'),
+					'road15' 	:	pygame.image.load('gfx/infrastructure/road15.png'),
+					'road25'	:	pygame.image.load('gfx/infrastructure/road25.png'),
+					'road35' 	:	pygame.image.load('gfx/infrastructure/road35.png'),
+					'road36' 	:	pygame.image.load('gfx/infrastructure/road36.png'),
+					'road46' 	:	pygame.image.load('gfx/infrastructure/road46.png'),
+					'road124'	:	pygame.image.load('gfx/infrastructure/road124.png'),
+					'road236' 	:	pygame.image.load('gfx/infrastructure/road236.png'),
+					'road346' 	:	pygame.image.load('gfx/infrastructure/road346.png'),
+					'road14' 	:	pygame.image.load('gfx/infrastructure/road14.png'),
+					'path13' 	:	pygame.image.load('gfx/infrastructure/path13.png'),
+					'path14' 	:	pygame.image.load('gfx/infrastructure/path14.png'),
+					'path25' 	:	pygame.image.load('gfx/infrastructure/path25.png'),
+					'path36' 	:	pygame.image.load('gfx/infrastructure/path36.png'),
+					'path46' 	:	pygame.image.load('gfx/infrastructure/path46.png'),
+					'bridge25' 	:	pygame.image.load('gfx/infrastructure/bridge25.png'),
+					'bridge36' 	:	pygame.image.load('gfx/infrastructure/bridge36.png')
+				}
+
+
+unitsIcons = 	{	'' 				:	None,
+					'infantryG' 	:	pygame.image.load('gfx/units/german_infantry.png'),
+					'eliteInfG'		:	pygame.image.load('gfx/units/german_eliteInfantry.png'),
+					'cavalryG'		:	pygame.image.load('gfx/units/german_cavalry.png'),
+					'lArtilleryG'	:	pygame.image.load('gfx/units/german_lightArtillery.png'),
+					'mArtilleryG'	:	pygame.image.load('gfx/units/german_mediumArtillery.png'),
+					'hArtilleryG'	:	pygame.image.load('gfx/units/german_heavyArtillery.png'),
+					'supplyCarG' 	:	pygame.image.load('gfx/units/german_supplyCar.png'),
+					'bunkerG'	 	:	pygame.image.load('gfx/units/german_bunker.png'),
+					'infantryF'		:	pygame.image.load('gfx/units/french_infantry.png'),
+					'eliteInfF'		:	pygame.image.load('gfx/units/french_eliteInfantry.png'),
+					'cavalryF'		:	pygame.image.load('gfx/units/french_cavalry.png'),
+					'lArtilleryF'	:	pygame.image.load('gfx/units/french_lightArtillery.png'),
+					'mArtilleryF'	:	pygame.image.load('gfx/units/french_mediumArtillery.png'),
+					'hArtilleryF'	:	pygame.image.load('gfx/units/french_heavyArtillery.png'),
+					'supplyCarF' 	:	pygame.image.load('gfx/units/french_supplyCar.png'),
+					'bunkerF'	 	:	pygame.image.load('gfx/units/french_bunker.png')
+				}
+
+
 
 
 class colorList:
-	black =			(0, 0, 0)
-	white =			(255, 255, 255)
-	red =			(255, 0, 0)
-	cyan =			(0, 255, 255)
-	green =			(0, 255, 0)
-	grey =			(150, 150, 150)
-	lightGrey =		(150, 150, 150)
-	almostBlack =	(20, 20, 20)
-	orange =		(220, 162, 57)
-	green =			(70, 180, 50)
-	blue =			(80, 120, 250)
-	background =	(55, 55, 55)
-	yellow = 		(255, 255, 0)
-
+	black =				(0, 0, 0)
+	white =				(255, 255, 255)
+	red =				(255, 0, 0)
+	darkRed =			(165, 32, 32)
+	cyan =				(0, 255, 255)
+	green =				(0, 255, 0)
+	grey =				(150, 150, 150)
+	darkGrey =			(50, 50, 50)
+	almostBlack =		(20, 20, 20)
+	orange =			(220, 162, 57)
+	green =				(70, 180, 50)
+	blue =				(80, 120, 250)
+	background =		(55, 55, 55)
+	yellow = 			(255, 255, 0)
+	bi3 =				(68, 136, 77)
+	historylineDark =	(49, 48, 33)
+	historylineLight =	(107, 105, 90)
 
 
 class renderObject():

@@ -15,40 +15,14 @@ import requests
 import argparse
 import pygame.locals
 from io import BytesIO
-#from PIL import Image
-
-from helperFunctions import *
 from level import Map
+from helperFunctions import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-pygame.init()
 version = '0.01'		# init
-sounds = {}
-font30 = pygame.font.Font('freesansbold.ttf', 30)
-font60 = pygame.font.Font('freesansbold.ttf', 60)
-
 
 # --- Classes -------------------------------------------------------------------------------------
-
-class colorList:
-
-	black =				(0, 0, 0)
-	white =				(255, 255, 255)
-	red =				(255, 0, 0)
-	cyan =				(0, 255, 255)
-	green =				(0, 255, 0)
-	grey =				(150, 150, 150)
-	darkGrey =			(50, 50, 50)
-	almostBlack =		(20, 20, 20)
-	orange =			(220, 162, 57)
-	green =				(70, 180, 50)
-	blue =				(80, 120, 250)
-	background =		(55, 55, 55)
-	yellow = 			(255, 255, 0)
-	bi3 =				(68, 136, 77)
-	historylineDark =	(49, 48, 33)
-	historylineLight =	(107, 105, 90)
 
 
 class Main():
@@ -63,6 +37,7 @@ class Main():
 		pygame.display.set_caption('Historyline 1914-1918 Remake')
 		self.display = pygame.display.set_mode((self.width, self.height))
 		self.viewDsp = [19,19]
+		self.cursorX2 = pygame.image.load('gfx/cursor_double.png')
 
 
 	def run(self):
@@ -73,7 +48,7 @@ class Main():
 	def initGame(self):
 		self.running = True
 		self.map = Map(self, 1)
-
+		self.test = [1537, 716]
 
 
 
@@ -89,12 +64,16 @@ class Main():
 			self.running = False
 		elif keysPressed[pygame.K_LEFT]:
 			self.map.cursorMove('Left')
+			self.test[0] -= 1
 		elif keysPressed[pygame.K_RIGHT]:
 			self.map.cursorMove('Right')
+			self.test[0] += 1
 		elif keysPressed[pygame.K_UP]:
 			self.map.cursorMove('Up')
+			self.test[1] -= 1
 		elif keysPressed[pygame.K_DOWN]:
 			self.map.cursorMove('Down')
+			self.test[1] += 1
 		elif keysPressed[pygame.K_PAGEUP]:
 			self.viewDsp[1] = 10
 		elif keysPressed[pygame.K_PAGEDOWN]:
@@ -102,12 +81,15 @@ class Main():
 
 
 	def drawBorders(self):
+		""" Draws borders and text """
 		pygame.draw.rect(self.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
 		pygame.draw.rect(self.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
 		pygame.draw.rect(self.display, colors.historylineLight , (1124, 15,  662, 400), 0)					# minimap background
 		pygame.draw.rect(self.display, colors.almostBlack, (1124, 15,  662, 400), 4)							# minimap border
 		pygame.draw.rect(self.display, colors.almostBlack, (1124, 426, 662, 273), 4)							# unused middle window border
 		pygame.draw.rect(self.display, colors.almostBlack, (1124, 710, 662, 273), 4)						# unused lower window border
+		self.display.blit(*self.map.movementModifierText)
+		self.display.blit(*self.map.battleModifierText)
 		return True
 
 
@@ -115,16 +97,23 @@ class Main():
 		""" fetches cursor position and fills out info on unit and terrain """
 		mapCursor = [self.map.cursorPos[0] + self.map.mapView[0], self.map.cursorPos[1]  + self.map.mapView[1]]
 		square = self.map[mapCursor[1]][mapCursor[0]]
+		self.display.blit(pygame.transform.scale2x(square.background), [1180, 483])
+		if square.infra:	self.display.blit(pygame.transform.scale2x(square.infra), [1180, 483])
+		if square.unit:		self.display.blit(pygame.transform.scale2x(square.unit.mapIcon), [1180, 483])
+		self.display.blit(self.cursorX2, [1155, 463])
+		# texts
+		mmText = font50.render(str(square.movementModifier), True, colors.darkRed)
+		rmmText = mmText.get_rect()
+		rmmText.topleft = (1555, 501)
+		self.display.blit(mmText, rmmText)
+		bmText = font50.render(str(square.battleModifier), True, colors.darkRed)
+		rbmText = bmText.get_rect()
+		rbmText.topleft = (1555, 600)
+		self.display.blit(bmText, rbmText)
 
 
-		self.display.blit(self.map.cursorGfx, [1250, 600])
-
-
-		self.display.blit(square.background, [1300, 600])
-		if square.infra:	self.display.blit(square.infra, 		[1300, 600])
-		if square.unit:		self.display.blit(square.unit.mapIcon, 	[1300, 600])
-		print('Cursor on Hex:', mapCursor) 
-
+#		print('Cursor on Hex:', mapCursor) 
+#		print(self.test)
 
 
 
@@ -133,11 +122,7 @@ class Main():
 		while self.running:
 			self.checkInput()
 			self.map.draw()
-
-
 			self.drawInfo()
-
-
 			self.drawBorders()
 			pygame.display.update()
 			self.renderList = []
@@ -155,6 +140,7 @@ args = parser.parse_args()
 
 
 colors = colorList
+
 obj =  Main()
 obj.run()
 
