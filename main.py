@@ -21,6 +21,7 @@ from helperFunctions import *
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 version = '0.01'		# init
+colors = colorList
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -37,7 +38,6 @@ class Main():
 		pygame.display.set_caption('Historyline 1914-1918 Remake')
 		self.display = pygame.display.set_mode((self.width, self.height))
 		self.viewDsp = [19,19]
-		self.cursorX2 = pygame.image.load('gfx/cursor_double.png')
 
 
 	def run(self):
@@ -48,7 +48,7 @@ class Main():
 	def initGame(self):
 		self.running = True
 		self.map = Map(self, 1)
-		self.test = [1537, 716]
+		self.test = [0, 0]
 
 
 
@@ -80,19 +80,6 @@ class Main():
 			self.viewDsp[1] = -990
 
 
-	def drawBorders(self):
-		""" Draws borders and text """
-		pygame.draw.rect(self.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
-		pygame.draw.rect(self.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
-		pygame.draw.rect(self.display, colors.historylineLight , (1124, 15,  662, 400), 0)					# minimap background
-		pygame.draw.rect(self.display, colors.almostBlack, (1124, 15,  662, 400), 4)							# minimap border
-		pygame.draw.rect(self.display, colors.almostBlack, (1124, 426, 662, 273), 4)							# unused middle window border
-		pygame.draw.rect(self.display, colors.almostBlack, (1124, 710, 662, 273), 4)						# unused lower window border
-		self.display.blit(*self.map.movementModifierText)
-		self.display.blit(*self.map.battleModifierText)
-		return True
-
-
 	def drawInfo(self):
 		""" fetches cursor position and fills out info on unit and terrain """
 		mapCursor = [self.map.cursorPos[0] + self.map.mapView[0], self.map.cursorPos[1]  + self.map.mapView[1]]
@@ -100,18 +87,17 @@ class Main():
 		self.display.blit(pygame.transform.scale2x(square.background), [1180, 483])
 		if square.infra:	self.display.blit(pygame.transform.scale2x(square.infra), [1180, 483])
 		if square.unit:		self.display.blit(pygame.transform.scale2x(square.unit.mapIcon), [1180, 483])
-		self.display.blit(self.cursorX2, [1155, 463])
-		# texts
-		mmText = font50.render(str(square.movementModifier), True, colors.darkRed)
-		rmmText = mmText.get_rect()
-		rmmText.topleft = (1555, 501)
-		self.display.blit(mmText, rmmText)
-		bmText = font50.render(str(square.battleModifier), True, colors.darkRed)
-		rbmText = bmText.get_rect()
-		rbmText.topleft = (1555, 600)
-		self.display.blit(bmText, rbmText)
-
-
+		self.display.blit(self.map.cursorX2, [1155, 463])
+		# bars
+		if square.movementModifier != None:
+			self.display.blit(self.map.progressBar, [1425, 485], (0, 0, square.movementModifier * 30, 20))
+		else:
+			self.display.blit(self.map.iProgressBar, [1425, 485])
+		if square.battleModifier != None:
+			self.display.blit(self.map.progressBar, [1425, 565], (0, 0, square.battleModifier * 3, 20))	
+		else:
+			self.display.blit(self.map.iProgressBar, [1425, 565])
+		self.display.blit(self.map.progressBar, [1425, 645], (0, 0, square.sightModifier * 30, 20))
 #		print('Cursor on Hex:', mapCursor) 
 #		print(self.test)
 
@@ -123,11 +109,10 @@ class Main():
 			self.checkInput()
 			self.map.draw()
 			self.drawInfo()
-			self.drawBorders()
 			pygame.display.update()
 			self.renderList = []
 		pygame.quit()
-		print('\n  Game terminated gracefully')
+		print('\n  Game terminated gracefully\n')
 
 
 # --- Main  ---------------------------------------------------------------------------------------
@@ -138,14 +123,14 @@ parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpForma
 parser.add_argument("-v", "--version",	action="store_true",	help="Print version and exit")
 args = parser.parse_args()
 
-
-colors = colorList
-
 obj =  Main()
 obj.run()
 
 
 # --- TODO ---------------------------------------------------------------------------------------
+# - 
+# - 
+# - 
 
 
 # --- NOTES --------------------------------------------------------------------------------------

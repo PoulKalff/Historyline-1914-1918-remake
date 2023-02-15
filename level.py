@@ -9,12 +9,15 @@ from helperFunctions import *
 colors = colorList
 developerMode = False
 # texts used on map
-movementModifierText = font30.render('Movement modifier', True, colors.black)
+movementModifierText = font30.render('Movement Penalty', True, colors.black)
 rMovementModifierText = movementModifierText.get_rect()
-rMovementModifierText.topleft = (1440, 460)
-battleModifierText = font30.render('Battle modifier', True, colors.black)
+rMovementModifierText.topleft = (1440, 440)
+battleModifierText = font30.render('Battle Advantage', True, colors.black)
 rBattleModifierText = battleModifierText.get_rect()
-rBattleModifierText.topleft = (1470, 560)
+rBattleModifierText.topleft = (1455, 520)
+sightModifierText = font30.render('Sight Hindrance', True, colors.black)
+rSightModifierText = sightModifierText.get_rect()
+rSightModifierText.topleft = (1460, 600)
 
 
 # --- Classes -------------------------------------------------------------------------------------
@@ -35,12 +38,30 @@ class HexSquare():
 
 	def __init__(self, hexType, infrastructure, unit):
 		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
-		self.infra = infraIcons[infrastructure] if infrastructure else None			# one of 1) Road, 2) Railroad 3) Trenches 	(overlay gfx)
+		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
 		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
 		self.fogofwar = None									# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
+		if infrastructure:
+			self.infra = infraIcons[infrastructure]
+			if infrastructure.startswith("road"):
+				self.movementModifier = 0
+				self.battleModifier = 0
+			elif infrastructure.startswith("path"):
+				self.movementModifier = 1
+				self.battleModifier = 0
+			elif infrastructure.startswith("bridge"):
+				self.movementModifier = 1
+				self.battleModifier = 0
+			elif infrastructure.startswith("rail"):
+				self.movementModifier = 0
+			elif infrastructure.startswith("barbed"):
+				self.movementModifier = 10
+			elif infrastructure.startswith("trench"):
+				self.movementModifier = 10
+				self.battleModifier = 10
 
 
 class Map(list):
@@ -56,11 +77,15 @@ class Map(list):
 		self.pixelWidth = self.squareWidth * 142
 		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
+		self.cursorX2 = pygame.image.load('gfx/cursor_double.png')
+		self.progressBar = pygame.image.load('gfx/progressBar.png')
+		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts
 		self.movementModifierText = [movementModifierText, rMovementModifierText]
 		self.battleModifierText = [battleModifierText, rBattleModifierText]
+		self.sightModifierText =  [sightModifierText, rSightModifierText]
 		for value in jsonLevelData['tiles'].values():
 			line = []
 			for square in value:
@@ -88,8 +113,17 @@ class Map(list):
 					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
 		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning), self.parent.viewDsp[1] + (self.cursorPos[1] * 40)])
-
-
+		# window borders
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
+		pygame.draw.rect(self.parent.display, colors.historylineLight , (1124, 15,  662, 400), 0)					# minimap background
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 15,  662, 400), 4)							# minimap border
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 273), 4)							# unused middle window border
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 710, 662, 273), 4)						# unused lower window border
+		self.parent.display.blit(*self.movementModifierText)
+		self.parent.display.blit(*self.battleModifierText)
+		self.parent.display.blit(*self.sightModifierText)
+		return 1
 
 
 
