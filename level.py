@@ -9,27 +9,52 @@ from helperFunctions import *
 colors = colorList
 developerMode = False
 # texts used on map
-movementModifierText = font30.render('Movement Penalty', True, colors.black)
+movementModifierText = font20.render('Movement Penalty', True, colors.black)
 rMovementModifierText = movementModifierText.get_rect()
-rMovementModifierText.topleft = (1440, 440)
-battleModifierText = font30.render('Battle Advantage', True, colors.black)
+rMovementModifierText.topleft = (1250, 435)
+battleModifierText = font20.render('Battle Advantage', True, colors.black)
 rBattleModifierText = battleModifierText.get_rect()
-rBattleModifierText.topleft = (1455, 520)
-sightModifierText = font30.render('Sight Hindrance', True, colors.black)
+rBattleModifierText.topleft = (1250, 465)
+sightModifierText = font20.render('Sight Hindrance', True, colors.black)
 rSightModifierText = sightModifierText.get_rect()
-rSightModifierText.topleft = (1460, 600)
+rSightModifierText.topleft = (1250, 495)
 
 
 # --- Classes -------------------------------------------------------------------------------------
 
 
-class Unit():
-	""" Representation of one unit
-		'type' defines the unit and the graphic icon of the unit
-	"""
+class Weapon():
+	""" Representation of one weapon """
 
-	def __init__(self, unitType):
-		self.mapIcon = unitsIcons[unitType] if unitType else None
+	def __init__(self, key):
+		if key:
+			data = weaponsParameters[key]
+			self.name = data['name']
+			self.air = data['air']
+			self.ground = data['ground']
+			self.water = data['water']
+			self.ammo = data['ammo']
+			self.picture = data['picture']
+
+
+
+class Unit():
+	""" Representation of one unit	"""
+
+	def __init__(self, key):
+		if key:
+			data = unitsParameters[key]
+			self.name = data['name']
+			self.maxSize = 10		# all units size 10?
+			self.currentSize = 10
+			self.fuel = data['fuel']
+			self.movement = data['movement']
+			self.sight = data['sight']
+			self.weapons = []
+			for w in data['weapons']:
+				if w: self.weapons.append(Weapon(w))
+			self.mapIcon = data['icon']
+
 
 
 
@@ -77,7 +102,7 @@ class Map(list):
 		self.pixelWidth = self.squareWidth * 142
 		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
-		self.cursorX2 = pygame.image.load('gfx/cursor_double.png')
+		self.infinityGfx = pygame.image.load('gfx/infinity.png')
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
@@ -118,8 +143,10 @@ class Map(list):
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
 		pygame.draw.rect(self.parent.display, colors.historylineLight , (1124, 15,  662, 400), 0)					# minimap background
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 15,  662, 400), 4)							# minimap border
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 273), 4)							# unused middle window border
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 710, 662, 273), 4)						# unused lower window border
+
+
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 100), 4)							# middle window border
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 537, 662, 446), 4)						# lower window border
 		self.parent.display.blit(*self.movementModifierText)
 		self.parent.display.blit(*self.battleModifierText)
 		self.parent.display.blit(*self.sightModifierText)
