@@ -34,7 +34,9 @@ class Main():
 		self.height = 1000
 		self.develop = False
 		pygame.init()
+		icon = pygame.image.load('gfx/icon.png')
 		self.devModeFont = pygame.font.Font('freesansbold.ttf', 32)
+		pygame.display.set_icon(icon)
 		pygame.display.set_caption('Historyline 1914-1918 Remake')
 		self.display = pygame.display.set_mode((self.width, self.height))
 		self.viewDsp = [19,19]
@@ -91,22 +93,22 @@ class Main():
 		mapCursor = [self.map.cursorPos[0] + self.map.mapView[0], self.map.cursorPos[1]  + self.map.mapView[1]]
 		square = self.map[mapCursor[1]][mapCursor[0]]
 		# terrain
-		self.display.blit(square.background, [1136, 436])
-		if square.infra:	self.display.blit(square.infra, [1136, 436])
-		self.display.blit(self.map.cursorGfx, [1124, 426])
+		self.display.blit(square.background, [1144, 446])
+		if square.infra:	self.display.blit(square.infra, [1144, 446])
+		self.display.blit(self.map.cursorGfx, [1132, 435])
 		if square.movementModifier != None:
-			self.display.blit(self.map.progressBar, [1460, 435], (0, 0, square.movementModifier * 30, 20))
+			self.display.blit(self.map.progressBar, [1460, 445], (0, 0, square.movementModifier * 30, 20))
 		else:
-			self.display.blit(self.map.iProgressBar, [1460, 435])
+			self.display.blit(self.map.iProgressBar, [1460, 445])
 		if square.battleModifier != None:
-			self.display.blit(self.map.progressBar, [1460, 465], (0, 0, square.battleModifier * 3, 20))	
+			self.display.blit(self.map.progressBar, [1460, 475], (0, 0, square.battleModifier * 3, 20))	
 		else:
-			self.display.blit(self.map.iProgressBar, [1460, 465])
-		self.display.blit(self.map.progressBar, [1460, 495], (0, 0, square.sightModifier * 30, 20))
+			self.display.blit(self.map.iProgressBar, [1460, 475])
+		self.display.blit(self.map.progressBar, [1460, 505], (0, 0, square.sightModifier * 30, 20))
 		# unit
 		if square.unit:
-			self.display.blit(square.unit.mapIcon, [1136, 546])
-			self.display.blit(self.map.cursorGfx, [1124, 536])
+			self.display.blit(square.unit.mapIcon, [1144, 573])
+			self.display.blit(self.map.cursorGfx, [1132, 563])
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
 			# weapons
