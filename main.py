@@ -93,7 +93,7 @@ class Main():
 		# terrain
 		self.display.blit(square.background, [1136, 436])
 		if square.infra:	self.display.blit(square.infra, [1136, 436])
-		self.display.blit(self.map.cursorGfx, [1136, 436])
+		self.display.blit(self.map.cursorGfx, [1124, 426])
 		if square.movementModifier != None:
 			self.display.blit(self.map.progressBar, [1460, 435], (0, 0, square.movementModifier * 30, 20))
 		else:
@@ -105,7 +105,8 @@ class Main():
 		self.display.blit(self.map.progressBar, [1460, 495], (0, 0, square.sightModifier * 30, 20))
 		# unit
 		if square.unit:
-			self.display.blit(square.unit.mapIcon, [1125, 540])
+			self.display.blit(square.unit.mapIcon, [1136, 546])
+			self.display.blit(self.map.cursorGfx, [1124, 536])
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
 			# weapons
@@ -124,7 +125,7 @@ class Main():
 					# name
 					nameText = font20.render(str(weapon.name), True, colors.grey, colors.almostBlack)
 					rNameText = ammoText.get_rect()
-					rNameText.topleft = (1420, yCoords[y] + 5)
+					rNameText.topleft = (11240, yCoords[y] + 5)
 					self.display.blit(nameText, rNameText)
 
 
