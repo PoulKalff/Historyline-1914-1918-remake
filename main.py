@@ -123,7 +123,7 @@ class Main():
 						rAmmoText.topleft = (1140, yCoords[y] + 10)
 						pygame.draw.rect(self.display, colors.almostBlack, (1128, yCoords[y], 41, 50), 0)
 						self.display.blit(ammoText, rAmmoText)
-					self.display.blit(weapon.picture, [1170, yCoords[y]])
+					self.display.blit(weapon.picture, [1169, yCoords[y]])
 					# name
 					nameText = font20.render(str(weapon.name), True, colors.grey, colors.almostBlack)
 					rNameText = ammoText.get_rect()
