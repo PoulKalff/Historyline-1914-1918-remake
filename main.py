@@ -113,9 +113,10 @@ class Main():
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
 			# weapons
 			yCoords = [767, 821, 875, 929]			
-			for y, weapon in enumerate(square.unit.weapons):
+			for y in range(4):
+				weapon = square.unit.weapons[y]
 				if weapon:
-					if weapon.ammo == 999:
+					if not weapon.ammo:
 						self.display.blit(self.map.infinityGfx, (1128, yCoords[y]))
 					else:
 						ammoText = font30.render(str(weapon.ammo), True, colors.grey, colors.almostBlack)
@@ -129,6 +130,10 @@ class Main():
 					rNameText = ammoText.get_rect()
 					rNameText.topleft = (11240, yCoords[y] + 5)
 					self.display.blit(nameText, rNameText)
+				else:
+					self.display.blit(self.map.emptyAmmoGfx, (1128, yCoords[y]))
+					self.display.blit(self.map.noWeapon, [1169, yCoords[y]])
+
 
 
 #		print('Cursor on Hex:', mapCursor)

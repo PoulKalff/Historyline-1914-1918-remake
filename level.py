@@ -48,11 +48,14 @@ class Unit():
 			self.maxSize = 10		# all units size 10?
 			self.currentSize = 10
 			self.fuel = data['fuel']
-			self.movement = data['movement']
+			self.speed = data['speed']
 			self.sight = data['sight']
 			self.weapons = []
 			for w in data['weapons']:
-				if w: self.weapons.append(Weapon(w))
+				if w:
+					self.weapons.append(Weapon(w))
+				else:
+					self.weapons.append(None)
 			self.mapIcon = data['icon']
 
 
@@ -103,8 +106,10 @@ class Map(list):
 		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.infinityGfx = pygame.image.load('gfx/infinity.png')
+		self.emptyAmmoGfx = pygame.image.load('gfx/emptyAmmo.png')
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
+		self.noWeapon = pygame.image.load('gfx/weapons/empty.png')
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts
