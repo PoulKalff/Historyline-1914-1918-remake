@@ -2,7 +2,7 @@ import sys
 import json
 import time
 import pygame
-from helperFunctions import *
+from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
@@ -30,12 +30,14 @@ class Weapon():
 		if key:
 			data = weaponsParameters[key]
 			self.name = data['name']
+			self.rangeMin = data['rangeMin']
+			self.rangeMax = data['rangeMax']
+			self.power = data['power']
 			self.air = data['air']
 			self.ground = data['ground']
 			self.water = data['water']
 			self.ammo = data['ammo']
 			self.picture = data['picture']
-
 
 
 class Unit():
@@ -105,11 +107,13 @@ class Map(list):
 		self.pixelWidth = self.squareWidth * 142
 		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
-		self.infinityGfx = pygame.image.load('gfx/infinity.png')
-		self.emptyAmmoGfx = pygame.image.load('gfx/emptyAmmo.png')
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
 		self.noWeapon = pygame.image.load('gfx/weapons/empty.png')
+		self.blankHex = pygame.image.load('gfx/hexTypes/hex_blank.png')
+		self.backgroundTexture = pygame.image.load('gfx/steelTexture.png')
+		self.backgroundTextureUnit = pygame.image.load('gfx/steelTextureUnit.png')
+		self.backgroundTextureTerrain = pygame.image.load('gfx/steelTextureTerrain.png')
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts
@@ -125,7 +129,7 @@ class Map(list):
 
 
 	def draw(self):
-		self.parent.display.fill([49, 48, 33])
+		self.parent.display.blit(self.backgroundTexture, (0,0))
 		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
 		for x in range(23):
 			for y in range(len(self[x])):
@@ -145,10 +149,12 @@ class Map(list):
 		# window borders
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
-		pygame.draw.rect(self.parent.display, colors.historylineLight , (1124, 15,  662, 400), 0)					# minimap background
+		pygame.draw.rect(self.parent.display, colors.historylineDark , (1124, 15,  662, 400), 0)					# minimap background
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 15,  662, 400), 4)							# minimap border
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)							# middle window border
+		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 555, 662, 428), 4)						# lower window border
+		self.parent.display.blit(self.backgroundTextureUnit, (1128, 559))
 		self.parent.display.blit(*self.movementModifierText)
 		self.parent.display.blit(*self.battleModifierText)
 		self.parent.display.blit(*self.sightModifierText)

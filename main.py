@@ -16,11 +16,11 @@ import argparse
 import pygame.locals
 from io import BytesIO
 from level import Map
-from helperFunctions import *
+from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.01'		# init
+version = '0.10'		# weapons done
 colors = colorList
 
 # --- Classes -------------------------------------------------------------------------------------
@@ -107,6 +107,7 @@ class Main():
 		self.display.blit(self.map.progressBar, [1460, 505], (0, 0, square.sightModifier * 30, 20))
 		# unit
 		if square.unit:
+			self.display.blit(self.map.blankHex, [1144, 573])
 			self.display.blit(square.unit.mapIcon, [1144, 573])
 			self.display.blit(self.map.cursorGfx, [1132, 563])
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
@@ -116,23 +117,27 @@ class Main():
 			for y in range(4):
 				weapon = square.unit.weapons[y]
 				if weapon:
-					if not weapon.ammo:
-						self.display.blit(self.map.infinityGfx, (1128, yCoords[y]))
-					else:
+					# render weapon gfx background
+					self.display.blit(weapon.picture, [1128, yCoords[y]])
+					if weapon.ammo:
+						# render ammo
 						ammoText = font30.render(str(weapon.ammo), True, colors.grey, colors.almostBlack)
 						rAmmoText = ammoText.get_rect()
 						rAmmoText.topleft = (1140, yCoords[y] + 10)
 						pygame.draw.rect(self.display, colors.almostBlack, (1128, yCoords[y], 41, 50), 0)
 						self.display.blit(ammoText, rAmmoText)
-					self.display.blit(weapon.picture, [1169, yCoords[y]])
-					# name
-					nameText = font20.render(str(weapon.name), True, colors.grey, colors.almostBlack)
-					rNameText = ammoText.get_rect()
-					rNameText.topleft = (11240, yCoords[y] + 5)
-					self.display.blit(nameText, rNameText)
+					# render power
+					powerText = font20.render(str(weapon.power), True, colors.grey)
+					rPowerText = powerText.get_rect()
+					rPowerText.topleft = (1441, yCoords[y] + 30)
+					self.display.blit(powerText, rPowerText)
+					# render range
+					powerText = font20.render(str(weapon.rangeMin) + ' - ' + str(weapon.rangeMax), True, colors.grey)
+					rPowerText = powerText.get_rect()
+					rPowerText.topleft = (1728, yCoords[y] + 30)
+					self.display.blit(powerText, rPowerText)
 				else:
-					self.display.blit(self.map.emptyAmmoGfx, (1128, yCoords[y]))
-					self.display.blit(self.map.noWeapon, [1169, yCoords[y]])
+					self.display.blit(self.map.noWeapon, [1128, yCoords[y]])
 
 
 
