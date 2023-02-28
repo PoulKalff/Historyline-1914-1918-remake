@@ -108,7 +108,7 @@ class Main():
 		# unit
 		if square.unit:
 			self.display.blit(self.map.blankHex, [1144, 573])
-			self.display.blit(square.unit.mapIcon, [1144, 573])
+			self.display.blit(square.unit.mapIcon, [1144, 565])
 			self.display.blit(self.map.cursorGfx, [1132, 563])
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
@@ -138,9 +138,6 @@ class Main():
 					self.display.blit(powerText, rPowerText)
 				else:
 					self.display.blit(self.map.noWeapon, [1128, yCoords[y]])
-
-
-
 #		print('Cursor on Hex:', mapCursor)
 #		print(self.test)
 

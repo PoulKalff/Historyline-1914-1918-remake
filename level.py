@@ -2,6 +2,9 @@ import sys
 import json
 import time
 import pygame
+import numpy as np
+from PIL import Image
+import pygame.surfarray as surfarray
 from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
@@ -47,18 +50,48 @@ class Unit():
 		if key:
 			data = unitsParameters[key]
 			self.name = data['name']
+			self.country = data['country']
+			self.armour = data['armour']
+			self.speed = data['speed']
+			self.weight = data['weight']
+			self.sight = data['sight']
+			self.fuel = data['fuel']
+			self.experience = 0
+			self.skills = []
+			self.weapons = []
 			self.maxSize = 10		# all units size 10?
 			self.currentSize = 10
-			self.fuel = data['fuel']
-			self.speed = data['speed']
-			self.sight = data['sight']
-			self.weapons = []
+			self.faction = 'CentralPowers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'EntenteCordial'
 			for w in data['weapons']:
 				if w:
 					self.weapons.append(Weapon(w))
 				else:
 					self.weapons.append(None)
-			self.mapIcon = data['icon']
+			rawIcon = data['icon']
+			# if central powers, rotate and colourize icon
+			if self.faction == 'CentralPowers':
+				arr = pygame.surfarray.pixels3d(rawIcon)
+				for i in range(48):
+					for j in range(48): # loop over the 2d array
+						if np.array_equal(arr[i, j], [164, 132, 112]):
+							arr[i, j] = [72, 88, 52]
+						elif np.array_equal(arr[i, j], [80, 68, 52]):
+							arr[i, j] = [24, 40, 20]
+						elif np.array_equal(arr[i, j], [216, 188, 160]):
+							arr[i, j] = [148, 168, 100]
+						elif np.array_equal(arr[i, j], [144, 112,  88]):
+							arr[i, j] = [56, 72, 36]
+						elif np.array_equal(arr[i, j], [180, 148, 124]):
+							arr[i, j] = [88, 104, 36]
+			rawIcon = pygame.transform.scale2x(rawIcon)
+			self.allIcons = [	rot_center(rawIcon, 60),
+								rot_center(rawIcon, 120), 
+								rot_center(rawIcon, 180), 			
+								rot_center(rawIcon, 240), 
+								rot_center(rawIcon, 300), 
+								rawIcon
+							 ]
+			self.mapIcon = self.allIcons[2] if self.faction == 'CentralPowers' else self.allIcons[5]
 
 
 
@@ -137,7 +170,8 @@ class Map(list):
 				forskydning = 71 if (x % 2) != 0 else 0
 				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-				if square.unit:		self.parent.display.blit(square.unit.mapIcon, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+				if square.unit:		self.parent.display.blit(square.unit.mapIcon, 
+					[self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
 				if developerMode:
 					text = self.parent.devModeFont.render(str(x + 1) + '/' + str(y + 1), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
