@@ -97,14 +97,14 @@ class Main():
 		if square.infra:	self.display.blit(square.infra, [1144, 446])
 		self.display.blit(self.map.cursorGfx, [1132, 435])
 		if square.movementModifier != None:
-			self.display.blit(self.map.progressBar, [1460, 445], (0, 0, square.movementModifier * 30, 20))
+			self.display.blit(self.map.progressBar, [1460, 444], (0, 0, square.movementModifier * 30, 20))
 		else:
-			self.display.blit(self.map.iProgressBar, [1460, 445])
+			self.display.blit(self.map.iProgressBar, [1460, 444])
 		if square.battleModifier != None:
-			self.display.blit(self.map.progressBar, [1460, 475], (0, 0, square.battleModifier * 3, 20))	
+			self.display.blit(self.map.progressBar, [1460, 474], (0, 0, square.battleModifier * 3, 20))	
 		else:
-			self.display.blit(self.map.iProgressBar, [1460, 475])
-		self.display.blit(self.map.progressBar, [1460, 505], (0, 0, square.sightModifier * 30, 20))
+			self.display.blit(self.map.iProgressBar, [1460, 474])
+		self.display.blit(self.map.progressBar, [1460, 504], (0, 0, square.sightModifier * 30, 20))
 		# unit
 		if square.unit:
 			self.display.blit(self.map.blankHex, [1144, 573])
