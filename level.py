@@ -67,6 +67,7 @@ class Unit():
 					self.weapons.append(Weapon(w))
 				else:
 					self.weapons.append(None)
+			self.picture = data['picture']
 			rawIcon = data['icon']
 			# if central powers, rotate and colourize icon
 			if self.faction == 'CentralPowers':
@@ -143,7 +144,9 @@ class Map(list):
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
 		self.noWeapon = pygame.image.load('gfx/weapons/empty.png')
-		self.blankHex = pygame.image.load('gfx/hexTypes/hex_blank.png')
+		self.ranksGfx = pygame.image.load('gfx/ranks.png')
+		self.unitPanel = pygame.image.load('gfx/unit_panel.png')
+		self.unitSkills = pygame.image.load('gfx/skills.png')
 		self.backgroundTexture = pygame.image.load('gfx/steelTexture.png')
 		self.backgroundTextureUnit = pygame.image.load('gfx/steelTextureUnit.png')
 		self.backgroundTextureTerrain = pygame.image.load('gfx/steelTextureTerrain.png')

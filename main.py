@@ -107,11 +107,21 @@ class Main():
 		self.display.blit(self.map.progressBar, [1460, 504], (0, 0, square.sightModifier * 30, 20))
 		# unit
 		if square.unit:
-			self.display.blit(self.map.blankHex, [1144, 573])
-			self.display.blit(square.unit.mapIcon, [1144, 565])
-			self.display.blit(self.map.cursorGfx, [1132, 563])
+			self.display.blit(self.map.unitPanel, [1135, 570])
+			self.display.blit(square.unit.mapIcon, [1141, 569])
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
+			self.display.blit(self.map.unitSkills, [1750, 565])
+			self.display.blit(self.map.ranksGfx, [1156, 676], (square.unit.experience * 66, 0, 66, 66))
+			self.display.blit(square.unit.picture, [1522, 573])
+
+
+
+
+
+
+
+
 			# weapons
 			yCoords = [767, 821, 875, 929]			
 			for y in range(4):

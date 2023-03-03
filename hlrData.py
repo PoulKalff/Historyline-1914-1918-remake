@@ -136,7 +136,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['gewehr98', 'lugerp08', 'bayonet' , None],
-												'icon'		: pygame.image.load('gfx/units/infantry.png'), 
+												'icon'		: pygame.image.load('gfx/units/icons/infantry.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_infantry'	:	{	'name'		: 'Infantry',
 												'country'	: 'France',
@@ -148,7 +149,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['leeEnfield', 'revolveur', 'bayonet', None],
-												'icon'		 : pygame.image.load('gfx/units/infantry.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/infantry.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'CP_eliteInf'	:	{	'name'		: 'Elite Infantry',
 												'country'	: 'Germany',
@@ -160,7 +162,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['maxim', 'trenchKnife', None, None],
-												'icon'		 : pygame.image.load('gfx/units/eliteInfantry.png')
+												'icon'		 : pygame.image.load('gfx/units/icons/eliteInfantry.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_eliteInf'	:	{	'name'		: 'Elite Infantry',
 												'country'	: 'France',
@@ -172,7 +175,9 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['wickers', 'trenchKnife', None, None],
-												'icon' 		: pygame.image.load('gfx/units/eliteInfantry.png') 
+												'icon' 		: pygame.image.load('gfx/units/icons/eliteInfantry.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
+
 											},
 						'CP_cavalry'	:	{	'name'		: 'Cavalry',
 												'country'	: 'Germany',
@@ -184,7 +189,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['gewehr98', 'sabre', None, None],
-												'icon'		 : pygame.image.load('gfx/units/cavalry.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/cavalry.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_cavalry'	:	{	'name'		: 'Cavalry',
 												'country'	: 'France',
@@ -196,7 +202,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['leeEnfield', 'sabre', None, None],
-												'icon'		 : pygame.image.load('gfx/units/cavalry.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/cavalry.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'CP_lArtillery'	:	{	'name'		: 'Light Artillery',
 												'country'	: 'Germany',
@@ -208,7 +215,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['feldkanone16', None, None, None],
-												'icon'		 : pygame.image.load('gfx/units/lightArtillery.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/lightArtillery.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_lArtillery'	:	{	'name'		: 'Light Artillery',
 												'country'	: 'France',
@@ -220,7 +228,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['m1902', None, None, None],
-												'icon'		 : pygame.image.load('gfx/units/lightArtillery.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/lightArtillery.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'CP_mArtillery'	:	{	'name'		: 'Medium Artillery',
 												'country'	: 'Germany',
@@ -232,7 +241,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['lefh', None, None, None],
-												'icon'		 : pygame.image.load('gfx/units/mediumArtillery.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/mediumArtillery.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_mArtillery'	:	{	'name'		: 'Medium Artillery',
 												'country'	: 'France',
@@ -244,7 +254,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['canon75', None, None, None],
-												'icon' 		: pygame.image.load('gfx/units/mediumArtillery.png') 
+												'icon' 		: pygame.image.load('gfx/units/icons/mediumArtillery.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'CP_hArtillery'	:	{	'name'		: 'Heavy Artillery',
 												'country'	: 'Germany',
@@ -256,7 +267,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['morser', None, None, None],
-												'icon'		 : pygame.image.load('gfx/units/heavyArtillery.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/heavyArtillery.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_hArtillery'	:	{	'name'		: 'Heavy Artillery',
 												'country'	: 'France',
@@ -268,7 +280,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['canon155', None, None, None],
-												'icon'		 : pygame.image.load('gfx/units/heavyArtillery.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/heavyArtillery.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'CP_supplyCar' 	:	{	'name'		: 'SupplyCar',
 												'country'	: 'Germany',
@@ -280,7 +293,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: [None, None, None, None],
-												'icon' 		: pygame.image.load('gfx/units/supplyCar.png') 
+												'icon' 		: pygame.image.load('gfx/units/icons/supplyCar.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_supplyCar' 	:	{	'name'		: 'SupplyCar',
 												'country'	: 'France',
@@ -292,7 +306,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: [None, None, None, None],
-												'icon'		 : pygame.image.load('gfx/units/supplyCar.png')
+												'icon'		 : pygame.image.load('gfx/units/icons/supplyCar.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'CP_bunker'	 	:	{	'name'		: 'Bunker',
 												'country'	: 'Germany',
@@ -304,7 +319,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['feldkanone16', None, None, None],
-												'icon'		 : pygame.image.load('gfx/units/bunker.png') 
+												'icon'		 : pygame.image.load('gfx/units/icons/bunker.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											},
 						'EC_bunker'	 	:	{	'name'		: 'Bunker',
 												'country'	: 'France',
@@ -316,7 +332,8 @@ unitsParameters = 	{	'' 				:	None,
 												'exp'		: 0,
 												'skills'	: [],
 												'weapons'	: ['m1902', None, None, None],
-												'icon' 		: pygame.image.load('gfx/units/bunker.png') 
+												'icon' 		: pygame.image.load('gfx/units/icons/bunker.png'),
+												'picture'	: pygame.image.load('gfx/units/pictures/eliteInfantry.png')
 											}
 					}
 
