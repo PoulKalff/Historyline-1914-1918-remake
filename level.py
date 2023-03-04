@@ -11,17 +11,6 @@ from hlrData import *
 
 colors = colorList
 developerMode = False
-# texts used on map
-movementModifierText = font20.render('Movement Penalty', True, colors.black)
-rMovementModifierText = movementModifierText.get_rect()
-rMovementModifierText.topleft = (1270, 445)
-battleModifierText = font20.render('Battle Advantage', True, colors.black)
-rBattleModifierText = battleModifierText.get_rect()
-rBattleModifierText.topleft = (1270, 475)
-sightModifierText = font20.render('Sight Hindrance', True, colors.black)
-rSightModifierText = sightModifierText.get_rect()
-rSightModifierText.topleft = (1270, 505)
-
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -57,11 +46,11 @@ class Unit():
 			self.sight = data['sight']
 			self.fuel = data['fuel']
 			self.experience = 0
-			self.skills = []
+			self.skills = data['skills']
 			self.weapons = []
 			self.maxSize = 10		# all units size 10?
 			self.currentSize = 10
-			self.faction = 'CentralPowers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'EntenteCordial'
+			self.faction = 'Central Powers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'Entente Cordial'
 			for w in data['weapons']:
 				if w:
 					self.weapons.append(Weapon(w))
@@ -70,7 +59,7 @@ class Unit():
 			self.picture = data['picture']
 			rawIcon = data['icon']
 			# if central powers, rotate and colourize icon
-			if self.faction == 'CentralPowers':
+			if self.faction == 'Central Powers':
 				arr = pygame.surfarray.pixels3d(rawIcon)
 				for i in range(48):
 					for j in range(48): # loop over the 2d array
@@ -92,7 +81,7 @@ class Unit():
 								rot_center(rawIcon, 300), 
 								rawIcon
 							 ]
-			self.mapIcon = self.allIcons[2] if self.faction == 'CentralPowers' else self.allIcons[5]
+			self.mapIcon = self.allIcons[2] if self.faction == 'Central Powers' else self.allIcons[5]
 
 
 
@@ -141,8 +130,11 @@ class Map(list):
 		self.pixelWidth = self.squareWidth * 142
 		self.pixelHeight = self.squareHeight * 40
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
+		self.hexBorder = pygame.image.load('gfx/hexBorder.png')
+		self.skillsMarker = pygame.image.load('gfx/skills_marker.png')
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
+		self.flags = pygame.image.load('gfx/flags.png')
 		self.noWeapon = pygame.image.load('gfx/weapons/empty.png')
 		self.ranksGfx = pygame.image.load('gfx/ranks.png')
 		self.unitPanel = pygame.image.load('gfx/unit_panel.png')
@@ -153,9 +145,9 @@ class Map(list):
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts
-		self.movementModifierText = [movementModifierText, rMovementModifierText]
-		self.battleModifierText = [battleModifierText, rBattleModifierText]
-		self.sightModifierText =  [sightModifierText, rSightModifierText]
+		self.movementModifierText = font20.render('Movement Penalty', True, colors.black) 	# [movementModifierText, rMovementModifierText]
+		self.battleModifierText = font20.render('Battle Advantage', True, colors.black)		#[battleModifierText, rBattleModifierText]
+		self.sightModifierText = font20.render('Sight Hindrance', True, colors.black)				# [sightModifierText, rSightModifierText]
 		for value in jsonLevelData['tiles'].values():
 			line = []
 			for square in value:
@@ -192,9 +184,9 @@ class Map(list):
 		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 555, 662, 428), 4)						# lower window border
 		self.parent.display.blit(self.backgroundTextureUnit, (1128, 559))
-		self.parent.display.blit(*self.movementModifierText)
-		self.parent.display.blit(*self.battleModifierText)
-		self.parent.display.blit(*self.sightModifierText)
+		self.parent.display.blit(self.movementModifierText, (1270, 445))
+		self.parent.display.blit(self.battleModifierText, (1270, 475))
+		self.parent.display.blit(self.sightModifierText, (1270, 505))
 		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning) -12, self.parent.viewDsp[1] + (self.cursorPos[1] * 40) - 10])
 		return 1
 

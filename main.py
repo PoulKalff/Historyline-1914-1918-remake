@@ -22,6 +22,7 @@ from hlrData import *
 
 version = '0.10'		# weapons done
 colors = colorList
+flagIndex = {'Germany' : 0, 'France' : 1}
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -83,9 +84,9 @@ class Main():
 			self.test[1] += 1
 		# ------------------------------------- test end ---------------------------------------
 		elif keysPressed[pygame.K_PAGEUP]:
-			self.viewDsp[1] = 10
+			self.map.mapView = [0, 0]
 		elif keysPressed[pygame.K_PAGEDOWN]:
-			self.viewDsp[1] = -990
+			self.map.mapView = [0, 24]
 
 
 	def drawInfo(self):
@@ -95,7 +96,7 @@ class Main():
 		# terrain
 		self.display.blit(square.background, [1144, 446])
 		if square.infra:	self.display.blit(square.infra, [1144, 446])
-		self.display.blit(self.map.cursorGfx, [1132, 435])
+		self.display.blit(self.map.hexBorder, [1142, 444])
 		if square.movementModifier != None:
 			self.display.blit(self.map.progressBar, [1460, 444], (0, 0, square.movementModifier * 30, 20))
 		else:
@@ -112,16 +113,20 @@ class Main():
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
 			pygame.draw.rect(self.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
 			self.display.blit(self.map.unitSkills, [1750, 565])
+			self.display.blit(self.map.flags, [1156, 676], (flagIndex[square.unit.country] * 66, 0, 66, 66))
 			self.display.blit(self.map.ranksGfx, [1156, 676], (square.unit.experience * 66, 0, 66, 66))
 			self.display.blit(square.unit.picture, [1522, 573])
-
-
-
-
-
-
-
-
+			gfx = font20.render(square.unit.name, True, (208, 185, 140)); self.display.blit(gfx, [1380 - (gfx.get_width() / 2), 575])
+			gfx = font20.render(square.unit.faction, True, (208, 185, 140)); self.display.blit(gfx, [1380 - (gfx.get_width() / 2), 610])
+			gfx = font20.render(str(square.unit.sight), True, (208, 185, 140)); self.display.blit(gfx, [1318 - (gfx.get_width() / 2), 662])
+			gfx = font20.render(str(square.unit.speed), True, (208, 185, 140)); self.display.blit(gfx, [1392 - (gfx.get_width() / 2), 662])
+			gfx = font20.render(str(square.unit.currentSize), True, (208, 185, 140)); self.display.blit(gfx, [1462 - (gfx.get_width() / 2), 662])
+			gfx = font20.render(str(square.unit.armour), True, (208, 185, 140)); self.display.blit(gfx, [1318 - (gfx.get_width() / 2), 712])
+			gfx = font20.render(str(square.unit.weight), True, (208, 185, 140)); self.display.blit(gfx, [1392 - (gfx.get_width() / 2), 712])
+			gfx = font20.render(str(square.unit.fuel), True, (208, 185, 140)); self.display.blit(gfx, [1462 - (gfx.get_width() / 2), 712])
+			# mark active skills
+			for x in square.unit.skills:
+				self.display.blit(self.map.skillsMarker, [1748, 535 + (x * 28)])
 			# weapons
 			yCoords = [767, 821, 875, 929]			
 			for y in range(4):
@@ -160,7 +165,10 @@ class Main():
 			self.map.draw()
 			self.drawInfo()
 			pygame.display.update()
-			self.renderList = []
+
+
+			print(self.map.cursorPos, self.map.mapView)
+
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
