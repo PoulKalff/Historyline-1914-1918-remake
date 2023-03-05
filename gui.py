@@ -185,29 +185,21 @@ class GUI():
 		width = (self.mapWidth * 142) - 46 
 		height = (self.mapHeight + 1) * 40
 		miniMap = pygame.Surface((width, height)) # dunno why 46 must be subtracted?
-		for x in range(int(self.mapHeight)):
+		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				square = self.mainMap[x][y]
 				forskydning = 71 if (x % 2) != 0 else 0
 				miniMap.blit(square.background, [y * 142 + forskydning, x * 40])
 				if square.infra:	miniMap.blit(square.infra, [y * 142 + forskydning, x * 40])
 				if square.unit:		miniMap.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40])
-
-
-
-
+		# calculate percentage of area displayed
+		widthPercentageDisplayed = 8 / self.mapWidth
+		heightPercentageDisplayed = 12 / int((self.mapHeight + 1) / 2)
+		# calculate marker offset
+		markerOffsetX = self.mapView[0] / self.mapWidth
+		markerOffsetY = self.mapView[1] / self.mapHeight
 		# draw a rectangle to show the field of view on the miniMap
-		pygame.draw.rect(miniMap, colors.red, (0, 0, width - 5, height - 5), 18)
-
-
-
-		print(self.mapView)
-
-
-
-
-
-
+		pygame.draw.rect(miniMap, colors.red, (int(width * markerOffsetX), int(height * markerOffsetY), (width - 5) * widthPercentageDisplayed, (height - 20) * heightPercentageDisplayed), 18)
 		# scale minimap to max height of minimap area (392)
 		scaleFactor = 392 / height
 		scaledMiniMap = pygame.transform.scale(miniMap, (width * scaleFactor, height * scaleFactor))
