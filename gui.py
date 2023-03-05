@@ -198,12 +198,20 @@ class GUI():
 		# calculate marker offset
 		markerOffsetX = self.mapView[0] / self.mapWidth
 		markerOffsetY = self.mapView[1] / self.mapHeight
-		# draw a rectangle to show the field of view on the miniMap
-		pygame.draw.rect(miniMap, colors.red, (int(width * markerOffsetX), int(height * markerOffsetY), (width - 5) * widthPercentageDisplayed, (height - 20) * heightPercentageDisplayed), 18)
 		# scale minimap to max height of minimap area (392)
 		scaleFactor = 392 / height
 		scaledMiniMap = pygame.transform.scale(miniMap, (width * scaleFactor, height * scaleFactor))
-		self.parent.display.blit(scaledMiniMap, [1459 - int(scaledMiniMap.get_width() / 2) , 19])
+		miniMapXCoord =	1459 - int(scaledMiniMap.get_width() / 2)
+		self.parent.display.blit(scaledMiniMap, [miniMapXCoord, 19])
+		w, h = scaledMiniMap.get_size()
+		# draw a rectangle to show the field of view on the miniMap
+		pygame.draw.rect(self.parent.display, colors.red, 
+			(	miniMapXCoord -2 + int(w * markerOffsetX), 
+				17 + int(h * markerOffsetY), 
+				(w + 4) * widthPercentageDisplayed, 
+				(h + 4) * heightPercentageDisplayed), 
+				2)
+
 
 
 
