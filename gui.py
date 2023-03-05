@@ -117,11 +117,12 @@ class HexSquare():
 				self.battleModifier = 10
 
 
-class Map(list):
+class GUI():
 	""" Representation of the background """
 
 	def __init__(self, parent, levelNo):
 		self.parent = parent
+		self.mainMap = []
 		# read data
 		with open('levels/level' + str(levelNo) + '.json') as json_file:
 			jsonLevelData = json.load(json_file)
@@ -129,6 +130,7 @@ class Map(list):
 		self.squareHeight = len(jsonLevelData["tiles"])					# 47 for level 1
 		self.pixelWidth = self.squareWidth * 142
 		self.pixelHeight = self.squareHeight * 40
+		self.flagIndex = {'Germany' : 0, 'France' : 1}
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.hexBorder = pygame.image.load('gfx/hexBorder.png')
 		self.skillsMarker = pygame.image.load('gfx/skills_marker.png')
@@ -152,16 +154,35 @@ class Map(list):
 			line = []
 			for square in value:
 				line.append(HexSquare(*square))
-			self.append(line)
+			self.mainMap.append(line)
+		self.mapWidth = len(self.mainMap[0])
+		self.mapHeight = len(self.mainMap)
 
 
 
-	def draw(self):
+	def currentSquare(self):
+		""" returns the current hightlighted hexSquare """
+		mapCursor = [self.cursorPos[0] + self.mapView[0], self.cursorPos[1]  + self.mapView[1]]
+		return self.mainMap[mapCursor[1]][mapCursor[0]]
+
+
+
+	def drawMiniMap(self):
+		pass
+#		print(self.mapWidth)
+#		print(self.mapHeight)
+#		sys.exit()
+
+
+
+
+
+	def drawMainMap(self):
 		self.parent.display.blit(self.backgroundTexture, (0,0))
 		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
-		for x in range(23):
-			for y in range(len(self[x])):
-				square = self[x + self.mapView[1]][y]
+		for x in range(int(self.mapHeight / 2 )):
+			for y in range(len(self.mainMap[x])):
+				square = self.mainMap[x + self.mapView[1]][y]
 				forskydning = 71 if (x % 2) != 0 else 0
 				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
@@ -189,6 +210,79 @@ class Map(list):
 		self.parent.display.blit(self.sightModifierText, (1270, 505))
 		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning) -12, self.parent.viewDsp[1] + (self.cursorPos[1] * 40) - 10])
 		return 1
+
+
+
+
+	def drawTerrainGUI(self):
+		""" fetches cursor position and fills out info on unit and terrain """
+		square = self.currentSquare()
+		self.parent.display.blit(square.background, [1144, 446])
+		if square.infra:	self.parent.display.blit(square.infra, [1144, 446])
+		self.parent.display.blit(self.hexBorder, [1142, 444])
+		if square.movementModifier != None:
+			self.parent.display.blit(self.progressBar, [1460, 444], (0, 0, square.movementModifier * 30, 20))
+		else:
+			self.parent.display.blit(self.iProgressBar, [1460, 444])
+		if square.battleModifier != None:
+			self.parent.display.blit(self.progressBar, [1460, 474], (0, 0, square.battleModifier * 3, 20))	
+		else:
+			self.parent.display.blit(self.iProgressBar, [1460, 474])
+		self.parent.display.blit(self.progressBar, [1460, 504], (0, 0, square.sightModifier * 30, 20))
+
+
+
+	def drawUnitGUI(self):
+		square = self.currentSquare()
+		if square.unit:
+			self.parent.display.blit(self.unitPanel, [1135, 570])
+			self.parent.display.blit(square.unit.mapIcon, [1141, 569])
+			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
+			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
+			self.parent.display.blit(self.unitSkills, [1750, 565])
+			self.parent.display.blit(self.flags, [1156, 676], (self.flagIndex[square.unit.country] * 66, 0, 66, 66))
+			self.parent.display.blit(self.ranksGfx, [1156, 676], (square.unit.experience * 66, 0, 66, 66))
+			self.parent.display.blit(square.unit.picture, [1522, 573])
+			gfx = font20.render(square.unit.name, True, (208, 185, 140)); self.parent.display.blit(gfx, [1380 - (gfx.get_width() / 2), 575])
+			gfx = font20.render(square.unit.faction, True, (208, 185, 140)); self.parent.display.blit(gfx, [1380 - (gfx.get_width() / 2), 610])
+			gfx = font20.render(str(square.unit.sight), True, (208, 185, 140)); self.parent.display.blit(gfx, [1318 - (gfx.get_width() / 2), 662])
+			gfx = font20.render(str(square.unit.speed), True, (208, 185, 140)); self.parent.display.blit(gfx, [1392 - (gfx.get_width() / 2), 662])
+			gfx = font20.render(str(square.unit.currentSize), True, (208, 185, 140)); self.parent.display.blit(gfx, [1462 - (gfx.get_width() / 2), 662])
+			gfx = font20.render(str(square.unit.armour), True, (208, 185, 140)); self.parent.display.blit(gfx, [1318 - (gfx.get_width() / 2), 712])
+			gfx = font20.render(str(square.unit.weight), True, (208, 185, 140)); self.parent.display.blit(gfx, [1392 - (gfx.get_width() / 2), 712])
+			gfx = font20.render(str(square.unit.fuel), True, (208, 185, 140)); self.parent.display.blit(gfx, [1462 - (gfx.get_width() / 2), 712])
+			# mark active skills
+			for x in square.unit.skills:
+				self.parent.display.blit(self.skillsMarker, [1748, 535 + (x * 28)])
+			# weapons
+			yCoords = [767, 821, 875, 929]			
+			for y in range(4):
+				weapon = square.unit.weapons[y]
+				if weapon:
+					# render weapon gfx background
+					self.parent.display.blit(weapon.picture, [1128, yCoords[y]])
+					if weapon.ammo:
+						# render ammo
+						ammoText = font30.render(str(weapon.ammo), True, colors.grey, colors.almostBlack)
+						rAmmoText = ammoText.get_rect()
+						rAmmoText.topleft = (1140, yCoords[y] + 10)
+						pygame.draw.rect(self.parent.display, colors.almostBlack, (1128, yCoords[y], 41, 50), 0)
+						self.parent.display.blit(ammoText, rAmmoText)
+					# render power
+					powerText = font20.render(str(weapon.power), True, colors.grey)
+					rPowerText = powerText.get_rect()
+					rPowerText.topleft = (1441, yCoords[y] + 30)
+					self.parent.display.blit(powerText, rPowerText)
+					# render range
+					powerText = font20.render(str(weapon.rangeMin) + ' - ' + str(weapon.rangeMax), True, colors.grey)
+					rPowerText = powerText.get_rect()
+					rPowerText.topleft = (1728, yCoords[y] + 30)
+					self.parent.display.blit(powerText, rPowerText)
+				else:
+					self.parent.display.blit(self.noWeapon, [1128, yCoords[y]])
+#		print('Cursor on Hex:', mapCursor)
+#		print(self.test)
+
 
 
 
