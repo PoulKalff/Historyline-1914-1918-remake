@@ -92,10 +92,7 @@ class Main():
 		""" Ensure that view runs until terminated by user """
 		while self.running:
 			self.checkInput()
-			self.interface.drawMainMap()
-			self.interface.drawMiniMap()
-			self.interface.drawTerrainGUI()
-			self.interface.drawUnitGUI()
+			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')

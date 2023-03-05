@@ -166,19 +166,60 @@ class GUI():
 		return self.mainMap[mapCursor[1]][mapCursor[0]]
 
 
+	def draw(self):
+		""" draws all parts of the interface """
+		self.parent.display.blit(self.backgroundTexture, (0,0))
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
+		self.drawMap()
+		self.drawMiniMap()
+		self.drawTerrainGUI()
+		self.drawUnitGUI()
+
+
 
 	def drawMiniMap(self):
-		pass
-#		print(self.mapWidth)
-#		print(self.mapHeight)
-#		sys.exit()
+		pygame.draw.rect(self.parent.display, colors.historylineDark , (1124, 15,  662, 400), 0)	# minimap background
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 15,  662, 400), 4)			# minimap border
+		miniMap = pygame.Surface((self.mapWidth * 4, self.mapHeight * 2))
+		miniMap.fill((107, 105, 90))
+		# put 4x4 on minimap for each square
+
+
+		miniHex = pygame.Surface((4, 4))
+		miniHex.fill((0, 255, 0))
+
+
+		for x in range(int(self.mapHeight / 2 )):
+			for y in range(len(self.mainMap[x])):
+				square = self.mainMap[x + self.mapView[1]][y]
+				forskydning = 2 if (x % 2) != 0 else 0
+				if y % 2:
+					miniHex.fill((255, 0, 0))
+				else:
+					miniHex.fill((0, 255, 0))
+
+				miniMap.blit(miniHex, [	forskydning + (y * 4), (x * 4)])
+#				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+#				if square.unit:		self.parent.display.blit(square.unit.mapIcon, 
+#					[self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
 
 
 
 
 
-	def drawMainMap(self):
-		self.parent.display.blit(self.backgroundTexture, (0,0))
+
+ 	
+
+		# scale minimap to max height of minimap area (392)
+		w, h = miniMap.get_size()
+		scaleFactor = 392 / h
+		scaledMiniMap = pygame.transform.scale(miniMap, (w * scaleFactor, h * scaleFactor))
+		self.parent.display.blit(scaledMiniMap, [1459 - int(scaledMiniMap.get_width() / 2) , 19])
+
+
+
+	def drawMap(self, update = False):
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
 		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
 		for x in range(int(self.mapHeight / 2 )):
 			for y in range(len(self.mainMap[x])):
@@ -196,18 +237,6 @@ class GUI():
 					image.blit(text, textRect)
 					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
-		# window borders
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
-		pygame.draw.rect(self.parent.display, colors.historylineDark , (1124, 15,  662, 400), 0)					# minimap background
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 15,  662, 400), 4)							# minimap border
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)							# middle window border
-		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 555, 662, 428), 4)						# lower window border
-		self.parent.display.blit(self.backgroundTextureUnit, (1128, 559))
-		self.parent.display.blit(self.movementModifierText, (1270, 445))
-		self.parent.display.blit(self.battleModifierText, (1270, 475))
-		self.parent.display.blit(self.sightModifierText, (1270, 505))
 		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning) -12, self.parent.viewDsp[1] + (self.cursorPos[1] * 40) - 10])
 		return 1
 
@@ -216,6 +245,11 @@ class GUI():
 
 	def drawTerrainGUI(self):
 		""" fetches cursor position and fills out info on unit and terrain """
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)		# middle window border
+		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
+		self.parent.display.blit(self.movementModifierText, (1270, 445))
+		self.parent.display.blit(self.battleModifierText, (1270, 475))
+		self.parent.display.blit(self.sightModifierText, (1270, 505))
 		square = self.currentSquare()
 		self.parent.display.blit(square.background, [1144, 446])
 		if square.infra:	self.parent.display.blit(square.infra, [1144, 446])
@@ -233,6 +267,8 @@ class GUI():
 
 
 	def drawUnitGUI(self):
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 555, 662, 428), 4)						# lower window border
+		self.parent.display.blit(self.backgroundTextureUnit, (1128, 559))
 		square = self.currentSquare()
 		if square.unit:
 			self.parent.display.blit(self.unitPanel, [1135, 570])
