@@ -166,6 +166,7 @@ class GUI():
 		return self.mainMap[mapCursor[1]][mapCursor[0]]
 
 
+
 	def draw(self):
 		""" draws all parts of the interface """
 		self.parent.display.blit(self.backgroundTexture, (0,0))
@@ -180,45 +181,41 @@ class GUI():
 	def drawMiniMap(self):
 		pygame.draw.rect(self.parent.display, colors.historylineDark , (1124, 15,  662, 400), 0)	# minimap background
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 15,  662, 400), 4)			# minimap border
-		miniMap = pygame.Surface((self.mapWidth * 4, self.mapHeight * 2))
-		miniMap.fill((107, 105, 90))
-		# put 4x4 on minimap for each square
-
-
-		miniHex = pygame.Surface((4, 4))
-		miniHex.fill((0, 255, 0))
-
-
-		for x in range(int(self.mapHeight / 2 )):
+		# generate minimap
+		width = (self.mapWidth * 142) - 46 
+		height = (self.mapHeight + 1) * 40
+		miniMap = pygame.Surface((width, height)) # dunno why 46 must be subtracted?
+		for x in range(int(self.mapHeight)):
 			for y in range(len(self.mainMap[x])):
-				square = self.mainMap[x + self.mapView[1]][y]
-				forskydning = 2 if (x % 2) != 0 else 0
-				if y % 2:
-					miniHex.fill((255, 0, 0))
-				else:
-					miniHex.fill((0, 255, 0))
-
-				miniMap.blit(miniHex, [	forskydning + (y * 4), (x * 4)])
-#				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-#				if square.unit:		self.parent.display.blit(square.unit.mapIcon, 
-#					[self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
+				square = self.mainMap[x][y]
+				forskydning = 71 if (x % 2) != 0 else 0
+				miniMap.blit(square.background, [y * 142 + forskydning, x * 40])
+				if square.infra:	miniMap.blit(square.infra, [y * 142 + forskydning, x * 40])
+				if square.unit:		miniMap.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40])
 
 
 
 
+		# draw a rectangle to show the field of view on the miniMap
+		pygame.draw.rect(miniMap, colors.red, (0, 0, width - 5, height - 5), 18)
 
 
- 	
+
+		print(self.mapView)
+
+
+
+
+
 
 		# scale minimap to max height of minimap area (392)
-		w, h = miniMap.get_size()
-		scaleFactor = 392 / h
-		scaledMiniMap = pygame.transform.scale(miniMap, (w * scaleFactor, h * scaleFactor))
+		scaleFactor = 392 / height
+		scaledMiniMap = pygame.transform.scale(miniMap, (width * scaleFactor, height * scaleFactor))
 		self.parent.display.blit(scaledMiniMap, [1459 - int(scaledMiniMap.get_width() / 2) , 19])
 
 
 
-	def drawMap(self, update = False):
+	def drawMap(self):
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
 		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
 		for x in range(int(self.mapHeight / 2 )):
