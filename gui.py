@@ -91,6 +91,13 @@ class HexSquare():
 
 	def __init__(self, hexType, infrastructure, unit):
 		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
+		self.bgHidden = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
+		self.hasBeenSeen = False									# has this hex ever been seen? If true, render 
+		self.bgUnseen = bgTiles['unseen']											# Never seen by player (mapcolour, with outline)
+		self.visible = False
+
+
+
 		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
 		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
 		self.fogofwar = None									# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
@@ -99,6 +106,10 @@ class HexSquare():
 		self.sightModifier = bgTilesModifiers[hexType][2]
 		if infrastructure:
 			self.infra = infraIcons[infrastructure]
+
+			self.bgHidden.blit(greyscale(self.infra), (0,0))	# grayscale and blit any infrastructure on the hidden filed gfx
+
+
 			if infrastructure.startswith("road"):
 				self.movementModifier = 0
 				self.battleModifier = 0
@@ -157,6 +168,26 @@ class GUI():
 			self.mainMap.append(line)
 		self.mapWidth = len(self.mainMap[0])
 		self.mapHeight = len(self.mainMap)
+		self.markVisibleSquares()
+
+
+
+	def markVisibleSquares(self):
+		""" checks each hexSquare on the map and marks it as visible if it can be seen by any friendly unit 
+			must be called each time player moves a piece"""
+		for x in range(self.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				self.mainMap[x][y].visible = False
+		for x in range(self.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				if self.mainMap[x][y].unit:
+					if self.mainMap[x][y].unit.faction == self.parent.playerSide:			# only mark visible if it is our own unit
+						self.mainMap[x][y].visible = True
+						print(self.mainMap[x][y].unit.sight)
+						# must find a way to mark all squares within sight distance of this field
+
+
+
 
 
 
@@ -209,9 +240,8 @@ class GUI():
 			(	miniMapXCoord -2 + int(w * markerOffsetX), 
 				17 + int(h * markerOffsetY), 
 				(w + 4) * widthPercentageDisplayed, 
-				(h + 4) * heightPercentageDisplayed), 
+				(h) * heightPercentageDisplayed), 
 				2)
-
 
 
 
@@ -222,11 +252,13 @@ class GUI():
 			for y in range(len(self.mainMap[x])):
 				square = self.mainMap[x + self.mapView[1]][y]
 				forskydning = 71 if (x % 2) != 0 else 0
-				self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-				if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-				if square.unit:		self.parent.display.blit(square.unit.mapIcon, 
-					[self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
-				if developerMode:
+				if square.visible:
+					self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					if square.unit:		self.parent.display.blit(square.unit.mapIcon, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
+				else:
+					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+				if developerMode:	# put as number on square
 					text = self.parent.devModeFont.render(str(x + 1) + '/' + str(y + 1), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
 					textRect = text.get_rect()
@@ -236,7 +268,6 @@ class GUI():
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
 		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning) -12, self.parent.viewDsp[1] + (self.cursorPos[1] * 40) - 10])
 		return 1
-
 
 
 
@@ -313,9 +344,6 @@ class GUI():
 					self.parent.display.blit(powerText, rPowerText)
 				else:
 					self.parent.display.blit(self.noWeapon, [1128, yCoords[y]])
-#		print('Cursor on Hex:', mapCursor)
-#		print(self.test)
-
 
 
 

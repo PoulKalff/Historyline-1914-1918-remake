@@ -20,7 +20,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.10'		# weapons done
+version = '0.50'		# gfx interface done
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ class Main():
 		self.height = 1000
 		self.develop = False
 		pygame.init()
-		icon = pygame.image.load('gfx/icon.png')
+		icon = pygame.image.load('gfx/gameIcon.png')
 		self.devModeFont = pygame.font.Font('freesansbold.ttf', 32)
 		pygame.display.set_icon(icon)
 		pygame.display.set_caption('Historyline 1914-1918 Remake')
@@ -41,13 +41,16 @@ class Main():
 		self.viewDsp = [19,19]
 
 
+
 	def run(self):
 		self.initGame()
 		self.loop()
 
 
+
 	def initGame(self):
 		self.running = True
+		self.playerSide = 'Central Powers'			# hardcoded, for now
 		self.interface = GUI(self, 1)
 		self.test = [0, 0]
 

@@ -1,4 +1,5 @@
 import pygame
+import numpy
 
 pygame.init()
 font20 = pygame.font.Font('freesansbold.ttf', 20)
@@ -98,8 +99,8 @@ bgTiles = 	{	'forest'	 	:	pygame.image.load('gfx/hexTypes/hex_forest.png'),
 				'lakeside123'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside123.png'),
 				'lakeside126'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside126.png'),
 				'lakeside156'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside156.png'),
-				'lakeside3456'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside3456.png')
-
+				'lakeside3456'	: 	pygame.image.load('gfx/hexTypes/hex_lakeside3456.png'),
+				'unseen'		: 	pygame.image.load('gfx/hexTypes/hex_unseen.png')
 			}
 
 
@@ -504,6 +505,17 @@ def rot_center(image, angle):
     rot_rect.center = rot_image.get_rect().center
     rot_image = rot_image.subsurface(rot_rect).copy()
     return rot_image
+
+
+def greyscale(surface: pygame.Surface):
+    surface_copy = surface.copy()  # I want to use the original surface as is.
+    arr = pygame.surfarray.pixels3d(surface_copy)
+    mean_arr = numpy.dot(arr, [0.216, 0.587, 0.144])
+    arr[:, :, 0] = mean_arr
+    arr[:, :, 1] = mean_arr
+    arr[:, :, 2] = mean_arr
+    return surface_copy
+
 
 
 class colorList:
