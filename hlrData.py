@@ -507,6 +507,7 @@ def rot_center(image, angle):
     return rot_image
 
 
+
 def greyscale(surface: pygame.Surface):
     surface_copy = surface.copy()  # I want to use the original surface as is.
     arr = pygame.surfarray.pixels3d(surface_copy)
@@ -515,6 +516,24 @@ def greyscale(surface: pygame.Surface):
     arr[:, :, 1] = mean_arr
     arr[:, :, 2] = mean_arr
     return surface_copy
+
+
+
+def adjacentHexes(x, y, maxX, maxY):
+	""" returns a list of 6 pairs of coords of the hexes that borders hex of coord given """
+	checked = []
+	if (x % 2) == 1: 
+		neighbors = [(x - 1, y + 1), (x + 1, y + 1), (x + 2, y), (x + 1, y), (x - 1, y), (x - 2, y)]
+	else:
+		neighbors = [(x - 1, y), (x + 1, y), (x + 2, y), (x + 1, y - 1), (x - 1, y - 1), (x - 2, y)]
+		maxX -= 1
+	# filter invalid coordinates
+	for coord in neighbors:
+		if coord[0] > -1 and coord[0] < maxY:
+			if coord[1] > -1 and coord[1] < maxX:
+				checked.append(coord)
+	return checked
+
 
 
 

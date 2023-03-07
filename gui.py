@@ -10,7 +10,7 @@ from hlrData import *
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 colors = colorList
-developerMode = False
+developerMode = True
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -182,9 +182,21 @@ class GUI():
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].unit:
 					if self.mainMap[x][y].unit.faction == self.parent.playerSide:			# only mark visible if it is our own unit
-						self.mainMap[x][y].visible = True
-						print(self.mainMap[x][y].unit.sight)
-						# must find a way to mark all squares within sight distance of this field
+						withinSight = [(x,y)]	# coord of self
+						for iteration in range(self.mainMap[x][y].unit.sight):
+							for coord in set(withinSight):
+								neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+								withinSight += neighbors
+						for c in set(withinSight):
+							try:
+								self.mainMap[c[0]][c[1]].visible = True
+							except:
+								print("Coordinate exceed map size in markVisibleSquares():", c)
+
+
+
+
+
 
 
 
@@ -259,7 +271,7 @@ class GUI():
 				else:
 					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if developerMode:	# put as number on square
-					text = self.parent.devModeFont.render(str(x + 1) + '/' + str(y + 1), True, (255,0,0))
+					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
 					textRect = text.get_rect()
 					textRect.topleft = (20, 20)
