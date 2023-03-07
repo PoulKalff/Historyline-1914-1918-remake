@@ -92,12 +92,13 @@ class HexSquare():
 	def __init__(self, hexType, infrastructure, unit):
 		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
 		self.bgHidden = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
-		self.hasBeenSeen = False									# has this hex ever been seen? If true, render 
-		self.bgUnseen = bgTiles['unseen']											# Never seen by player (mapcolour, with outline)
+		self.bgUnseen = self.bgHidden.copy()
+		self.bgUnseen.blit(bgTiles['unseen'], (0,0))					# Never seen by player (mapcolour, with outline)
+
+
+
+
 		self.visible = False
-
-
-
 		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
 		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
 		self.fogofwar = None									# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
@@ -106,10 +107,7 @@ class HexSquare():
 		self.sightModifier = bgTilesModifiers[hexType][2]
 		if infrastructure:
 			self.infra = infraIcons[infrastructure]
-
 			self.bgHidden.blit(greyscale(self.infra), (0,0))	# grayscale and blit any infrastructure on the hidden filed gfx
-
-
 			if infrastructure.startswith("road"):
 				self.movementModifier = 0
 				self.battleModifier = 0
@@ -228,6 +226,7 @@ class GUI():
 		width = (self.mapWidth * 142) - 46 
 		height = (self.mapHeight + 1) * 40
 		miniMap = pygame.Surface((width, height)) # dunno why 46 must be subtracted?
+		miniMap.fill(colors.historylineLight)
 		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				square = self.mainMap[x][y]
@@ -269,7 +268,7 @@ class GUI():
 					if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 					if square.unit:		self.parent.display.blit(square.unit.mapIcon, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
 				else:
-					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					self.parent.display.blit(square.bgUnseen, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if developerMode:	# put as number on square
 					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
@@ -312,11 +311,11 @@ class GUI():
 		square = self.currentSquare()
 		if square.unit:
 			self.parent.display.blit(self.unitPanel, [1135, 570])
+			self.parent.display.blit(self.flags, [1141, 569], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
 			self.parent.display.blit(square.unit.mapIcon, [1141, 569])
 			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
 			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
 			self.parent.display.blit(self.unitSkills, [1750, 565])
-			self.parent.display.blit(self.flags, [1156, 676], (self.flagIndex[square.unit.country] * 66, 0, 66, 66))
 			self.parent.display.blit(self.ranksGfx, [1156, 676], (square.unit.experience * 66, 0, 66, 66))
 			self.parent.display.blit(square.unit.picture, [1522, 573])
 			gfx = font20.render(square.unit.name, True, (208, 185, 140)); self.parent.display.blit(gfx, [1380 - (gfx.get_width() / 2), 575])
