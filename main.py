@@ -74,6 +74,8 @@ class Main():
 			self.interface.cursorMove('Up')
 		elif keysPressed[pygame.K_DOWN]:
 			self.interface.cursorMove('Down')
+		elif keysPressed[pygame.K_SPACE]:
+			self.interface.actionMenu.show(self.interface.currentSquare())
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1

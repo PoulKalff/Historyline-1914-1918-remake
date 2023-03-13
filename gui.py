@@ -91,13 +91,9 @@ class HexSquare():
 
 	def __init__(self, hexType, infrastructure, unit):
 		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
-		self.bgHidden = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
-		self.bgUnseen = self.bgHidden.copy()
-		self.bgUnseen.blit(bgTiles['unseen'], (0,0))					# Never seen by player (mapcolour, with outline)
-
-
-
-
+		self.bgGrey = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
+		self.bgHidden = self.bgGrey.copy()
+		self.bgHidden.blit(bgTiles['unseen'], (0,0))							# Never seen by player (mapcolour, with outline)
 		self.visible = False
 		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
 		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
@@ -107,7 +103,7 @@ class HexSquare():
 		self.sightModifier = bgTilesModifiers[hexType][2]
 		if infrastructure:
 			self.infra = infraIcons[infrastructure]
-			self.bgHidden.blit(greyscale(self.infra), (0,0))	# grayscale and blit any infrastructure on the hidden filed gfx
+			self.bgGrey.blit(greyscale(self.infra), (0,0))	# grayscale and blit any infrastructure on the hidden filed gfx
 			if infrastructure.startswith("road"):
 				self.movementModifier = 0
 				self.battleModifier = 0
@@ -124,6 +120,44 @@ class HexSquare():
 			elif infrastructure.startswith("trench"):
 				self.movementModifier = 10
 				self.battleModifier = 10
+
+
+
+
+
+class ActionMenu():
+	""" Representation of the games' action menu """
+
+	def __init__(self, display):
+		self.display = display
+		self.visible = False
+		self.location = (50, 50)
+		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png')]
+		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png')]
+		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png')]
+		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png')]
+
+
+	def show(self, activeSquare):
+		self.square = activeSquare
+		if self.square.visible and self.square.unit:
+			self.visible = True
+
+
+	def hide(self):
+		self.visible = False
+
+
+	def draw(self):
+		if self.visible:
+			pygame.draw.rect(self.display, colors.almostBlack, (self.location[0], self.location[1], 256, 60), 4)			# menu border
+			self.display.blit(self.buttonAttack[1],  [self.location[0] + 4,   self.location[1] + 4])
+			self.display.blit(self.buttonMove[0],    [self.location[0] + 66,  self.location[1] + 4])
+			self.display.blit(self.buttonContain[0], [self.location[0] + 128, self.location[1] + 4])
+			self.display.blit(self.buttonExit[0],    [self.location[0] + 190, self.location[1] + 4])
+
+
+
 
 
 class GUI():
@@ -153,6 +187,7 @@ class GUI():
 		self.backgroundTexture = pygame.image.load('gfx/steelTexture.png')
 		self.backgroundTextureUnit = pygame.image.load('gfx/steelTextureUnit.png')
 		self.backgroundTextureTerrain = pygame.image.load('gfx/steelTextureTerrain.png')
+		self.actionMenu = ActionMenu(self.parent.display)
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts
@@ -167,7 +202,6 @@ class GUI():
 		self.mapWidth = len(self.mainMap[0])
 		self.mapHeight = len(self.mainMap)
 		self.markVisibleSquares()
-
 
 
 	def markVisibleSquares(self):
@@ -190,14 +224,8 @@ class GUI():
 								self.mainMap[c[0]][c[1]].visible = True
 							except:
 								print("Coordinate exceed map size in markVisibleSquares():", c)
-
-
-
-
-
-
-
-
+							# change squares gfx since it has been seen at least once
+							self.mainMap[c[0]][c[1]].bgHidden =	self.mainMap[c[0]][c[1]].bgGrey
 
 
 
@@ -213,9 +241,11 @@ class GUI():
 		self.parent.display.blit(self.backgroundTexture, (0,0))
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
 		self.drawMap()
+		self.actionMenu.draw()
 		self.drawMiniMap()
 		self.drawTerrainGUI()
 		self.drawUnitGUI()
+			
 
 
 
@@ -268,7 +298,7 @@ class GUI():
 					if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 					if square.unit:		self.parent.display.blit(square.unit.mapIcon, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
 				else:
-					self.parent.display.blit(square.bgUnseen, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 				if developerMode:	# put as number on square
 					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
@@ -286,22 +316,25 @@ class GUI():
 		""" fetches cursor position and fills out info on unit and terrain """
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)		# middle window border
 		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
-		self.parent.display.blit(self.movementModifierText, (1270, 445))
-		self.parent.display.blit(self.battleModifierText, (1270, 475))
-		self.parent.display.blit(self.sightModifierText, (1270, 505))
 		square = self.currentSquare()
-		self.parent.display.blit(square.background, [1144, 446])
-		if square.infra:	self.parent.display.blit(square.infra, [1144, 446])
-		self.parent.display.blit(self.hexBorder, [1142, 444])
-		if square.movementModifier != None:
-			self.parent.display.blit(self.progressBar, [1460, 444], (0, 0, square.movementModifier * 30, 20))
-		else:
-			self.parent.display.blit(self.iProgressBar, [1460, 444])
-		if square.battleModifier != None:
-			self.parent.display.blit(self.progressBar, [1460, 474], (0, 0, square.battleModifier * 3, 20))	
-		else:
-			self.parent.display.blit(self.iProgressBar, [1460, 474])
-		self.parent.display.blit(self.progressBar, [1460, 504], (0, 0, square.sightModifier * 30, 20))
+		if square.visible:
+			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)		# middle window border
+			self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
+			self.parent.display.blit(self.movementModifierText, (1270, 445))
+			self.parent.display.blit(self.battleModifierText, (1270, 475))
+			self.parent.display.blit(self.sightModifierText, (1270, 505))
+			self.parent.display.blit(square.background, [1144, 446])
+			if square.infra:	self.parent.display.blit(square.infra, [1144, 446])
+			self.parent.display.blit(self.hexBorder, [1142, 444])
+			if square.movementModifier != None:
+				self.parent.display.blit(self.progressBar, [1460, 444], (0, 0, square.movementModifier * 30, 20))
+			else:
+				self.parent.display.blit(self.iProgressBar, [1460, 444])
+			if square.battleModifier != None:
+				self.parent.display.blit(self.progressBar, [1460, 474], (0, 0, square.battleModifier * 3, 20))	
+			else:
+				self.parent.display.blit(self.iProgressBar, [1460, 474])
+			self.parent.display.blit(self.progressBar, [1460, 504], (0, 0, square.sightModifier * 30, 20))
 
 
 
@@ -309,7 +342,7 @@ class GUI():
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 555, 662, 428), 4)						# lower window border
 		self.parent.display.blit(self.backgroundTextureUnit, (1128, 559))
 		square = self.currentSquare()
-		if square.unit:
+		if square.visible and square.unit:
 			self.parent.display.blit(self.unitPanel, [1135, 570])
 			self.parent.display.blit(self.flags, [1141, 569], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
 			self.parent.display.blit(square.unit.mapIcon, [1141, 569])
