@@ -10,7 +10,7 @@ from hlrData import *
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 colors = colorList
-developerMode = True
+developerMode = False
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -130,8 +130,10 @@ class ActionMenu():
 
 	def __init__(self, display):
 		self.display = display
-		self.visible = False
+		self.active = False
 		self.location = (50, 50)
+		self.focused = RangeIterator(4)
+		self.focusedArray = [1,0,0,0]
 		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png')]
 		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png')]
 		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png')]
@@ -141,20 +143,41 @@ class ActionMenu():
 	def show(self, activeSquare):
 		self.square = activeSquare
 		if self.square.visible and self.square.unit:
-			self.visible = True
+			self.active = True
 
 
 	def hide(self):
-		self.visible = False
+		self.active = False
+
+
+
+	def checkInput(self):
+		""" Checks and responds to input from keyboard """
+		for event in pygame.event.get():
+			keysPressed = pygame.key.get_pressed()
+			if keysPressed[pygame.K_LEFT]:
+				self.focused.dec()
+			elif keysPressed[pygame.K_RIGHT]:
+				self.focused.inc()
+			elif keysPressed[pygame.K_RETURN]:
+				result = self.focused.get()
+				self.active = False
+				self.focused.count = 0
+				self.focusedArray = [0, 0, 0, 0]
+				self.focusedArray[self.focused.get()] = 1
+				return result
+			self.focusedArray = [0, 0, 0, 0]
+			self.focusedArray[self.focused.get()] = 1
+
 
 
 	def draw(self):
-		if self.visible:
+		if self.active:
 			pygame.draw.rect(self.display, colors.almostBlack, (self.location[0], self.location[1], 256, 60), 4)			# menu border
-			self.display.blit(self.buttonAttack[1],  [self.location[0] + 4,   self.location[1] + 4])
-			self.display.blit(self.buttonMove[0],    [self.location[0] + 66,  self.location[1] + 4])
-			self.display.blit(self.buttonContain[0], [self.location[0] + 128, self.location[1] + 4])
-			self.display.blit(self.buttonExit[0],    [self.location[0] + 190, self.location[1] + 4])
+			self.display.blit(self.buttonAttack[self.focusedArray[0]],  [self.location[0] + 4,   self.location[1] + 4])
+			self.display.blit(self.buttonMove[self.focusedArray[1]],    [self.location[0] + 66,  self.location[1] + 4])
+			self.display.blit(self.buttonContain[self.focusedArray[2]], [self.location[0] + 128, self.location[1] + 4])
+			self.display.blit(self.buttonExit[self.focusedArray[3]],    [self.location[0] + 190, self.location[1] + 4])
 
 
 
@@ -261,9 +284,12 @@ class GUI():
 			for y in range(len(self.mainMap[x])):
 				square = self.mainMap[x][y]
 				forskydning = 71 if (x % 2) != 0 else 0
-				miniMap.blit(square.background, [y * 142 + forskydning, x * 40])
-				if square.infra:	miniMap.blit(square.infra, [y * 142 + forskydning, x * 40])
-				if square.unit:		miniMap.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40])
+				if square.visible:
+					miniMap.blit(square.background, [y * 142 + forskydning, x * 40])
+					if square.infra:	miniMap.blit(square.infra, [y * 142 + forskydning, x * 40])
+					if square.unit:		miniMap.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40])
+				else:
+					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 		# calculate percentage of area displayed
 		widthPercentageDisplayed = 8 / self.mapWidth
 		heightPercentageDisplayed = 12 / int((self.mapHeight + 1) / 2)

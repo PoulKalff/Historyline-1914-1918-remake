@@ -41,11 +41,9 @@ class Main():
 		self.viewDsp = [19,19]
 
 
-
 	def run(self):
 		self.initGame()
 		self.loop()
-
 
 
 	def initGame(self):
@@ -53,6 +51,17 @@ class Main():
 		self.playerSide = 'Central Powers'			# hardcoded, for now
 		self.interface = GUI(self, 1)
 		self.test = [0, 0]
+
+
+	def doAction(self, result):
+		if result == 0:
+			print('Attack')
+		elif result == 1:
+			print('Move')
+		elif result == 2:
+			print('View unit content')
+		elif result == 3:
+			print('Closed actionMenu, back to main loop')
 
 
 
@@ -96,7 +105,12 @@ class Main():
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
-			self.checkInput()
+			if self.interface.actionMenu.active:
+				result = self.interface.actionMenu.checkInput()
+				if result != None:
+					self.doAction(result)
+			else:
+				self.checkInput()
 			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()

@@ -579,32 +579,36 @@ class FlipSwitch():
 
 
 class RangeIterator():
-	# (v3) Represents a range of INTs from 0 -> X
+    """ Represents a range of INTs from 0 -> X """
 
-	def __init__(self, Ind, loop=True):
-		self.current = 0
-		self.max = Ind
-		self.loop = loop
+    def __init__(self, Ind, loop=True):
+        self.count = 0
+        self.max = Ind
+        self.loop = loop
 
-	def inc(self, count=1):
-		self.current += count
-		self._test()
+    def inc(self, count=1, changeMax=False):
+        self.count += count
+        if changeMax:
+            self.max += count
+        self._test()
 
-	def dec(self, count=1):
-		self.current -= count
-		self._test()
+    def dec(self, count=1, changeMax=False):
+        self.count -= count
+        if changeMax and self.max < 0:
+            self.max -= count
+        self._test()
 
-	def incMax(self, incCurrent = True):
-		""" Increase both value and max valuse """
-		self.max += 1
-		if incCurrent:
-			self.current += 1
-		self._test()
+    def _test(self):
+        if self.count >= self.max:
+            if self.loop:
+                self.count = 0
+            else:
+                self.count = self.max
+        if self.count < 0:
+            if self.loop:
+                self.count = self.max + self.count
+            else:
+                self.count = 0
 
-	def decMax(self, count=1):
-		""" Increase both value and max valuse """
-		self.max -= count
-		self.current -= count
-		self._test()
-
-
+    def get(self):
+        return self.count
