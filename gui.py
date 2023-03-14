@@ -289,7 +289,7 @@ class GUI():
 					if square.infra:	miniMap.blit(square.infra, [y * 142 + forskydning, x * 40])
 					if square.unit:		miniMap.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40])
 				else:
-					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					miniMap.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 		# calculate percentage of area displayed
 		widthPercentageDisplayed = 8 / self.mapWidth
 		heightPercentageDisplayed = 12 / int((self.mapHeight + 1) / 2)
