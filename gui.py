@@ -3,7 +3,6 @@ import json
 import time
 import pygame
 import numpy as np
-from PIL import Image
 import pygame.surfarray as surfarray
 from hlrData import *
 
@@ -225,6 +224,8 @@ class GUI():
 		self.mapWidth = len(self.mainMap[0])
 		self.mapHeight = len(self.mainMap)
 		self.markVisibleSquares()
+		self.generateMap()
+
 
 
 	def markVisibleSquares(self):
@@ -264,11 +265,47 @@ class GUI():
 		self.parent.display.blit(self.backgroundTexture, (0,0))
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (0, 0, 1800, 1000), 4)							# window border
 		self.drawMap()
-		self.actionMenu.draw()
-		self.drawMiniMap()
+	#	self.drawMiniMap()
 		self.drawTerrainGUI()
 		self.drawUnitGUI()
+		self.actionMenu.draw()
 			
+
+
+	def generateMap(self):
+		""" generate the basic map to be used to draw main map and minimap """
+		width = (self.mapWidth * 142) - 46  # dunno why 46 must be subtracted?
+		height = (self.mapHeight + 1) * 40
+		self.map = pygame.Surface((width, height))
+		self.map.fill(colors.historylineLight)
+		for x in range(self.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				square = self.mainMap[x][y]
+				forskydning = 71 if (x % 2) != 0 else 0
+				if square.visible:
+					self.map.blit(square.background, [y * 142 + forskydning, x * 40])
+					if square.infra:	self.map.blit(square.infra, [y * 142 + forskydning, x * 40])
+					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
+				else:
+					self.map.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+				if developerMode:	# put as number on square
+					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
+					image = pygame.Surface((96, 80), pygame.SRCALPHA)
+					textRect = text.get_rect()
+					textRect.topleft = (20, 20)
+					image.blit(text, textRect)
+					self.map.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning - 15), self.parent.viewDsp[1] + (x * 40) - 15])
+		pygame.image.save(self.map, 'generatedMap.png')
+
+
+
+	def drawMap(self):
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
+		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
+		self.parent.display.blit(self.map, [19, 19])
+		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
+		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning) -12, self.parent.viewDsp[1] + (self.cursorPos[1] * 40) - 10])
+		return 1
 
 
 
@@ -289,7 +326,7 @@ class GUI():
 					if square.infra:	miniMap.blit(square.infra, [y * 142 + forskydning, x * 40])
 					if square.unit:		miniMap.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40])
 				else:
-					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					miniMap.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
 		# calculate percentage of area displayed
 		widthPercentageDisplayed = 8 / self.mapWidth
 		heightPercentageDisplayed = 12 / int((self.mapHeight + 1) / 2)
@@ -309,33 +346,6 @@ class GUI():
 				(w + 4) * widthPercentageDisplayed, 
 				(h) * heightPercentageDisplayed), 
 				2)
-
-
-
-	def drawMap(self):
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
-		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
-		for x in range(int(self.mapHeight / 2 )):
-			for y in range(len(self.mainMap[x])):
-				square = self.mainMap[x + self.mapView[1]][y]
-				forskydning = 71 if (x % 2) != 0 else 0
-				if square.visible:
-					self.parent.display.blit(square.background, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-					if square.infra:	self.parent.display.blit(square.infra, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-					if square.unit:		self.parent.display.blit(square.unit.mapIcon, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40) - 8])
-				else:
-					self.parent.display.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-				if developerMode:	# put as number on square
-					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
-					image = pygame.Surface((96, 80), pygame.SRCALPHA)
-					textRect = text.get_rect()
-					textRect.topleft = (20, 20)
-					image.blit(text, textRect)
-					self.parent.display.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
-		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
-		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning) -12, self.parent.viewDsp[1] + (self.cursorPos[1] * 40) - 10])
-		return 1
-
 
 
 	def drawTerrainGUI(self):
@@ -370,7 +380,7 @@ class GUI():
 		square = self.currentSquare()
 		if square.visible and square.unit:
 			self.parent.display.blit(self.unitPanel, [1135, 570])
-			self.parent.display.blit(self.flags, [1141, 569], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
+			self.parent.display.blit(self.flags, [1145, 573], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
 			self.parent.display.blit(square.unit.mapIcon, [1141, 569])
 			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
 			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
