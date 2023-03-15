@@ -287,24 +287,29 @@ class GUI():
 					if square.infra:	self.map.blit(square.infra, [y * 142 + forskydning, x * 40])
 					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
 				else:
-					self.map.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					self.map.blit(square.bgHidden, [y * 142 + forskydning, x * 40])
 				if developerMode:	# put as number on square
 					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
 					textRect = text.get_rect()
 					textRect.topleft = (20, 20)
 					image.blit(text, textRect)
-					self.map.blit(image, [self.parent.viewDsp[0] + (y * 142 + forskydning - 15), self.parent.viewDsp[1] + (x * 40) - 15])
+					self.map.blit(image, [y * 142 + forskydning, x * 40])
 		pygame.image.save(self.map, 'generatedMap.png')
 
 
 
 	def drawMap(self):
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
-		pygame.draw.rect(self.parent.display, (107, 105, 90), (19, 19, 1090, 960), 0)							# map background
-		self.parent.display.blit(self.map, [19, 19])
+
+
+		self.parent.display.blit(self.map, [19, 19], (self.mapView[0], self.mapView[1] * 40, 1098 + self.mapView[0], 960 + self.mapView[1] * 40))		# blit visible area of map
+
+
+		print(self.mapView)
+
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
-		self.parent.display.blit(self.cursorGfx, [self.parent.viewDsp[0] + (self.cursorPos[0] * 142 + forskydning) -12, self.parent.viewDsp[1] + (self.cursorPos[1] * 40) - 10])
+		self.parent.display.blit(self.cursorGfx, [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9])
 		return 1
 
 
@@ -326,7 +331,7 @@ class GUI():
 					if square.infra:	miniMap.blit(square.infra, [y * 142 + forskydning, x * 40])
 					if square.unit:		miniMap.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40])
 				else:
-					miniMap.blit(square.bgHidden, [self.parent.viewDsp[0] + (y * 142 + forskydning), self.parent.viewDsp[1] + (x * 40)])
+					miniMap.blit(square.bgHidden, [y * 142 + forskydning + 19, x * 40 + 19])
 		# calculate percentage of area displayed
 		widthPercentageDisplayed = 8 / self.mapWidth
 		heightPercentageDisplayed = 12 / int((self.mapHeight + 1) / 2)

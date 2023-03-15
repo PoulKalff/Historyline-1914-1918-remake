@@ -38,7 +38,6 @@ class Main():
 		pygame.display.set_icon(icon)
 		pygame.display.set_caption('Historyline 1914-1918 Remake')
 		self.display = pygame.display.set_mode((self.width, self.height))
-		self.viewDsp = [19,19]
 
 
 	def run(self):
