@@ -229,7 +229,7 @@ class GUI():
 
 
 
-	def moveUnit(self):
+	def markMovableSquares(self):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to
 			must be called each time player selects move """
 		unitSpeed = self.currentSquare().unit.speed
@@ -258,9 +258,11 @@ class GUI():
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].fogofwar == 0 and (x,y) not in movableSquares:
 					self.mainMap[x][y].fogofwar = 3
-		# move unit
 
-		# regenerate map
+
+#		return list of squares to move to
+
+
 
 
 
@@ -318,11 +320,6 @@ class GUI():
 		self.calculateFOW()
 		if movingUnit:
 			self.markMovableSquares()
-
-
-
-
-
 		width = (self.mapWidth * 142) - 46  # dunno why 46 must be subtracted?
 		height = (self.mapHeight + 1) * 40
 		self.map = pygame.Surface((width, height))
