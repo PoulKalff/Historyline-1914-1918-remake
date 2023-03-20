@@ -57,7 +57,9 @@ class Main():
 		if result == 0:
 			print('Attack')
 		elif result == 1:	# MOVE
-			self.interface.markMovableSquares()
+			self.interface.generateMap(True)
+#			sys.exit('Do stuff aftaerwards....')
+
 
 
 
