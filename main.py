@@ -53,10 +53,14 @@ class Main():
 
 
 	def doAction(self, result):
+		""" execute action selected in the action menu """
 		if result == 0:
 			print('Attack')
-		elif result == 1:
-			print('Move')
+		elif result == 1:	# MOVE
+			self.interface.markMovableSquares()
+
+
+
 		elif result == 2:
 			print('View unit content')
 		elif result == 3:

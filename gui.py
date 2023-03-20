@@ -96,7 +96,7 @@ class HexSquare():
 		self.visible = False
 		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
 		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
-		self.fogofwar = None									# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
+		self.fogofwar = None									# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
@@ -225,6 +225,25 @@ class GUI():
 		self.mapHeight = len(self.mainMap)
 		self.markVisibleSquares()
 		self.generateMap()
+
+
+
+	def markMovableSquares(self):
+		""" prints an overlay on each hexSquare on the map that the current unit cannot move to
+			DOES NOT affect the map itself
+			must be called each time player selects move """
+		moveValue = self.currentSquare().unit.speed
+		print(moveValue)
+		sys.exit('Killed for DEV')
+
+
+
+
+		for x in range(self.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				self.mainMap[x][y].visible = False
+
+
 
 
 
