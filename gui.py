@@ -9,7 +9,7 @@ from hlrData import *
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 colors = colorList
-developerMode = False
+developerMode = True
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -88,15 +88,16 @@ class Unit():
 class HexSquare():
 	""" Representation of one hex """
 
-	def __init__(self, hexType, infrastructure, unit):
+	def __init__(self, pos, hexType, infrastructure, unit):
 		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
 		self.bgGrey = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
 		self.bgHidden = self.bgGrey.copy()
 		self.bgHidden.blit(bgTiles['unseen'], (0,0))							# Never seen by player (mapcolour, with outline)
-		self.visible = False
+		self.seen = False										# has the square ever been visible?
 		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
 		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
-		self.fogofwar = None									# one of 1) Black, 2) Semi transparent (e.g. seen before, but not currently)
+		self.fogofwar = None									# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
+		self.position = pos
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
@@ -141,7 +142,7 @@ class ActionMenu():
 
 	def show(self, activeSquare):
 		self.square = activeSquare
-		if self.square.visible and self.square.unit:
+		if not self.square.fogofwar and self.square.unit:
 			self.active = True
 
 
@@ -209,6 +210,7 @@ class GUI():
 		self.backgroundTexture = pygame.image.load('gfx/steelTexture.png')
 		self.backgroundTextureUnit = pygame.image.load('gfx/steelTextureUnit.png')
 		self.backgroundTextureTerrain = pygame.image.load('gfx/steelTextureTerrain.png')
+		self.semiTransparent = pygame.image.load('gfx/hexTypes/hex_semiTransparent.png')
 		self.actionMenu = ActionMenu(self.parent.display)
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
@@ -216,24 +218,64 @@ class GUI():
 		self.movementModifierText = font20.render('Movement Penalty', True, colors.black) 	# [movementModifierText, rMovementModifierText]
 		self.battleModifierText = font20.render('Battle Advantage', True, colors.black)		#[battleModifierText, rBattleModifierText]
 		self.sightModifierText = font20.render('Sight Hindrance', True, colors.black)				# [sightModifierText, rSightModifierText]
-		for value in jsonLevelData['tiles'].values():
+		for nrX, value in enumerate(jsonLevelData['tiles'].values()):
 			line = []
-			for square in value:
-				line.append(HexSquare(*square))
+			for nrY, square in enumerate(value):
+				line.append(HexSquare((nrX, nrY), *square))
 			self.mainMap.append(line)
 		self.mapWidth = len(self.mainMap[0])
 		self.mapHeight = len(self.mainMap)
-		self.markVisibleSquares()
 		self.generateMap()
 
 
 
-	def markVisibleSquares(self):
+	def markMovableSquares(self):
+		""" prints an overlay on each hexSquare on the map that the current unit cannot move to
+			must be called each time player selects move """
+		unitSpeed = self.currentSquare().unit.speed
+		movingFrom = self.currentSquare().position
+		x, y = movingFrom
+		withinRange = [(x,y)]	# coord of self
+		for iteration in range(unitSpeed):
+			for coord in set(withinRange):
+				neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+				withinRange += neighbors
+		movableSquares = list(set(withinRange))
+		movableSquares.remove(movingFrom)
+		obstructed = []
+		for x, y in movableSquares:
+			if self.mainMap[x][y].fogofwar != 0:
+				obstructed.append((x,y))
+			elif self.mainMap[x][y].unit:
+				obstructed.append((x,y))
+			elif self.mainMap[x][y].movementModifier == None:
+				obstructed.append((x,y))
+		# remove obstacaled squares
+		for pos in obstructed:
+			movableSquares.remove(pos)
+		# mark squares not possible to target 
+		for x in range(self.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				if self.mainMap[x][y].fogofwar == 0 and (x,y) not in movableSquares:
+					self.mainMap[x][y].fogofwar = 3
+
+
+#		return list of squares to move to
+
+
+
+
+
+
+
+
+
+	def calculateFOW(self):
 		""" checks each hexSquare on the map and marks it as visible if it can be seen by any friendly unit 
 			must be called each time player moves a piece"""
 		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
-				self.mainMap[x][y].visible = False
+				self.mainMap[x][y].fogofwar = 2 if self.mainMap[x][y].seen else 1
 		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].unit:
@@ -245,18 +287,19 @@ class GUI():
 								withinSight += neighbors
 						for c in set(withinSight):
 							try:
-								self.mainMap[c[0]][c[1]].visible = True
+								self.mainMap[c[0]][c[1]].fogofwar = 0
+								self.mainMap[c[0]][c[1]].seen = True
 							except:
-								print("Coordinate exceed map size in markVisibleSquares():", c)
-							# change squares gfx since it has been seen at least once
-							self.mainMap[c[0]][c[1]].bgHidden =	self.mainMap[c[0]][c[1]].bgGrey
+								print("Coordinate exceed map size in calculateFOW():", c)
 
 
-
-	def currentSquare(self):
-		""" returns the current hightlighted hexSquare """
+	def currentSquare(self, coords = False):
+		""" returns the currently hightlighted hexSquare """
 		mapCursor = [self.cursorPos[0] + self.mapView[0], self.cursorPos[1]  + self.mapView[1]]
-		return self.mainMap[mapCursor[1]][mapCursor[0]]
+		if coords:
+			return mapCursor
+		else:
+			return self.mainMap[mapCursor[1]][mapCursor[0]]
 
 
 
@@ -272,8 +315,11 @@ class GUI():
 
 
 
-	def generateMap(self):
-		""" generate the basic map to be used to draw main map and minimap """
+	def generateMap(self, movingUnit = False):
+		""" generate the basic map to be used to draw main map and minimap """	
+		self.calculateFOW()
+		if movingUnit:
+			self.markMovableSquares()
 		width = (self.mapWidth * 142) - 46  # dunno why 46 must be subtracted?
 		height = (self.mapHeight + 1) * 40
 		self.map = pygame.Surface((width, height))
@@ -282,12 +328,20 @@ class GUI():
 			for y in range(len(self.mainMap[x])):
 				square = self.mainMap[x][y]
 				forskydning = 71 if (x % 2) != 0 else 0
-				if square.visible:
+		 		# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
+				if square.fogofwar == 0:	# fully visible
 					self.map.blit(square.background, [y * 142 + forskydning, x * 40])
 					if square.infra:	self.map.blit(square.infra, [y * 142 + forskydning, x * 40])
 					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
-				else:
+				elif square.fogofwar == 1:	# fully hidden, black
 					self.map.blit(square.bgHidden, [y * 142 + forskydning, x * 40])
+				elif square.fogofwar == 2:	# hidden, but seen before, grey
+					self.map.blit(square.bgGrey, [y * 142 + forskydning, x * 40])
+				elif square.fogofwar == 3:	# unreachable to move to, normal but overlayed
+					self.map.blit(square.background, [y * 142 + forskydning, x * 40])
+					if square.infra:	self.map.blit(square.infra, [y * 142 + forskydning, x * 40])
+					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
+					self.map.blit(self.semiTransparent, [y * 142 + forskydning, x * 40])
 				if developerMode:	# put as number on square
 					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
@@ -337,7 +391,7 @@ class GUI():
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)		# middle window border
 		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
 		square = self.currentSquare()
-		if square.visible:
+		if not square.fogofwar:
 			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)		# middle window border
 			self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
 			self.parent.display.blit(self.movementModifierText, (1270, 445))
@@ -362,7 +416,7 @@ class GUI():
 		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 555, 662, 428), 4)						# lower window border
 		self.parent.display.blit(self.backgroundTextureUnit, (1128, 559))
 		square = self.currentSquare()
-		if square.visible and square.unit:
+		if not square.fogofwar and square.unit:
 			self.parent.display.blit(self.unitPanel, [1135, 570])
 			self.parent.display.blit(self.flags, [1145, 573], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
 			self.parent.display.blit(square.unit.mapIcon, [1141, 569])
