@@ -31,8 +31,16 @@
       "Desktop Wallpaper"
     ],
     [
+      "/usr/local/share/vlc_playlist.xspf",
+      "-"
+    ],
+    [
       "/usr/share/icons/Humanity/devices/64/harddrive-hdd_6tb.svg",
       "Desktop Icon File"
+    ],
+    [
+      "/etc/conky/conky.conf",
+      "Configuration for Conky System Monitoring"
     ]
   ],
   "aptPackages": [
@@ -94,10 +102,6 @@
     ],
     [
       "kodi",
-      "-"
-    ],
-    [
-      "kodi-data",
       "-"
     ],
     [
