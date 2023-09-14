@@ -1,0 +1,4 @@
+ - Point on map with mouse to move cursor
+ - Point on minimap with mouse to move main map
+ - enable/disable debug (field no)
+ - 
