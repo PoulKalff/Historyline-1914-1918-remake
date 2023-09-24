@@ -9,7 +9,6 @@ from hlrData import *
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 colors = colorList
-developerMode = True
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -74,10 +73,10 @@ class Unit():
 							arr[i, j] = [88, 104, 36]
 			rawIcon = pygame.transform.scale2x(rawIcon)
 			self.allIcons = [	rot_center(rawIcon, 60),
-								rot_center(rawIcon, 120), 
-								rot_center(rawIcon, 180), 			
-								rot_center(rawIcon, 240), 
-								rot_center(rawIcon, 300), 
+								rot_center(rawIcon, 120),
+								rot_center(rawIcon, 180),
+								rot_center(rawIcon, 240),
+								rot_center(rawIcon, 300),
 								rawIcon
 							 ]
 			self.mapIcon = self.allIcons[2] if self.faction == 'Central Powers' else self.allIcons[5]
@@ -342,7 +341,7 @@ class GUI():
 					if square.infra:	self.map.blit(square.infra, [y * 142 + forskydning, x * 40])
 					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
 					self.map.blit(self.semiTransparent, [y * 142 + forskydning, x * 40])
-				if developerMode:	# put as number on square
+				if self.parent.cmdArgs.hexnumbers:	# put as number on square
 					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
 					image = pygame.Surface((96, 80), pygame.SRCALPHA)
 					textRect = text.get_rect()
@@ -361,7 +360,7 @@ class GUI():
 
 
 	def drawMap(self):
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
+		self.rectMap = pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
 		self.parent.display.blit(self.map, [19, 19], (self.mapView[0], self.mapView[1] * 40, 1098 + self.mapView[0], 960))		# blit visible area of map
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
 		self.parent.display.blit(self.cursorGfx, [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9])
@@ -375,14 +374,14 @@ class GUI():
 		miniMapXCoord =	1459 - int(self.miniMap.get_width() / 2)
 		w, h = self.miniMap.get_size()
 		self.parent.display.blit(self.miniMap, [miniMapXCoord, 19])
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (miniMapXCoord - 4, 15,  w + 8, h + 8), 4)					# minimap border
+		self.rectMini = pygame.draw.rect(self.parent.display, colors.almostBlack, (miniMapXCoord - 4, 15,  w + 8, h + 8), 4)					# minimap border
 		# calculate percentage of area displayed
 		widthPercentageDisplayed = 8 / self.mapWidth
 		heightPercentageDisplayed = 12 / int((self.mapHeight + 1) / 2)
 		# draw a rectangle to show the field of view on the miniMap
 		markerOffsetX = self.mapView[0] / self.mapWidth				# calculate marker offset
 		markerOffsetY = self.mapView[1] / self.mapHeight
-		pygame.draw.rect(self.parent.display, colors.red, (	miniMapXCoord -2 + int(w * markerOffsetX), 17 + int(h * markerOffsetY), (w + 4) * widthPercentageDisplayed, (h) * heightPercentageDisplayed), 2)
+		pygame.draw.rect(self.parent.display, colors.red, (miniMapXCoord -2 + int(w * markerOffsetX), 17 + int(h * markerOffsetY), int((w + 4) * widthPercentageDisplayed), int((h) * heightPercentageDisplayed)), 2)
 
 
 

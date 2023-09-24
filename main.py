@@ -20,7 +20,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.50'		# gfx interface done
+version = '0.51'		# added mouse control to map and minimap
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -28,8 +28,9 @@ version = '0.50'		# gfx interface done
 class Main():
 	""" get data from API and display it """
 
-	def __init__(self):
-		self.width = 1800	# 1110 minimum,as it is smallest map
+	def __init__(self, args):
+		self.cmdArgs = args
+		self.width = 1800	# 1110 minimum, as it is smallest map
 		self.height = 1000
 		self.develop = False
 		pygame.init()
@@ -62,7 +63,6 @@ class Main():
 
 
 
-
 		elif result == 2:
 			print('View unit content')
 		elif result == 3:
@@ -73,8 +73,85 @@ class Main():
 	def checkInput(self):
 		""" Checks and responds to input from keyboard and mouse """
 		for event in pygame.event.get():
+			# Quit
 			if event.type == pygame.QUIT:
 				self.running = False
+			# Mouse
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				mX, mY = pygame.mouse.get_pos()
+				if self.interface.rectMap.collidepoint(mX, mY):
+					# figure out which hex we are in
+					mX -= 21
+					mY -= 21
+					# calculate where we are in horizontal
+					xNoHex = int(mX / 142)
+					yNoHex = int(mY / 80) * 2
+					xInHex = mX % 142
+					yInHex = mY % 80
+					odd = True if yInHex < 40 else False		# Define half hex row, determine if odd or even
+					if xInHex < 23:		# Define 4 columns, determine which one
+						field = 1
+						# determine if we are left or right of diagonal. 
+						if odd:
+							# manage reverese slope. Reverse diagonal is given by Y = W - (X * (H / W))
+							if yInHex < 23 - (xInHex * (40 / 23)):	# 1.7391304347826086
+								xHexSelected = xNoHex - 1
+								yHexSelected = yNoHex - 1
+							else:
+								xHexSelected = xNoHex
+								yHexSelected = yNoHex
+						else:
+							yInHex -= 40
+							# Manage slope. Diagonal is given by Y = X * (H / W)
+							if yInHex < xInHex * (40 / 23):	# 1.7391304347826086
+								xHexSelected = xNoHex
+								yHexSelected = yNoHex
+							else:
+								xHexSelected = xNoHex - 1
+								yHexSelected = yNoHex + 1
+					elif xInHex < 74:
+						field = 2
+						xHexSelected = xNoHex
+						yHexSelected = yNoHex
+					elif xInHex < 96:
+						field = 3
+						xInHex -= 74
+						# determine if we are left or right of diagonal. Diagonal is given by Y = X * (H / W)	>
+						if odd:
+							if yInHex < xInHex * (40 / 23):	# 1.7391304347826086
+								xHexSelected = xNoHex
+								yHexSelected = yNoHex - 1
+							else:
+								xHexSelected = xNoHex
+								yHexSelected = yNoHex
+						else:
+							yInHex -= 40
+							# manage reverese slope. Reverse diagonal is given by Y = W - (X * (H / W))
+							if yInHex < 23 - (xInHex * (40 / 23)):	# 1.7391304347826086
+								xHexSelected = xNoHex
+								yHexSelected = yNoHex
+							else:
+								xHexSelected = xNoHex
+								yHexSelected = yNoHex + 1
+					else:
+						field = 4
+						xHexSelected = xNoHex
+						yHexSelected = yNoHex - 1 if odd else yNoHex + 1	
+					self.interface.cursorPos = [xHexSelected, yHexSelected]
+#					print("   Field %i, %s (%i/%i)" % (field, "Odd" if odd else "Even", yNoHex, xNoHex))	# debug
+				elif self.interface.rectMini.collidepoint(mX, mY):
+					# inside miniMap
+					percentageX = (mX - self.interface.rectMini.x) / self.interface.rectMini.width
+					percentageY = (mY - self.interface.rectMini.y) / self.interface.rectMini.height
+					maxDispY = (self.interface.squareHeight + 1) / 2
+					dispY = int(percentageY * percentageY * 50)
+					dispY = int(maxDispY) if dispY > maxDispY else dispY
+					dispY = 0 if dispY < 0 else dispY
+					self.interface.mapView[1] = dispY
+					self.interface.cursorPos = [int((percentageX + 0.05) * 7), int((percentageY + 0.05) * 23)]	# add 5% to be able to reach last hexes
+				else:
+					print("outside both maps",  mX, mY)
+		# Keyboard
 		keysPressed = pygame.key.get_pressed()
 		if keysPressed[pygame.K_q]:
 			self.running = False
@@ -107,6 +184,7 @@ class Main():
 
 
 
+
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
@@ -127,21 +205,21 @@ class Main():
 
 #check arguments
 parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=120))
-parser.add_argument("-v", "--version",	action="store_true",	help="Print version and exit")
+parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
+parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields")
 args = parser.parse_args()
 
-obj =  Main()
+obj =  Main(args)
 obj.run()
 
 
 # --- TODO ---------------------------------------------------------------------------------------
-# - 
+# - BUG : some overflow can happen on rightside of map
 # - 
 # - 
 
 
 # --- NOTES --------------------------------------------------------------------------------------
-
 
 
 
