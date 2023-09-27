@@ -127,8 +127,8 @@ class HexSquare():
 class ActionMenu():
 	""" Representation of the games' action menu """
 
-	def __init__(self, display):
-		self.display = display
+	def __init__(self, parent):
+		self.parent = parent
 		self.active = False
 		self.location = (50, 50)
 		self.focused = RangeIterator(4)
@@ -139,8 +139,12 @@ class ActionMenu():
 		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png')]
 
 
-	def show(self, activeSquare):
-		self.square = activeSquare
+	def show(self):
+		self.square = self.parent.interface.currentSquare()
+		self.location  = self.parent.interface.currentSquare(True)
+		self.location[0] += 110
+		self.location[1] -= 30
+		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
 		if not self.square.fogofwar and self.square.unit:
 			self.active = True
 
@@ -172,11 +176,11 @@ class ActionMenu():
 
 	def draw(self):
 		if self.active:
-			pygame.draw.rect(self.display, colors.almostBlack, (self.location[0], self.location[1], 256, 60), 4)			# menu border
-			self.display.blit(self.buttonAttack[self.focusedArray[0]],  [self.location[0] + 4,   self.location[1] + 4])
-			self.display.blit(self.buttonMove[self.focusedArray[1]],    [self.location[0] + 66,  self.location[1] + 4])
-			self.display.blit(self.buttonContain[self.focusedArray[2]], [self.location[0] + 128, self.location[1] + 4])
-			self.display.blit(self.buttonExit[self.focusedArray[3]],    [self.location[0] + 190, self.location[1] + 4])
+			pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], 256, 60), 4)			# menu border
+			self.parent.display.blit(self.buttonAttack[self.focusedArray[0]],  [self.location[0] + 4,   self.location[1] + 4])
+			self.parent.display.blit(self.buttonMove[self.focusedArray[1]],    [self.location[0] + 66,  self.location[1] + 4])
+			self.parent.display.blit(self.buttonContain[self.focusedArray[2]], [self.location[0] + 128, self.location[1] + 4])
+			self.parent.display.blit(self.buttonExit[self.focusedArray[3]],    [self.location[0] + 190, self.location[1] + 4])
 
 
 
@@ -210,7 +214,7 @@ class GUI():
 		self.backgroundTextureUnit = pygame.image.load('gfx/steelTextureUnit.png')
 		self.backgroundTextureTerrain = pygame.image.load('gfx/steelTextureTerrain.png')
 		self.semiTransparent = pygame.image.load('gfx/hexTypes/hex_semiTransparent.png')
-		self.actionMenu = ActionMenu(self.parent.display)
+		self.actionMenu = ActionMenu(self.parent)
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts
@@ -225,6 +229,9 @@ class GUI():
 		self.mapWidth = len(self.mainMap[0])
 		self.mapHeight = len(self.mainMap)
 		self.generateMap()
+
+
+
 
 
 
@@ -296,9 +303,19 @@ class GUI():
 		""" returns the currently hightlighted hexSquare """
 		mapCursor = [self.cursorPos[0] + self.mapView[0], self.cursorPos[1]  + self.mapView[1]]
 		if coords:
-			return mapCursor
+			# get the pixel coordinates from the hex coordinates
+			forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
+			pixelCooords = [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9]
+
+
+#			sys.exit(   str(pixelCooords)  )
+
+
+
+			return pixelCooords
 		else:
 			return self.mainMap[mapCursor[1]][mapCursor[0]]
+
 
 
 

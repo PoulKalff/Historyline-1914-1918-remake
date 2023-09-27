@@ -166,7 +166,7 @@ class Main():
 		elif keysPressed[pygame.K_DOWN]:
 			self.interface.cursorMove('Down')
 		elif keysPressed[pygame.K_SPACE]:
-			self.interface.actionMenu.show(self.interface.currentSquare())
+			self.interface.actionMenu.show()
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -215,8 +215,7 @@ obj.run()
 
 # --- TODO ---------------------------------------------------------------------------------------
 # - BUG : some overflow can happen on rightside of map
-# - 
-# - 
+# - mouse doubleclick to select square in actionMenu
 
 
 # --- NOTES --------------------------------------------------------------------------------------
