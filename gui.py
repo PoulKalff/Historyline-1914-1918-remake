@@ -129,58 +129,93 @@ class ActionMenu():
 
 	def __init__(self, parent):
 		self.parent = parent
-		self.active = False
 		self.location = (50, 50)
 		self.focused = RangeIterator(4)
 		self.focusedArray = [1,0,0,0]
-		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png')]
-		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png')]
-		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png')]
-		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png')]
-
-
-	def show(self):
-		self.square = self.parent.interface.currentSquare()
-		self.location  = self.parent.interface.currentSquare(True)
-		self.location[0] += 110
-		self.location[1] -= 30
-		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
-		if not self.square.fogofwar and self.square.unit:
-			self.active = True
-
-
-	def hide(self):
-		self.active = False
-
+		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'), None]
+		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'), None]
+		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'), None]
+		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'), None]
 
 
 	def checkInput(self):
 		""" Checks and responds to input from keyboard """
 		for event in pygame.event.get():
-			keysPressed = pygame.key.get_pressed()
-			if keysPressed[pygame.K_LEFT]:
-				self.focused.dec()
-			elif keysPressed[pygame.K_RIGHT]:
-				self.focused.inc()
-			elif keysPressed[pygame.K_RETURN]:
-				result = self.focused.get()
-				self.active = False
+			mPos = pygame.mouse.get_pos()
+			# check mouseover
+			if self.buttonAttack[2].collidepoint(mPos):
 				self.focused.count = 0
-				self.focusedArray = [0, 0, 0, 0]
-				self.focusedArray[self.focused.get()] = 1
-				return result
-			self.focusedArray = [0, 0, 0, 0]
-			self.focusedArray[self.focused.get()] = 1
+				self.focusedArray = [1,0,0,0]
+			elif self.buttonMove[2].collidepoint(mPos):
+				self.focused.count = 1
+				self.focusedArray = [0,1,0,0]
+			elif self.buttonContain[2].collidepoint(mPos):
+				self.focused.count = 2
+				self.focusedArray = [0,0,1,0]
+			elif self.buttonExit[2].collidepoint(mPos):
+				self.focused.count = 3
+				self.focusedArray = [0,0,0,1]
+			# check mouseclick
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				self.endMenu(self.focused.get())
+			# Keyboard
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_ESCAPE:	# close menu
+					self.parent.holdEscape = True
+					self.parent.mode = "normal"
+					self.focused.count = 0
+					self.focusedArray = [1, 0, 0, 0]
+				elif event.key == pygame.K_LEFT:
+					self.focused.dec()
+					self.focusedArray = [0, 0, 0, 0]
+					self.focusedArray[self.focused.get()] = 1
+					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
+					pygame.time.wait(50)
+				elif event.key == pygame.K_RIGHT:
+					self.focused.inc()
+					self.focusedArray = [0, 0, 0, 0]
+					self.focusedArray[self.focused.get()] = 1
+					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
+					pygame.time.wait(50)
+				elif event.key == pygame.K_RETURN:
+					self.endMenu(self.focused.get())
+
+
+
+	def endMenu(self, result):
+		""" execute action selected in the action menu """
+		self.focused.count = 0							# reset menu
+		self.focusedArray = [1, 0, 0, 0]				# reset menu
+		# choose mode and let main continue
+		if result == 0:									# ATTACK
+			self.parent.mode = "attack"
+			sys.exit('notImplemented Exception: Attack')
+		elif result == 1:								# MOVE
+			self.parent.interface.generateMap(True)
+			self.parent.mode = "moveTo"
+		elif result == 2:								# CONTENT
+			self.parent.mode = "showContent"
+			sys.exit('notImplemented Exception: Content')
+		elif result == 3:								# RETURN
+			self.parent.mode = "normal"
 
 
 
 	def draw(self):
-		if self.active:
-			pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], 256, 60), 4)			# menu border
-			self.parent.display.blit(self.buttonAttack[self.focusedArray[0]],  [self.location[0] + 4,   self.location[1] + 4])
-			self.parent.display.blit(self.buttonMove[self.focusedArray[1]],    [self.location[0] + 66,  self.location[1] + 4])
-			self.parent.display.blit(self.buttonContain[self.focusedArray[2]], [self.location[0] + 128, self.location[1] + 4])
-			self.parent.display.blit(self.buttonExit[self.focusedArray[3]],    [self.location[0] + 190, self.location[1] + 4])
+		self.square = self.parent.interface.currentSquare()
+		self.location  = self.parent.interface.currentSquare(True)
+		self.location[0] += 110
+		self.location[1] -= 30
+		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
+		self.buttonAttack[2]	= pygame.Rect(self.location[0] + 4,   self.location[1] + 4, 62, 52)
+		self.buttonMove[2]		= pygame.Rect(self.location[0] + 66,  self.location[1] + 4, 62, 52)
+		self.buttonContain[2]	= pygame.Rect(self.location[0] + 128, self.location[1] + 4, 62, 52)
+		self.buttonExit[2]		= pygame.Rect(self.location[0] + 190, self.location[1] + 4, 62, 52)
+		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], 256, 60), 4)	# menu border
+		self.parent.display.blit(self.buttonAttack[self.focusedArray[0]],  self.buttonAttack[2])
+		self.parent.display.blit(self.buttonMove[self.focusedArray[1]],    self.buttonMove[2])
+		self.parent.display.blit(self.buttonContain[self.focusedArray[2]], self.buttonContain[2])
+		self.parent.display.blit(self.buttonExit[self.focusedArray[3]],    self.buttonExit[2])
 
 
 
@@ -229,9 +264,6 @@ class GUI():
 		self.mapWidth = len(self.mainMap[0])
 		self.mapHeight = len(self.mainMap)
 		self.generateMap()
-
-
-
 
 
 
@@ -306,12 +338,6 @@ class GUI():
 			# get the pixel coordinates from the hex coordinates
 			forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
 			pixelCooords = [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9]
-
-
-#			sys.exit(   str(pixelCooords)  )
-
-
-
 			return pixelCooords
 		else:
 			return self.mainMap[mapCursor[1]][mapCursor[0]]
@@ -327,7 +353,8 @@ class GUI():
 		self.drawMiniMap()
 		self.drawTerrainGUI()
 		self.drawUnitGUI()
-		self.actionMenu.draw()
+		if self.parent.mode == "actionMenu":
+			self.actionMenu.draw()
 
 
 

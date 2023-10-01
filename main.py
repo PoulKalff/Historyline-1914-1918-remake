@@ -20,7 +20,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.51'		# added mouse control to map and minimap
+version = '0.52'		# added mouse control to actionMenu
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -39,6 +39,9 @@ class Main():
 		pygame.display.set_icon(icon)
 		pygame.display.set_caption('Historyline 1914-1918 Remake')
 		self.display = pygame.display.set_mode((self.width, self.height))
+		self.mouseClick = pygame.time.Clock()
+		self.holdEscape = False
+		self.mode = "normal"		# selection mode: normal, actionMenu, selectMoveTo, moveTo, ??
 
 
 	def run(self):
@@ -53,20 +56,66 @@ class Main():
 		self.test = [0, 0]
 
 
-	def doAction(self, result):
-		""" execute action selected in the action menu """
-		if result == 0:
-			print('Attack')
-		elif result == 1:	# MOVE
-			self.interface.generateMap(True)
-#			sys.exit('Do stuff aftaerwards....')
-
-
-
-		elif result == 2:
-			print('View unit content')
-		elif result == 3:
-			print('Closed actionMenu, back to main loop')
+	def findHex(self, _mX, _mY):
+		""" Determine which Hex the mouse is in """
+		_mX -= 21
+		_mY -= 21
+		# calculate where we are in horizontal
+		xNoHex = int(_mX / 142)
+		yNoHex = int(_mY / 80) * 2
+		xInHex = _mX % 142
+		yInHex = _mY % 80
+		odd = True if yInHex < 40 else False		# Define half hex row, determine if odd or even
+		if xInHex < 23:		# Define 4 columns, determine which one
+			field = 1
+			# determine if we are left or right of diagonal. 
+			if odd:
+				# manage reverese slope. Reverse diagonal is given by Y = W - (X * (H / W))
+				if yInHex < 23 - (xInHex * (40 / 23)):	# 1.7391304347826086
+					xHexSelected = xNoHex - 1
+					yHexSelected = yNoHex - 1
+				else:
+					xHexSelected = xNoHex
+					yHexSelected = yNoHex
+			else:
+				yInHex -= 40
+				# Manage slope. Diagonal is given by Y = X * (H / W)
+				if yInHex < xInHex * (40 / 23):	# 1.7391304347826086
+					xHexSelected = xNoHex
+					yHexSelected = yNoHex
+				else:
+					xHexSelected = xNoHex - 1
+					yHexSelected = yNoHex + 1
+		elif xInHex < 74:
+			field = 2
+			xHexSelected = xNoHex
+			yHexSelected = yNoHex
+		elif xInHex < 96:
+			field = 3
+			xInHex -= 74
+			# determine if we are left or right of diagonal. Diagonal is given by Y = X * (H / W)	>
+			if odd:
+				if yInHex < xInHex * (40 / 23):	# 1.7391304347826086
+					xHexSelected = xNoHex
+					yHexSelected = yNoHex - 1
+				else:
+					xHexSelected = xNoHex
+					yHexSelected = yNoHex
+			else:
+				yInHex -= 40
+				# manage reverese slope. Reverse diagonal is given by Y = W - (X * (H / W))
+				if yInHex < 23 - (xInHex * (40 / 23)):	# 1.7391304347826086
+					xHexSelected = xNoHex
+					yHexSelected = yNoHex
+				else:
+					xHexSelected = xNoHex
+					yHexSelected = yNoHex + 1
+		else:
+			field = 4
+			xHexSelected = xNoHex
+			yHexSelected = yNoHex - 1 if odd else yNoHex + 1	
+#		print("   Field %i, %s (%i/%i)" % (field, "Odd" if odd else "Even", yNoHex, xNoHex))	# debug
+		return [xHexSelected, yHexSelected]
 
 
 
@@ -79,68 +128,11 @@ class Main():
 			# Mouse
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				mX, mY = pygame.mouse.get_pos()
-				if self.interface.rectMap.collidepoint(mX, mY):
-					# figure out which hex we are in
-					mX -= 21
-					mY -= 21
-					# calculate where we are in horizontal
-					xNoHex = int(mX / 142)
-					yNoHex = int(mY / 80) * 2
-					xInHex = mX % 142
-					yInHex = mY % 80
-					odd = True if yInHex < 40 else False		# Define half hex row, determine if odd or even
-					if xInHex < 23:		# Define 4 columns, determine which one
-						field = 1
-						# determine if we are left or right of diagonal. 
-						if odd:
-							# manage reverese slope. Reverse diagonal is given by Y = W - (X * (H / W))
-							if yInHex < 23 - (xInHex * (40 / 23)):	# 1.7391304347826086
-								xHexSelected = xNoHex - 1
-								yHexSelected = yNoHex - 1
-							else:
-								xHexSelected = xNoHex
-								yHexSelected = yNoHex
-						else:
-							yInHex -= 40
-							# Manage slope. Diagonal is given by Y = X * (H / W)
-							if yInHex < xInHex * (40 / 23):	# 1.7391304347826086
-								xHexSelected = xNoHex
-								yHexSelected = yNoHex
-							else:
-								xHexSelected = xNoHex - 1
-								yHexSelected = yNoHex + 1
-					elif xInHex < 74:
-						field = 2
-						xHexSelected = xNoHex
-						yHexSelected = yNoHex
-					elif xInHex < 96:
-						field = 3
-						xInHex -= 74
-						# determine if we are left or right of diagonal. Diagonal is given by Y = X * (H / W)	>
-						if odd:
-							if yInHex < xInHex * (40 / 23):	# 1.7391304347826086
-								xHexSelected = xNoHex
-								yHexSelected = yNoHex - 1
-							else:
-								xHexSelected = xNoHex
-								yHexSelected = yNoHex
-						else:
-							yInHex -= 40
-							# manage reverese slope. Reverse diagonal is given by Y = W - (X * (H / W))
-							if yInHex < 23 - (xInHex * (40 / 23)):	# 1.7391304347826086
-								xHexSelected = xNoHex
-								yHexSelected = yNoHex
-							else:
-								xHexSelected = xNoHex
-								yHexSelected = yNoHex + 1
-					else:
-						field = 4
-						xHexSelected = xNoHex
-						yHexSelected = yNoHex - 1 if odd else yNoHex + 1	
-					self.interface.cursorPos = [xHexSelected, yHexSelected]
-#					print("   Field %i, %s (%i/%i)" % (field, "Odd" if odd else "Even", yNoHex, xNoHex))	# debug
-				elif self.interface.rectMini.collidepoint(mX, mY):
-					# inside miniMap
+				if self.mouseClick.tick() < 500:						# if doubleclick detected
+					self.mode = "actionMenu"
+				elif self.interface.rectMap.collidepoint(mX, mY):		# if inside map
+					self.interface.cursorPos = self.findHex(mX, mY)
+				elif self.interface.rectMini.collidepoint(mX, mY):		# if inside miniMap
 					percentageX = (mX - self.interface.rectMini.x) / self.interface.rectMini.width
 					percentageY = (mY - self.interface.rectMini.y) / self.interface.rectMini.height
 					maxDispY = (self.interface.squareHeight + 1) / 2
@@ -156,7 +148,10 @@ class Main():
 		if keysPressed[pygame.K_q]:
 			self.running = False
 		elif keysPressed[pygame.K_ESCAPE]:
-			self.running = False
+			if self.holdEscape == True:
+				self.holdEscape = False
+			else:
+				self.running = False
 		elif keysPressed[pygame.K_LEFT]:
 			self.interface.cursorMove('Left')
 		elif keysPressed[pygame.K_RIGHT]:
@@ -166,7 +161,11 @@ class Main():
 		elif keysPressed[pygame.K_DOWN]:
 			self.interface.cursorMove('Down')
 		elif keysPressed[pygame.K_SPACE]:
-			self.interface.actionMenu.show()
+			self.mode = "actionMenu"
+
+
+
+
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -188,12 +187,16 @@ class Main():
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
-			if self.interface.actionMenu.active:
-				result = self.interface.actionMenu.checkInput()
-				if result != None:
-					self.doAction(result)
-			else:
+			if self.mode == "normal":
 				self.checkInput()
+			elif self.mode == "actionMenu":
+				self.interface.actionMenu.checkInput()
+			elif self.mode == "selectMoveTo":
+				print("Select a hex to move to, then enter moveTo")
+
+
+			print(self.mode)
+
 			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()
@@ -214,8 +217,15 @@ obj.run()
 
 
 # --- TODO ---------------------------------------------------------------------------------------
-# - BUG : some overflow can happen on rightside of map
-# - mouse doubleclick to select square in actionMenu
+# - actionMenu
+#	- ATTACK:	-
+#	- MOVE:		Started...
+#	- CONTAINS:	-
+#	- EXIT:		Completed
+
+
+# --- BUGS --------------------------------------------------------------------------------------- 
+# - some overflow can happen on rightside of map when using mouse
 
 
 # --- NOTES --------------------------------------------------------------------------------------
