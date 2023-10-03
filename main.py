@@ -41,7 +41,7 @@ class Main():
 		self.display = pygame.display.set_mode((self.width, self.height))
 		self.mouseClick = pygame.time.Clock()
 		self.holdEscape = False
-		self.mode = "normal"		# selection mode: normal, actionMenu, selectMoveTo, moveTo, ??
+		self.mode = "normal"		# selection mode: normal, actionMenu, selectMoveTo, moveTo, selectAttack, attack
 
 
 	def run(self):
@@ -150,6 +150,7 @@ class Main():
 		elif keysPressed[pygame.K_ESCAPE]:
 			if self.holdEscape == True:
 				self.holdEscape = False
+				pygame.time.delay(500)
 			else:
 				self.running = False
 		elif keysPressed[pygame.K_LEFT]:
@@ -193,6 +194,9 @@ class Main():
 				self.interface.actionMenu.checkInput()
 			elif self.mode == "selectMoveTo":
 				print("Select a hex to move to, then enter moveTo")
+
+
+
 
 
 			print(self.mode)

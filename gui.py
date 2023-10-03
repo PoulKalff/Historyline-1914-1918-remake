@@ -192,7 +192,7 @@ class ActionMenu():
 			sys.exit('notImplemented Exception: Attack')
 		elif result == 1:								# MOVE
 			self.parent.interface.generateMap(True)
-			self.parent.mode = "moveTo"
+			self.parent.mode = "selectMoveTo"
 		elif result == 2:								# CONTENT
 			self.parent.mode = "showContent"
 			sys.exit('notImplemented Exception: Content')
