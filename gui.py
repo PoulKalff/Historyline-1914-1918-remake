@@ -193,6 +193,17 @@ class ActionMenu():
 		elif result == 1:								# MOVE
 			self.parent.interface.generateMap(True)
 			self.parent.mode = "selectMoveTo"
+			self.parent.interface.fromHex = self.parent.interface.currentSquare().position
+
+
+
+
+
+
+
+#			sys.exit(str(self.fromHex.position))
+
+
 		elif result == 2:								# CONTENT
 			self.parent.mode = "showContent"
 			sys.exit('notImplemented Exception: Content')
@@ -236,6 +247,7 @@ class GUI():
 		self.pixelHeight = self.squareHeight * 40
 		self.flagIndex = {'Germany' : 0, 'France' : 1}
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
+		self.cursorFromGfx = pygame.image.load('gfx/cursor_from.png')
 		self.hexBorder = pygame.image.load('gfx/hexBorder.png')
 		self.skillsMarker = pygame.image.load('gfx/skills_marker.png')
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
@@ -271,15 +283,15 @@ class GUI():
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to
 			must be called each time player selects move """
 		unitSpeed = self.currentSquare().unit.speed
-		movingFrom = self.currentSquare().position
-		x, y = movingFrom
+		self.movingFrom = self.currentSquare()
+		x, y = self.movingFrom.position
 		withinRange = [(x,y)]	# coord of self
 		for iteration in range(unitSpeed):
 			for coord in set(withinRange):
 				neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
 				withinRange += neighbors
 		movableSquares = list(set(withinRange))
-		movableSquares.remove(movingFrom)
+		movableSquares.remove(self.movingFrom.position)
 		obstructed = []
 		for x, y in movableSquares:
 			if self.mainMap[x][y].fogofwar != 0:
@@ -334,6 +346,18 @@ class GUI():
 	def currentSquare(self, coords = False):
 		""" returns the currently hightlighted hexSquare """
 		mapCursor = [self.cursorPos[0] + self.mapView[0], self.cursorPos[1]  + self.mapView[1]]
+
+		# prevent cursor exiting map
+		if mapCursor[0] < 0: mapCursor[0] = 0
+		if mapCursor[0] > 7: mapCursor[0] = 7
+		if mapCursor[1] < 0: mapCursor[1] = 0
+		if mapCursor[1] > 22: mapCursor[1] = 21
+
+
+#		print(mapCursor)
+#		print(self.squareWidth, self.squareHeight) 			 = 8, 47
+
+
 		if coords:
 			# get the pixel coordinates from the hex coordinates
 			forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
@@ -355,6 +379,7 @@ class GUI():
 		self.drawUnitGUI()
 		if self.parent.mode == "actionMenu":
 			self.actionMenu.draw()
+
 
 
 
@@ -407,6 +432,9 @@ class GUI():
 		self.rectMap = pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
 		self.parent.display.blit(self.map, [19, 19], (self.mapView[0], self.mapView[1] * 40, 1098 + self.mapView[0], 960))		# blit visible area of map
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
+		if self.parent.mode == "selectMoveTo":
+			forskydning2 = 71 if (self.fromHex[0] % 2) != 0 else 0
+			self.parent.display.blit(self.cursorFromGfx, [self.fromHex[1] * 142 + forskydning2 + 7, self.fromHex[0] * 40 + 9])
 		self.parent.display.blit(self.cursorGfx, [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9])
 		return 1
 

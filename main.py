@@ -20,7 +20,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.52'		# added mouse control to actionMenu
+version = '0.53'		# fixed crash when cliking mouse outside hexes
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -113,9 +113,45 @@ class Main():
 		else:
 			field = 4
 			xHexSelected = xNoHex
-			yHexSelected = yNoHex - 1 if odd else yNoHex + 1	
+			yHexSelected = yNoHex - 1 if odd else yNoHex + 1
+		# identify invalid areas, i.e top, bottom or sides
+		if xNoHex == 0 and field == 1:		# if outside hexes on left side
+			return False
+		if xNoHex == 7 and field == 3:		# if outside hexes on right side
+			return False
+		if yHexSelected < 0:				# if above hexes
+			return False
+		if yHexSelected >  22:				# if below hexes
+			return False
 #		print("   Field %i, %s (%i/%i)" % (field, "Odd" if odd else "Even", yNoHex, xNoHex))	# debug
 		return [xHexSelected, yHexSelected]
+
+
+
+	def handleSelection(self):
+		""" Handles user selection by SPACE or MOUSE """
+		cursorHex = self.interface.currentSquare()
+		if self.mode == "normal":
+			if cursorHex.unit:
+				self.mode = "actionMenu"
+		elif self.mode == "selectMoveTo":
+			if cursorHex.fogofwar:				# if field is clear, execute move, else cancel move and return to normal mode
+				self.interface.generateMap()
+				self.mode = "normal"
+			else:
+				moveFrom = self.interface.movingFrom.position
+				moveTo = str(cursorHex.position)
+				sys.exit("Unit must move from (%s) to (%s)" % (moveFrom, moveTo))
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -129,9 +165,11 @@ class Main():
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				mX, mY = pygame.mouse.get_pos()
 				if self.mouseClick.tick() < 500:						# if doubleclick detected
-					self.mode = "actionMenu"
+					self.handleSelection()
 				elif self.interface.rectMap.collidepoint(mX, mY):		# if inside map
-					self.interface.cursorPos = self.findHex(mX, mY)
+					result =  self.findHex(mX, mY)
+					if result:
+						self.interface.cursorPos = result
 				elif self.interface.rectMini.collidepoint(mX, mY):		# if inside miniMap
 					percentageX = (mX - self.interface.rectMini.x) / self.interface.rectMini.width
 					percentageY = (mY - self.interface.rectMini.y) / self.interface.rectMini.height
@@ -162,11 +200,7 @@ class Main():
 		elif keysPressed[pygame.K_DOWN]:
 			self.interface.cursorMove('Down')
 		elif keysPressed[pygame.K_SPACE]:
-			self.mode = "actionMenu"
-
-
-
-
+			self.handleSelection()
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -193,16 +227,25 @@ class Main():
 			elif self.mode == "actionMenu":
 				self.interface.actionMenu.checkInput()
 			elif self.mode == "selectMoveTo":
-				print("Select a hex to move to, then enter moveTo")
+				self.checkInput()
 
 
 
 
+#				self.cursorFromGfx
 
-			print(self.mode)
+				# we are now in gotomov, so
+					# mark fromFiled
+					# ensure that we can select any hex available
+					# select it
+					# show move-animation
+					# change back to old move
+
+
 
 			self.interface.draw()
 			pygame.display.update()
+#			print(self.mode)
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
@@ -228,9 +271,10 @@ obj.run()
 #	- EXIT:		Completed
 
 
-# --- BUGS --------------------------------------------------------------------------------------- 
-# - some overflow can happen on rightside of map when using mouse
 
+
+# --- BUGS --------------------------------------------------------------------------------------- 
+# - must be impossible to move to clear hex if no way to get there via other clear hexes
 
 # --- NOTES --------------------------------------------------------------------------------------
 
