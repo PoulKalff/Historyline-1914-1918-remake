@@ -140,18 +140,19 @@ class Main():
 				self.mode = "normal"
 			else:
 				moveFrom = self.interface.movingFrom.position
-				moveTo = str(cursorHex.position)
-				sys.exit("Unit must move from (%s) to (%s)" % (moveFrom, moveTo))
+				moveTo = cursorHex.position
+				self.interface.showMove(moveFrom, moveTo)
 
 
+				self.interface.generateMap()
+				self.mode = "normal"
 
 
-
-
-
-
-
-
+					# 	DONE mark fromFiled
+					# 	DONE ensure that we can select any hex available
+					# 	DONE select it
+					# show move-animation
+					#	DONE change back to old move
 
 
 
@@ -228,21 +229,6 @@ class Main():
 				self.interface.actionMenu.checkInput()
 			elif self.mode == "selectMoveTo":
 				self.checkInput()
-
-
-
-
-#				self.cursorFromGfx
-
-				# we are now in gotomov, so
-					# mark fromFiled
-					# ensure that we can select any hex available
-					# select it
-					# show move-animation
-					# change back to old move
-
-
-
 			self.interface.draw()
 			pygame.display.update()
 #			print(self.mode)
@@ -275,6 +261,7 @@ obj.run()
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - must be impossible to move to clear hex if no way to get there via other clear hexes
+# - must be impossible to selectToMove unmovable units (pillbox)
 
 # --- NOTES --------------------------------------------------------------------------------------
 

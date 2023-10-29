@@ -1,6 +1,7 @@
 import sys
 import json
 import time
+import copy
 import pygame
 import numpy as np
 import pygame.surfarray as surfarray
@@ -343,21 +344,20 @@ class GUI():
 								print("Coordinate exceed map size in calculateFOW():", c)
 
 
+	def getSquare(self, coord):
+		""" returns the hexSquare with the given coordinates"""
+		return self.mainMap[coord[0]][coord[1]]
+
+
 	def currentSquare(self, coords = False):
 		""" returns the currently hightlighted hexSquare """
 		mapCursor = [self.cursorPos[0] + self.mapView[0], self.cursorPos[1]  + self.mapView[1]]
-
 		# prevent cursor exiting map
 		if mapCursor[0] < 0: mapCursor[0] = 0
 		if mapCursor[0] > 7: mapCursor[0] = 7
 		if mapCursor[1] < 0: mapCursor[1] = 0
 		if mapCursor[1] > 22: mapCursor[1] = 21
-
-
-#		print(mapCursor)
-#		print(self.squareWidth, self.squareHeight) 			 = 8, 47
-
-
+		# return result
 		if coords:
 			# get the pixel coordinates from the hex coordinates
 			forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
@@ -572,6 +572,152 @@ class GUI():
 		if self.cursorPos[0] < 0: self.cursorPos[0] = 0
 		if self.cursorPos[1] < 0: self.cursorPos[1] = 0
 		if self.cursorPos[1] > 22: self.cursorPos[1] = 21
+
+
+
+
+	def showMove(self, _moveFrom, _moveTo):
+		""" Show the moving of unit from one hex to another, AND update map with move """
+		print("Unit must move from (%s) to (%s) :" % (_moveFrom, _moveTo))
+
+		counter = 0
+		blackList = [] 			# all fields prev investigated
+
+
+		paths = [[_moveFrom]]					# adding first step to matrix of all possible paths
+		newPaths = []
+		while counter < 5:			# calculate paths until path is found
+			counter += 1
+			for p in paths:
+				lastField = p[-1]
+				print("STARTING NEW LOOP, p is now =", p, " Last field is", lastField)
+				neighbors = adjacentHexes(*lastField, self.mapWidth, self.mapHeight)
+				for n in reversed(neighbors):
+					square = self.getSquare(n)
+					if square.unit:
+						if square.unit.faction != "Central Powers":		# if they are not ours
+							neighbors.remove(n)
+					elif square.fogofwar:			# if field not clear
+						neighbors.remove(n)
+					if n in blackList:
+						neighbors.remove(n)
+					
+
+
+
+
+				for n in neighbors:
+					new = copy.copy(p)
+					new.append(n)
+					newPaths.append(new)
+					blackList.append(n)
+
+
+
+
+				print("    Neighbours to ", p, " : ", neighbors)
+				print("    Collected paths:")
+				for p in newPaths:
+					print("        ", p)
+
+				paths = newPaths		# all previous paths overwritten
+				print()
+				print("Blacklist", blackList)
+
+
+				input("press key")
+#				sys.exit("Killed for DEV")
+
+
+
+
+
+
+		print("Possible Paths : ", pathMatrix)
+		sys.exit("Killed for DEV")
+
+
+
+
+
+		# determine direction
+		# if _moveTo[0] < path[-1][0]:
+		# 	vertical = "Up"
+		# elif _moveTo[0] > path[-1][0]:
+		# 	vertical = "Down"
+		# else:
+		# 	vertical = "Same"
+		# if _moveTo[1] < path[-1][1]:
+		# 	horizontal = "Left"
+		# elif _moveTo[1] > path[-1][1]:
+		# 	horizontal = "Right"
+		# else:
+		# 	horizontal = "Same"
+
+
+#		pathMatrix.append(neighbors)
+
+
+
+
+#		while path[-1] != _moveTo:					# Calculate next XCoord
+
+
+
+
+
+
+
+#		print(vertical, horizontal)
+
+
+
+
+
+
+
+
+		while path[-1] != _moveTo:					# Calculate next XCoord
+			if _moveTo[0] < path[-1][0]:
+				nextX = path[-1][0] - 1
+			elif _moveTo[0] > path[-1][0]:
+				nextX = path[-1][0] + 1
+			else:
+				nextX = path[-1][0]
+			if _moveTo[1] < path[-1][1]:			# Calculate next YCoord
+				nextY = path[-1][1] - 1
+			elif _moveTo[1] > path[-1][1]:
+				nextY = path[-1][1] + 1
+			else:
+				nextY = path[-1][1]
+			path.append((nextX, nextY))
+		# draw move on map
+		unit = self.getSquare(_moveFrom).unit
+		for coord in path:
+			print("  ",coord)
+			x, y = coord
+			forskydning = 71 if (x % 2) != 0 else 0
+			self.parent.display.blit(unit.mapIcon, [y * 142 + forskydning + 19, x * 40 + 10])		# must blit unit.allIcons[0-5]
+			pygame.display.update()
+			pygame.time.wait(1000)
+
+
+
+
+
+		input("Press any key to exit")
+		sys.exit("Killed for DEV")
+
+
+
+#		print("Unit must move from (%s) to (%s) :" % (_moveFrom, _moveTo))
+		# need to ensure no enemy ) unpassable fields crossed
+		# need to rotate unit for each move
+		
+
+
+
+
 
 
 
