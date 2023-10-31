@@ -142,10 +142,7 @@ class Main():
 				moveFrom = self.interface.movingFrom.position
 				moveTo = cursorHex.position
 				movePath = self.interface.findPath(moveFrom, moveTo)
-				self.interface.generateMap()	# to remove move-overlay
-				self.interface.drawMap()
 				self.interface.executeMove(movePath)
-				self.interface.generateMap()
 				self.mode = "normal"
 		return 1
 

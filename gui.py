@@ -73,14 +73,14 @@ class Unit():
 						elif np.array_equal(arr[i, j], [180, 148, 124]):
 							arr[i, j] = [88, 104, 36]
 			rawIcon = pygame.transform.scale2x(rawIcon)
-			self.allIcons = [	rot_center(rawIcon, 60),
+			self.allIcons = [	rawIcon,
+								rot_center(rawIcon, 60),
 								rot_center(rawIcon, 120),
 								rot_center(rawIcon, 180),
 								rot_center(rawIcon, 240),
 								rot_center(rawIcon, 300),
-								rawIcon
 							 ]
-			self.mapIcon = self.allIcons[2] if self.faction == 'Central Powers' else self.allIcons[5]
+			self.mapIcon = self.allIcons[3] if self.faction == 'Central Powers' else self.allIcons[0]
 
 
 
@@ -585,7 +585,6 @@ class GUI():
 			newPaths = []
 			for p in reversed(paths):
 				lastField = p[-1]
-#				print("STARTING NEW LOOP, p is now =", p, " Last field is", lastField, "  ", len(lastField), lastField == _moveTo)
 				neighbors = adjacentHexes(*lastField, self.mapWidth, self.mapHeight)
 				for n in reversed(neighbors):
 					square = self.getSquare(n)
@@ -602,21 +601,10 @@ class GUI():
 					newPaths.append(new)
 					visited.append(n)
 				paths.remove(p)			# remove currently processed path, as it is obsolete
-#				print()
-#				print("    Neighbours to ", p, " : ", neighbors)
-#				print("    paths:")
-#				for p in paths:
-#					print("        ", p)
-#				print("    NEW paths:")
 				for np in newPaths:				# searching for a match with target field
-#					print("        ", np)
 					if np[-1] == _moveTo:
 						print("Calculted path is", np)
 						return np
-#						print("FOUND!!!!")
-#						sys.exit(str( np ))
-#				print("Previously Visited", visited)
-#				input("In total, we know of " +  str(len(paths)) + " paths, newPaths is " + str(len(newPaths)))
 			paths += newPaths
 			paths.sort(key=len)
 
@@ -624,31 +612,69 @@ class GUI():
 
 	def executeMove(self, movePath):
 		""" Shows the movement of a unit along the path given by the points in the path, then updates map data """
-		unit = self.getSquare(movePath[0]).unit
-		for coord in movePath:
-			print("  ",coord)
-			x, y = coord
-			forskydning = 71 if (x % 2) != 0 else 0
-
-
-
-
-			# unit must be rotated for each move
-			# unit must be removed from old hex for each move
-			# unit must glide, not just appear
-
-
-
-
-			self.parent.display.blit(unit.mapIcon, [y * 142 + forskydning + 19, x * 40 + 10])		# must blit unit.allIcons[0-5]
-			pygame.display.update()
-			pygame.time.wait(1000)
-		# move the unit in the map matrix
+		self.parent.mode = "normal"
 		xFrom, yFrom = movePath[0]
+		_fromCoord = movePath[0]
 		xTo, yTo = movePath[-1]
 		fromHex = self.mainMap[xFrom][yFrom]
 		toHex = self.mainMap[xTo][yTo]
-		toHex.unit = fromHex.unit
+		# remove unit from matrix and save it, display map without unit
+		_unitMoved = fromHex.unit
 		fromHex.unit = None
+		self.generateMap()
+		for coord in movePath:
+			x, y = coord
+			forskydning = 71 if (x % 2) != 0 else 0
+			pixelCoordXto = x * 40 + 10
+			pixelCoordYto = y * 142 + forskydning + 19
+			if coord != _fromCoord:
+				print("Moving pixel coordinates: (%s, %s) ---> (%s, %s)" % (pixelCoordXfrom, pixelCoordYfrom, pixelCoordXto, pixelCoordYto))
+				# calculate rotation
+				if pixelCoordYfrom > pixelCoordYto:
+					if pixelCoordXfrom < pixelCoordXto:
+						rotation = 2	# right down 
+					else:
+						rotation = 1	# right up
+				elif pixelCoordYfrom < pixelCoordYto:
+					if pixelCoordXfrom < pixelCoordXto:
+						rotation = 4	# left down 
+					else:
+						rotation = 5	# left up 
+				else:
+					if pixelCoordXfrom < pixelCoordXto:
+						rotation = 3	# down
+					else:
+						rotation = 0	# up
+				_unitMoved.mapIcon = _unitMoved.allIcons[rotation]
+
+
+
+				# lav en flydende bevægelse, istf. en rykvis
+					# possible directions from 				(450, 374):
+					# --------------------------------------------------------------
+					#				1 (Straight up):		(370, 374)
+					#				2 						(410, 445)
+					#				3 						(490, 445)
+					#				4 (Straight down)		(530, 374)
+					#				5 						(490, 303)
+					#				6 						(410, 303)
+
+				# maaske boer animation times ift. time.tick()
+
+
+
+
+
+				self.drawMap()
+				self.parent.display.blit(_unitMoved.allIcons[rotation], [pixelCoordYto, pixelCoordXto])		# must blit unit.allIcons[0-5]
+				pygame.display.update()
+				pygame.time.wait(500)
+			pixelCoordXfrom = pixelCoordXto
+			pixelCoordYfrom = pixelCoordYto
+		# move the unit to its new hex in the map matrix, generate and display new map with unit
+		toHex.unit = _unitMoved
+		self.generateMap()
+		self.drawMap()
+		pygame.display.update()
 		return 1
 
