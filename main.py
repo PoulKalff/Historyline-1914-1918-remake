@@ -20,7 +20,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.53'		# fixed crash when cliking mouse outside hexes
+version = '0.54'		# units move almost completed
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -141,18 +141,13 @@ class Main():
 			else:
 				moveFrom = self.interface.movingFrom.position
 				moveTo = cursorHex.position
-				self.interface.showMove(moveFrom, moveTo)
-
-
+				movePath = self.interface.findPath(moveFrom, moveTo)
+				self.interface.generateMap()	# to remove move-overlay
+				self.interface.drawMap()
+				self.interface.executeMove(movePath)
 				self.interface.generateMap()
 				self.mode = "normal"
-
-
-					# 	DONE mark fromFiled
-					# 	DONE ensure that we can select any hex available
-					# 	DONE select it
-					# show move-animation
-					#	DONE change back to old move
+		return 1
 
 
 
