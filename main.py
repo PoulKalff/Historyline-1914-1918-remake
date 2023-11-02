@@ -133,6 +133,7 @@ class Main():
 		cursorHex = self.interface.currentSquare()
 		if self.mode == "normal":
 			if cursorHex.unit:
+				self.interface.actionMenu.create()
 				self.mode = "actionMenu"
 		elif self.mode == "selectMoveTo":
 			if cursorHex.fogofwar:				# if field is clear, execute move, else cancel move and return to normal mode
@@ -223,7 +224,6 @@ class Main():
 				self.checkInput()
 			self.interface.draw()
 			pygame.display.update()
-#			print(self.mode)
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
@@ -241,21 +241,24 @@ obj =  Main(args)
 obj.run()
 
 
-# --- TODO ---------------------------------------------------------------------------------------
-# - actionMenu
-#	- ATTACK:	-
-#	- MOVE:		Started...
-#	- CONTAINS:	-
-#	- EXIT:		Completed
+
+
+
+
+# --- TODO --------------------------------------------------------------------------------------- 
+# - show contents of unit
+# - attack mode
 
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
-# - must be impossible to move to clear hex if no way to get there via other clear hexes
-# - must be impossible to selectToMove unmovable units (pillbox)
+# - 
+
+
 
 # --- NOTES --------------------------------------------------------------------------------------
+# - 
 
 
 

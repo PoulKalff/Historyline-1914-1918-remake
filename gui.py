@@ -42,6 +42,7 @@ class Unit():
 			self.armour = data['armour']
 			self.speed = data['speed']
 			self.weight = data['weight']
+			self.storage= data['storage']
 			self.sight = data['sight']
 			self.fuel = data['fuel']
 			self.experience = 0
@@ -131,12 +132,36 @@ class ActionMenu():
 	def __init__(self, parent):
 		self.parent = parent
 		self.location = (50, 50)
-		self.focused = RangeIterator(4)
-		self.focusedArray = [1,0,0,0]
-		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'), None]
-		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'), None]
-		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'), None]
-		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'), None]
+		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'),		None, 0]
+		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'),		None, 1]
+		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'),	None, 2]
+		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'),		None, 3]
+
+
+
+	def create(self):
+		""" recreate the menu, calculate which buttons to include, should be called each time cursor is moved """
+		self.square = self.parent.interface.currentSquare()
+		self.location  = self.parent.interface.currentSquare(True)
+		self.location[0] += 110
+		self.location[1] -= 30
+		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
+		self.contents = []
+		_focusedUnit = self.parent.interface.currentSquare().unit
+		if _focusedUnit.speed:
+			self.contents.append(self.buttonAttack)
+		if _focusedUnit.weapons != [None, None, None, None]:								# How do I calculate this? calculate id any unit within attackrng of each weapon..... Not yet implemented
+			self.contents.append(self.buttonMove)
+		if _focusedUnit.storage:
+			self.contents.append(self.buttonContain)
+		self.contents.append(self.buttonExit)
+		self.focused = RangeIterator(len(self.contents))
+		self.menuWidth = 8 + (len(self.contents) * 62)
+		for butNr in range(len(self.contents)):
+			_butLocation = self.location[0] + 4 + (butNr * 62)
+			self.contents[butNr][2] = pygame.Rect(_butLocation, self.location[1] + 4, 62, 52)
+		self.focusedArray = [0 for x in range(len(self.contents))]
+
 
 
 	def checkInput(self):
@@ -144,19 +169,11 @@ class ActionMenu():
 		for event in pygame.event.get():
 			mPos = pygame.mouse.get_pos()
 			# check mouseover
-			if self.buttonAttack[2].collidepoint(mPos):
-				self.focused.count = 0
-				self.focusedArray = [1,0,0,0]
-			elif self.buttonMove[2].collidepoint(mPos):
-				self.focused.count = 1
-				self.focusedArray = [0,1,0,0]
-			elif self.buttonContain[2].collidepoint(mPos):
-				self.focused.count = 2
-				self.focusedArray = [0,0,1,0]
-			elif self.buttonExit[2].collidepoint(mPos):
-				self.focused.count = 3
-				self.focusedArray = [0,0,0,1]
-			# check mouseclick
+			self.focusedArray = [0 for x in range(len(self.contents))]
+			for butNr in range(len(self.contents)):
+				if self.contents[butNr][2].collidepoint(mPos):
+					self.focused.count = butNr
+					self.focusedArray[butNr] = 1
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
 			# Keyboard
@@ -185,50 +202,26 @@ class ActionMenu():
 
 	def endMenu(self, result):
 		""" execute action selected in the action menu """
-		self.focused.count = 0							# reset menu
-		self.focusedArray = [1, 0, 0, 0]				# reset menu
-		# choose mode and let main continue
-		if result == 0:									# ATTACK
+		_butID = self.contents[result][3]
+		if _butID == 0:									# ATTACK
 			self.parent.mode = "attack"
 			sys.exit('notImplemented Exception: Attack')
-		elif result == 1:								# MOVE
+		elif _butID == 1:								# MOVE
 			self.parent.interface.generateMap(True)
 			self.parent.mode = "selectMoveTo"
 			self.parent.interface.fromHex = self.parent.interface.currentSquare().position
-
-
-
-
-
-
-
-#			sys.exit(str(self.fromHex.position))
-
-
-		elif result == 2:								# CONTENT
+		elif _butID == 2:								# CONTENT
 			self.parent.mode = "showContent"
 			sys.exit('notImplemented Exception: Content')
-		elif result == 3:								# RETURN
+		elif _butID == 3:								# RETURN
 			self.parent.mode = "normal"
 
 
 
 	def draw(self):
-		self.square = self.parent.interface.currentSquare()
-		self.location  = self.parent.interface.currentSquare(True)
-		self.location[0] += 110
-		self.location[1] -= 30
-		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
-		self.buttonAttack[2]	= pygame.Rect(self.location[0] + 4,   self.location[1] + 4, 62, 52)
-		self.buttonMove[2]		= pygame.Rect(self.location[0] + 66,  self.location[1] + 4, 62, 52)
-		self.buttonContain[2]	= pygame.Rect(self.location[0] + 128, self.location[1] + 4, 62, 52)
-		self.buttonExit[2]		= pygame.Rect(self.location[0] + 190, self.location[1] + 4, 62, 52)
-		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], 256, 60), 4)	# menu border
-		self.parent.display.blit(self.buttonAttack[self.focusedArray[0]],  self.buttonAttack[2])
-		self.parent.display.blit(self.buttonMove[self.focusedArray[1]],    self.buttonMove[2])
-		self.parent.display.blit(self.buttonContain[self.focusedArray[2]], self.buttonContain[2])
-		self.parent.display.blit(self.buttonExit[self.focusedArray[3]],    self.buttonExit[2])
-
+		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], self.menuWidth, 60), 4)	# menu border
+		for butNr in range(len(self.contents)):
+			self.parent.display.blit(self.contents[butNr][self.focusedArray[butNr]],  self.contents[butNr][2])
 
 
 
@@ -577,7 +570,7 @@ class GUI():
 
 	def findPath(self, _moveFrom, _moveTo):
 		""" calculates the path that a unit must take to get from one filed to the next """
-		print("Unit must move from (%s) to (%s) :" % (_moveFrom, _moveTo))
+#		print("Unit must move from (%s) to (%s) :" % (_moveFrom, _moveTo))
 		paths = [[_moveFrom]]					# adding first step to matrix of all possible paths
 		visited = [_moveFrom] 			# all fields prev visted
 		while True:					# calculate paths until path is found
@@ -603,7 +596,7 @@ class GUI():
 				paths.remove(p)			# remove currently processed path, as it is obsolete
 				for np in newPaths:				# searching for a match with target field
 					if np[-1] == _moveTo:
-						print("Calculted path is", np)
+#						print("Calculated path is", np)
 						return np
 			paths += newPaths
 			paths.sort(key=len)
@@ -628,7 +621,7 @@ class GUI():
 			pixelCoordXto = x * 40 + 10
 			pixelCoordYto = y * 142 + forskydning + 19
 			if coord != _fromCoord:
-				print("Moving pixel coordinates: (%s, %s) ---> (%s, %s)" % (pixelCoordXfrom, pixelCoordYfrom, pixelCoordXto, pixelCoordYto))
+#				print("Moving pixel coordinates: (%s, %s) ---> (%s, %s)" % (pixelCoordXfrom, pixelCoordYfrom, pixelCoordXto, pixelCoordYto))
 				# calculate rotation
 				if pixelCoordYfrom > pixelCoordYto:
 					if pixelCoordXfrom < pixelCoordXto:
