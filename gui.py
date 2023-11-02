@@ -632,43 +632,44 @@ class GUI():
 				# calculate rotation
 				if pixelCoordYfrom > pixelCoordYto:
 					if pixelCoordXfrom < pixelCoordXto:
-						rotation = 2	# right down 
+						rotation = 2	# left down
 					else:
-						rotation = 1	# right up
+						rotation = 1	# left up
 				elif pixelCoordYfrom < pixelCoordYto:
 					if pixelCoordXfrom < pixelCoordXto:
-						rotation = 4	# left down 
+						rotation = 4	# right down
 					else:
-						rotation = 5	# left up 
+						rotation = 5	# right up
 				else:
 					if pixelCoordXfrom < pixelCoordXto:
 						rotation = 3	# down
 					else:
 						rotation = 0	# up
 				_unitMoved.mapIcon = _unitMoved.allIcons[rotation]
-
-
-
-				# lav en flydende bevægelse, istf. en rykvis
-					# possible directions from 				(450, 374):
-					# --------------------------------------------------------------
-					#				1 (Straight up):		(370, 374)
-					#				2 						(410, 445)
-					#				3 						(490, 445)
-					#				4 (Straight down)		(530, 374)
-					#				5 						(490, 303)
-					#				6 						(410, 303)
-
-				# maaske boer animation times ift. time.tick()
-
-
-
-
-
-				self.drawMap()
-				self.parent.display.blit(_unitMoved.allIcons[rotation], [pixelCoordYto, pixelCoordXto])		# must blit unit.allIcons[0-5]
-				pygame.display.update()
-				pygame.time.wait(500)
+				frameCoord = [pixelCoordYfrom, pixelCoordXfrom]
+				for x in range(8):
+					# show frame
+					self.drawMap()
+					self.parent.display.blit(_unitMoved.allIcons[rotation], [frameCoord[0], frameCoord[1]])		# must blit unit.allIcons[0-5]
+					pygame.display.update()
+					pygame.time.wait(20)
+					# use rotation to calculatenext frame
+					if rotation == 0:			# up
+						frameCoord[1] -= 10
+					elif rotation == 1:			# left up
+						frameCoord[0] = int(frameCoord[0] - 8.875)
+						frameCoord[1] -= 5
+					elif rotation == 2:			# left down
+						frameCoord[0] = int(frameCoord[0] - 8.875)
+						frameCoord[1] += 5
+					elif rotation == 3:			# down
+						frameCoord[1] += 10
+					elif rotation == 4:			# right down
+						frameCoord[0] = int(frameCoord[0] + 8.875)
+						frameCoord[1] += 5
+					elif rotation == 5:			# right up
+						frameCoord[0] = int(frameCoord[0] + 8.875)
+						frameCoord[1] -= 5
 			pixelCoordXfrom = pixelCoordXto
 			pixelCoordYfrom = pixelCoordYto
 		# move the unit to its new hex in the map matrix, generate and display new map with unit

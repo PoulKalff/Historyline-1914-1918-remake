@@ -1,8 +1,0 @@
- - Point on map with mouse to move cursor
- - Point on minimap with mouse to move main map
- - enable/disable debug (field no)
- - 
-
-
-
-git push https://poulkalff:b8537ddbdef22657a074ef9ef8d0fa4e481a51e1@github.com/PoulKalff/Historyline-1914-1918-remake
