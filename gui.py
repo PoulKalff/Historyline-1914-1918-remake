@@ -126,6 +126,47 @@ class HexSquare():
 
 
 
+
+
+class WeaponMenu():
+	""" Representation of the games' weapon menu """
+
+	def __init__(self, parent):
+		self.parent = parent
+		self.location = (50, 50)
+		self.weaponA =	[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'),		None, 0]
+		self.weaponB =	[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'),		None, 1]
+		self.weaponC =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'),	None, 2]
+		self.weaponD =	[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'),		None, 3]
+
+
+	def create(self):
+		pass
+
+	def checkInput(self):
+		pass
+
+	def endMenu(self, result):
+		pass
+
+	def draw(self):
+		pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class ActionMenu():
 	""" Representation of the games' action menu """
 
@@ -200,14 +241,17 @@ class ActionMenu():
 
 
 
+
+
 	def endMenu(self, result):
 		""" execute action selected in the action menu """
 		_butID = self.contents[result][3]
 		if _butID == 0:									# ATTACK
-			self.parent.mode = "attack"
-			sys.exit('notImplemented Exception: Attack')
+			self.parent.interface.generateMap("attack")
+			self.parent.mode = "selectAttack"
+			self.parent.interface.fromHex = self.parent.interface.currentSquare().position
 		elif _butID == 1:								# MOVE
-			self.parent.interface.generateMap(True)
+			self.parent.interface.generateMap("move")
 			self.parent.mode = "selectMoveTo"
 			self.parent.interface.fromHex = self.parent.interface.currentSquare().position
 		elif _butID == 2:								# CONTENT
@@ -274,8 +318,8 @@ class GUI():
 
 
 	def markMovableSquares(self):
-		""" prints an overlay on each hexSquare on the map that the current unit cannot move to
-			must be called each time player selects move """
+		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
+			Must be called each time player selects move """
 		unitSpeed = self.currentSquare().unit.speed
 		self.movingFrom = self.currentSquare()
 		x, y = self.movingFrom.position
@@ -304,13 +348,48 @@ class GUI():
 					self.mainMap[x][y].fogofwar = 3
 
 
-#		return list of squares to move to
 
-
-
-
-
-
+	def markAttackableSquares(self):
+		""" prints an overlay on each hexSquare on the map that the current unit cannot attack.
+			Must be called each time player selects attack """
+		attackingFrom = self.currentSquare()
+		x, y = attackingFrom.position
+		withinRange = [(x,y)]	# coord of self
+		_allMin = []
+		_allMax = []
+		for c in attackingFrom.unit.weapons:
+			if c:
+				_allMin.append(c.rangeMin)
+				_allMax.append(c.rangeMax)
+		rangeMin = min(_allMin)
+		rangeMax = max(_allMax)
+		for iteration in range(rangeMax):
+			for coord in set(withinRange):
+				neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+				withinRange += neighbors
+		attackableSquares = list(set(withinRange))
+		attackableSquares.remove(attackingFrom.position)
+		if rangeMin > 1:
+			belowMinRange = [(x,y)]
+			for iteration in range(rangeMin - 1):
+				for coord in set(belowMinRange):
+					neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+					belowMinRange += neighbors
+			# remove any field below min range
+			for coord in belowMinRange:
+				if coord in attackableSquares:
+					attackableSquares.remove(coord)
+		attackableEnemySquares = []
+		for x, y in attackableSquares:
+			if self.mainMap[x][y].fogofwar == 0:
+				if self.mainMap[x][y].unit:
+					if self.mainMap[x][y].unit.faction != self.parent.playerSide:
+						attackableEnemySquares.append((x,y))
+		# mark squares possible to attack 
+		for x in range(self.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				if self.mainMap[x][y].fogofwar == 0 and (x,y) not in attackableEnemySquares:
+					self.mainMap[x][y].fogofwar = 3
 
 
 
@@ -376,11 +455,13 @@ class GUI():
 
 
 
-	def generateMap(self, movingUnit = False):
+	def generateMap(self, action = None):
 		""" generate the basic map to be used to draw main map and minimap """	
 		self.calculateFOW()
-		if movingUnit:
+		if action == 'move':
 			self.markMovableSquares()
+		elif action == 'attack':
+			self.markAttackableSquares()
 		width = (self.mapWidth * 142) - 46  # dunno why 46 must be subtracted?
 		height = (self.mapHeight + 1) * 40
 		self.map = pygame.Surface((width, height))
