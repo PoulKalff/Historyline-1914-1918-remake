@@ -149,9 +149,9 @@ class ActionMenu():
 		self.contents = []
 		_focusedUnit = self.parent.interface.currentSquare().unit
 		if _focusedUnit.speed:
-			self.contents.append(self.buttonAttack)
-		if _focusedUnit.weapons != [None, None, None, None]:								# How do I calculate this? calculate id any unit within attackrng of each weapon..... Not yet implemented
 			self.contents.append(self.buttonMove)
+		if _focusedUnit.weapons != [None, None, None, None]:								# How do I calculate this? calculate id any unit within attackrng of each weapon..... Not yet implemented
+			self.contents.append(self.buttonAttack)
 		if _focusedUnit.storage:
 			self.contents.append(self.buttonContain)
 		self.contents.append(self.buttonExit)
