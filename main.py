@@ -258,6 +258,8 @@ obj.run()
 # --- TODO --------------------------------------------------------------------------------------- 
 # - show contents of unit
 # - attack mode
+#		- do not show attack symbol if noone to attack!
+
 
 
 

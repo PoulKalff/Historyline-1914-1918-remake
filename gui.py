@@ -191,8 +191,9 @@ class ActionMenu():
 		_focusedUnit = self.parent.interface.currentSquare().unit
 		if _focusedUnit.speed:
 			self.contents.append(self.buttonMove)
-		if _focusedUnit.weapons != [None, None, None, None]:								# How do I calculate this? calculate id any unit within attackrng of each weapon..... Not yet implemented
-			self.contents.append(self.buttonAttack)
+		if _focusedUnit.weapons != [None, None, None, None]:		# DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
+			if self.parent.interface.markAttackableSquares(True):
+				self.contents.append(self.buttonAttack)
 		if _focusedUnit.storage:
 			self.contents.append(self.buttonContain)
 		self.contents.append(self.buttonExit)
@@ -349,9 +350,10 @@ class GUI():
 
 
 
-	def markAttackableSquares(self):
+	def markAttackableSquares(self, check = False):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot attack.
-			Must be called each time player selects attack """
+			Must be called each time player selects attack
+			If check is True, returns True or False, indicating whether any units are in range """
 		attackingFrom = self.currentSquare()
 		x, y = attackingFrom.position
 		withinRange = [(x,y)]	# coord of self
@@ -385,11 +387,14 @@ class GUI():
 				if self.mainMap[x][y].unit:
 					if self.mainMap[x][y].unit.faction != self.parent.playerSide:
 						attackableEnemySquares.append((x,y))
-		# mark squares possible to attack 
-		for x in range(self.mapHeight):
-			for y in range(len(self.mainMap[x])):
-				if self.mainMap[x][y].fogofwar == 0 and (x,y) not in attackableEnemySquares:
-					self.mainMap[x][y].fogofwar = 3
+		if check:
+			return bool(attackableEnemySquares)
+		else:
+			# mark squares possible to attack 
+			for x in range(self.mapHeight):
+				for y in range(len(self.mainMap[x])):
+					if self.mainMap[x][y].fogofwar == 0 and (x,y) not in attackableEnemySquares:
+						self.mainMap[x][y].fogofwar = 3
 
 
 
