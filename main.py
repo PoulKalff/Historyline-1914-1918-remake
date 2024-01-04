@@ -145,6 +145,18 @@ class Main():
 				movePath = self.interface.findPath(moveFrom, moveTo)
 				self.interface.executeMove(movePath)
 				self.mode = "normal"
+		elif self.mode == "selectAttack":
+
+
+
+
+
+
+
+
+
+
+			sys.exit("notImplemented error: select a unit to attack (main.py, line 151)")
 		return 1
 
 
@@ -216,11 +228,9 @@ class Main():
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
-			if self.mode == "normal":
-				self.checkInput()
-			elif self.mode == "actionMenu":
+			if self.mode == "actionMenu":
 				self.interface.actionMenu.checkInput()
-			elif self.mode == "selectMoveTo":
+			else:
 				self.checkInput()
 			self.interface.draw()
 			pygame.display.update()
