@@ -146,18 +146,41 @@ class Main():
 				self.interface.executeMove(movePath)
 				self.mode = "normal"
 		elif self.mode == "selectAttack":
+			if cursorHex.fogofwar:				# if field is clear, execute move, else cancel move and return to normal mode
+				self.interface.generateMap()
+				self.mode = "normal"
+			else:
+				self.handleAttack(cursorHex.unit)
+		return True
+
+
+
+	def handleAttack(self, enemyUnit):
+		""" Handles the attack of an enemy unit """
+
+
+		# select a weapon
+		for w in enemyUnit.weapons:
+			if w:
+				print(w.name)
+
+
+
+		# calculate attack
+		print("Attacking", enemyUnit.name)
 
 
 
 
+		# regenerate map
+		self.interface.generateMap()
+		self.mode = "normal"
 
 
 
 
-
-
-			sys.exit("notImplemented error: select a unit to attack (main.py, line 151)")
-		return 1
+		sys.exit("notImplemented error: select a unit to attack (main.py, line 151)")
+		return True
 
 
 
@@ -258,8 +281,7 @@ obj.run()
 # --- TODO --------------------------------------------------------------------------------------- 
 # - show contents of unit
 # - attack mode
-#		- do not show attack symbol if noone to attack!
-
+#		handleAttack, line 158
 
 
 
