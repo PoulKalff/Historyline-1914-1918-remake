@@ -41,7 +41,7 @@ class Main():
 		self.display = pygame.display.set_mode((self.width, self.height))
 		self.mouseClick = pygame.time.Clock()
 		self.holdEscape = False
-		self.mode = "normal"		# selection mode: normal, actionMenu, selectMoveTo, moveTo, selectAttack, attack
+		self.mode = "normal"		# selection mode: normal, actionMenu, weaponMenu, selectMoveTo, moveTo, selectAttack, attack
 
 
 	def run(self):
@@ -239,6 +239,15 @@ class Main():
 			self.test[1] -= 1
 		elif keysPressed[pygame.K_KP2]:
 			self.test[1] += 1
+
+
+
+		elif keysPressed[pygame.K_w]:
+			self.interface.weaponMenu.create()
+			self.mode = "weaponMenu"
+
+
+
 		# ------------------------------------- test end ---------------------------------------
 		elif keysPressed[pygame.K_PAGEUP]:
 			self.interface.mapView = [0, 0]
@@ -253,6 +262,8 @@ class Main():
 		while self.running:
 			if self.mode == "actionMenu":
 				self.interface.actionMenu.checkInput()
+			elif self.mode == "weaponMenu":
+				self.interface.weaponMenu.checkInput()
 			else:
 				self.checkInput()
 			self.interface.draw()
