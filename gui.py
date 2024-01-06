@@ -141,7 +141,15 @@ class WeaponMenu():
 
 
 	def create(self):
-		pass
+		""" recreate the menu, calculate which buttons to include, should be called each time cursor is moved """
+		self.square = self.parent.interface.currentSquare()
+		self.location  = self.parent.interface.currentSquare(True)
+		self.location[0] += 110
+		self.location[1] -= 30
+		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
+		self.contents = []
+		_focusedUnit = self.parent.interface.currentSquare().unit
+
 
 	def checkInput(self):
 		pass
@@ -150,7 +158,9 @@ class WeaponMenu():
 		pass
 
 	def draw(self):
-		pass
+		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], self.menuWidth, 60), 4)	# menu border
+		for butNr in range(len(self.contents)):
+			self.parent.display.blit(self.contents[butNr][self.focusedArray[butNr]],  self.contents[butNr][2])
 
 
 
@@ -301,6 +311,7 @@ class GUI():
 		self.backgroundTextureTerrain = pygame.image.load('gfx/steelTextureTerrain.png')
 		self.semiTransparent = pygame.image.load('gfx/hexTypes/hex_semiTransparent.png')
 		self.actionMenu = ActionMenu(self.parent)
+		self.weaponMenu = WeaponMenu(self.parent)
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts

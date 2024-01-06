@@ -179,7 +179,7 @@ class Main():
 
 
 
-		sys.exit("notImplemented error: select a unit to attack (main.py, line 151)")
+		sys.exit("notImplemented error: select a unit to attack (main.py, line 158)")
 		return True
 
 
