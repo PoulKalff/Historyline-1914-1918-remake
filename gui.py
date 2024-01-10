@@ -166,6 +166,7 @@ class WeaponMenu():
 		self.parent = parent
 		self.location = (50, 50)
 		self.weapons = []
+		self.cursorGfx = pygame.image.load('gfx/menuIcons/weaponMenuCursor.png')
 
 
 	def create(self):
@@ -179,6 +180,11 @@ class WeaponMenu():
 		_focusedUnit = self.parent.interface.currentSquare().unit
 		for w in _focusedUnit.weaponsGfx:
 			self.weapons.append(pygame.transform.scale(w, (332, 25) ) if w else None)
+		_noOfWeapons = 0
+		for w in _focusedUnit.weapons:
+			if w != None:
+				_noOfWeapons += 1
+		self.focused = RangeIterator(_noOfWeapons)
 
 
 	def checkInput(self):
@@ -186,6 +192,10 @@ class WeaponMenu():
 			mPos = pygame.mouse.get_pos()
 			# check mouseover
 			self.focusedArray = [0 for x in range(len(self.contents))]
+	#		for butNr in range(len(self.contents)):
+	#			if self.contents[butNr][2].collidepoint(mPos):
+	#				self.focused.count = butNr
+	#				self.focusedArray[butNr] = 1
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
 			# Keyboard
@@ -198,28 +208,45 @@ class WeaponMenu():
 					self.weapons = []
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
+				elif event.key == pygame.K_UP:
+					self.focused.dec()
+					self.focusedArray = [0, 0, 0, 0]
+					self.focusedArray[self.focused.get()] = 1
+
+
+#					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
+					pygame.time.wait(50)
+				elif event.key == pygame.K_DOWN:
+					self.focused.inc()
+					self.focusedArray = [0, 0, 0, 0]
+					self.focusedArray[self.focused.get()] = 1
+
+
+
+#					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
+					pygame.time.wait(50)
+				elif event.key == pygame.K_RETURN:
+					self.endMenu(self.focused.get())
+
+
+
+# SPARKMIG!		:	Mangler at faa mus selection til at virke, ved ikke hvad self.focusedArray goer, maaske noget med samme?
+
+
+
 
 
 	def endMenu(self, result):
-		pass
+		sys.exit("Killed for DEV: User selected weapon number " + str( result ))
 
 
 	def draw(self):
 		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0] - 2, self.location[1] - 2, 336, 110))	# menu border
-		for nr, w in enumerate(self.weapons):
-			if w:
-				self.parent.display.blit(w, [self.location[0], self.location[1] + (nr * 27)])
-
-
-
-
-
-
-
-
-
-
-
+		self.parent.display.blit(self.weapons[0], [self.location[0], self.location[1]])
+		self.parent.display.blit(self.weapons[1], [self.location[0], self.location[1] + 27])
+		self.parent.display.blit(self.weapons[2], [self.location[0], self.location[1] + 54])
+		self.parent.display.blit(self.weapons[3], [self.location[0], self.location[1] + 81])
+		self.parent.display.blit(self.cursorGfx,  [self.location[0] - 2 , self.location[1] + (self.focused.get() * 27) - 2])
 
 
 
