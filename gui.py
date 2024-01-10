@@ -20,7 +20,7 @@ class Weapon():
 	def __init__(self, key):
 		if key:
 			data = weaponsParameters[key]
-			self.name = data['name']
+			self.name = data['name']	
 			self.rangeMin = data['rangeMin']
 			self.rangeMax = data['rangeMax']
 			self.power = data['power']
@@ -48,6 +48,7 @@ class Unit():
 			self.experience = 0
 			self.skills = data['skills']
 			self.weapons = []
+			self.weaponsGfx = []
 			self.maxSize = 10		# all units size 10?
 			self.currentSize = 10
 			self.faction = 'Central Powers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'Entente Cordial'
@@ -82,6 +83,38 @@ class Unit():
 								rot_center(rawIcon, 300),
 							 ]
 			self.mapIcon = self.allIcons[3] if self.faction == 'Central Powers' else self.allIcons[0]
+			self.updateWeaponsGfx()
+
+
+	def updateWeaponsGfx(self):
+		""" Creates the gfx for all weapons, based on the self.weapons """
+		self.weaponsGfx = []	# reset
+		for y in range(4):
+			weapon = self.weapons[y]
+			if weapon:
+				_weaponGfx = weapon.picture.copy()
+				# render weapon gfx background
+				if weapon.ammo:
+					# render ammo
+					ammoText = font30.render(str(weapon.ammo), True, colors.grey, colors.almostBlack)
+					rAmmoText = ammoText.get_rect()
+					rAmmoText.topleft = (12, 10)
+					pygame.draw.rect(_weaponGfx, colors.almostBlack, (0, 0, 41, 50), 0)
+					_weaponGfx.blit(ammoText, rAmmoText)
+				# render power
+				powerText = font20.render(str(weapon.power), True, colors.grey)
+				rPowerText = powerText.get_rect()
+				rPowerText.topleft = (312, 30)
+				_weaponGfx.blit(powerText, rPowerText)
+				# render range
+				powerText = font20.render(str(weapon.rangeMin) + ' - ' + str(weapon.rangeMax), True, colors.grey)
+				rPowerText = powerText.get_rect()
+				rPowerText.topleft = (601, 30)
+				_weaponGfx.blit(powerText, rPowerText)
+				self.weaponsGfx.append(_weaponGfx)
+			else:
+				self.weaponsGfx.append(pygame.image.load('gfx/weapons/empty.png'))
+
 
 
 
@@ -126,8 +159,6 @@ class HexSquare():
 
 
 
-
-
 class WeaponMenu():
 	""" Representation of the games' weapon menu """
 
@@ -146,8 +177,8 @@ class WeaponMenu():
 		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
 		self.contents = []
 		_focusedUnit = self.parent.interface.currentSquare().unit
-		for w in _focusedUnit.weapons:
-			self.weapons.append(pygame.transform.scale(w.picture, (332, 25) ) if w else None)
+		for w in _focusedUnit.weaponsGfx:
+			self.weapons.append(pygame.transform.scale(w, (332, 25) ) if w else None)
 
 
 	def checkInput(self):
@@ -319,7 +350,6 @@ class GUI():
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
 		self.flags = pygame.image.load('gfx/flags.png')
-		self.noWeapon = pygame.image.load('gfx/weapons/empty.png')
 		self.ranksGfx = pygame.image.load('gfx/ranks.png')
 		self.unitPanel = pygame.image.load('gfx/unit_panel.png')
 		self.unitSkills = pygame.image.load('gfx/skills.png')
@@ -617,31 +647,12 @@ class GUI():
 			for x in square.unit.skills:
 				self.parent.display.blit(self.skillsMarker, [1748, 535 + (x * 28)])
 			# weapons
-			yCoords = [767, 821, 875, 929]			
-			for y in range(4):
-				weapon = square.unit.weapons[y]
-				if weapon:
-					# render weapon gfx background
-					self.parent.display.blit(weapon.picture, [1128, yCoords[y]])
-					if weapon.ammo:
-						# render ammo
-						ammoText = font30.render(str(weapon.ammo), True, colors.grey, colors.almostBlack)
-						rAmmoText = ammoText.get_rect()
-						rAmmoText.topleft = (1140, yCoords[y] + 10)
-						pygame.draw.rect(self.parent.display, colors.almostBlack, (1128, yCoords[y], 41, 50), 0)
-						self.parent.display.blit(ammoText, rAmmoText)
-					# render power
-					powerText = font20.render(str(weapon.power), True, colors.grey)
-					rPowerText = powerText.get_rect()
-					rPowerText.topleft = (1441, yCoords[y] + 30)
-					self.parent.display.blit(powerText, rPowerText)
-					# render range
-					powerText = font20.render(str(weapon.rangeMin) + ' - ' + str(weapon.rangeMax), True, colors.grey)
-					rPowerText = powerText.get_rect()
-					rPowerText.topleft = (1728, yCoords[y] + 30)
-					self.parent.display.blit(powerText, rPowerText)
-				else:
-					self.parent.display.blit(self.noWeapon, [1128, yCoords[y]])
+			self.parent.display.blit(square.unit.weaponsGfx[0], [1128, 767])
+			self.parent.display.blit(square.unit.weaponsGfx[1], [1128, 821])
+			self.parent.display.blit(square.unit.weaponsGfx[2], [1128, 875])
+			self.parent.display.blit(square.unit.weaponsGfx[3], [1128, 929])
+
+
 
 
 
