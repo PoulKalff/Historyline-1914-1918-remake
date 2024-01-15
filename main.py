@@ -146,40 +146,43 @@ class Main():
 				self.interface.executeMove(movePath)
 				self.mode = "normal"
 		elif self.mode == "selectAttack":
-			if cursorHex.fogofwar:				# if field is clear, execute move, else cancel move and return to normal mode
+			if cursorHex.fogofwar:				# if field is clear, show menu selection menu, else cancel move and return to normal mode
 				self.interface.generateMap()
 				self.mode = "normal"
 			else:
-				self.handleAttack(cursorHex.unit)
+				self.interface.weaponMenu.create(self.interface.fromHex)
+				self.mode = "weaponMenu"
 		return True
 
 
 
-	def handleAttack(self, enemyUnit):
-		""" Handles the attack of an enemy unit """
-
-
-		# select a weapon
-		for w in enemyUnit.weapons:
-			if w:
-				print(w.name)
-
-
-
-		# calculate attack
-		print("Attacking", enemyUnit.name)
+	def calculateUnitBattleResult(self, friendlyUnit, enemyUnit, weapon):
+		""" Handles the battle between to units """
+		print("Friend: ", str( friendlyUnit.name ))
+		print("Enemy:  ", str( enemyUnit.name ))
+		print("Weapon: ", str( weapon.name ))
 
 
 
 
-		# regenerate map
-		self.interface.generateMap()
-		self.mode = "normal"
 
 
 
 
-		sys.exit("notImplemented error: select a unit to attack (main.py, line 158)")
+
+		# SPARKMIG
+		#	Calculate how the attack affects Unit A
+		#	Calculate how the attack affects Unit B
+		#	Update Unit A data
+		#	Update Unit b data
+		#	Update Map
+
+
+
+
+
+
+		sys.exit("Killed for DEV in main.calculateUnitBattleResult() ")
 		return True
 
 
@@ -239,15 +242,6 @@ class Main():
 			self.test[1] -= 1
 		elif keysPressed[pygame.K_KP2]:
 			self.test[1] += 1
-
-
-
-		elif keysPressed[pygame.K_w]:
-			self.interface.weaponMenu.create()
-			self.mode = "weaponMenu"
-
-
-
 		# ------------------------------------- test end ---------------------------------------
 		elif keysPressed[pygame.K_PAGEUP]:
 			self.interface.mapView = [0, 0]

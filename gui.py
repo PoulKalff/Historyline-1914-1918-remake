@@ -168,19 +168,19 @@ class WeaponMenu():
 		self.cursorGfx = pygame.image.load('gfx/menuIcons/weaponMenuCursor.png')
 
 
-	def create(self):
+	def create(self, attackingSquare):
 		""" recreate the menu, calculate which buttons to include, should be called each time cursor is moved """
+		self.attackingUnit = attackingSquare.unit
 		self.square = self.parent.interface.currentSquare()
 		self.location  = self.parent.interface.currentSquare(True)
 		self.location[0] += 110
 		self.location[1] -= 80
 		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
 		self.contents = []
-		_focusedUnit = self.parent.interface.currentSquare().unit
-		for w in _focusedUnit.weaponsGfx:
+		for w in self.attackingUnit.weaponsGfx:
 			self.contents.append([pygame.transform.scale(w, (332, 25) ) if w else None, None])
 		self.noOfWeapons = 0
-		for w in _focusedUnit.weapons:
+		for w in self.attackingUnit.weapons:
 			if w != None:
 				self.noOfWeapons += 1
 		self.focused = RangeIterator(self.noOfWeapons)
@@ -224,7 +224,7 @@ class WeaponMenu():
 
 
 	def endMenu(self, result):
-		sys.exit("Killed for DEV: User selected weapon number " + str( result ))
+		self.parent.calculateUnitBattleResult(self.attackingUnit, self.parent.interface.currentSquare().unit, self.attackingUnit.weapons[result])
 
 
 
@@ -322,11 +322,19 @@ class ActionMenu():
 		if _butID == 0:									# ATTACK
 			self.parent.interface.generateMap("attack")
 			self.parent.mode = "selectAttack"
-			self.parent.interface.fromHex = self.parent.interface.currentSquare().position
+			self.parent.interface.fromHex = self.parent.interface.currentSquare()
+
+
+	#		sys.exit("THIS IS the attacker " +  str(self.parent.interface.fromHex.name))
+
+
+
+
+
 		elif _butID == 1:								# MOVE
 			self.parent.interface.generateMap("move")
 			self.parent.mode = "selectMoveTo"
-			self.parent.interface.fromHex = self.parent.interface.currentSquare().position
+			self.parent.interface.fromHex = self.parent.interface.currentSquare()
 		elif _butID == 2:								# CONTENT
 			self.parent.mode = "showContent"
 			sys.exit('notImplemented Exception: Content')
@@ -359,6 +367,7 @@ class GUI():
 		self.flagIndex = {'Germany' : 0, 'France' : 1}
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.cursorFromGfx = pygame.image.load('gfx/cursor_from.png')
+		self.cursorAttackGfx = pygame.image.load('gfx/cursor_attacking.png')
 		self.hexBorder = pygame.image.load('gfx/hexBorder.png')
 		self.skillsMarker = pygame.image.load('gfx/skills_marker.png')
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
@@ -586,8 +595,11 @@ class GUI():
 		self.parent.display.blit(self.map, [19, 19], (self.mapView[0], self.mapView[1] * 40, 1098 + self.mapView[0], 960))		# blit visible area of map
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
 		if self.parent.mode == "selectMoveTo":
-			forskydning2 = 71 if (self.fromHex[0] % 2) != 0 else 0
-			self.parent.display.blit(self.cursorFromGfx, [self.fromHex[1] * 142 + forskydning2 + 7, self.fromHex[0] * 40 + 9])
+			forskydning2 = 71 if (self.fromHex.position[0] % 2) != 0 else 0
+			self.parent.display.blit(self.cursorFromGfx, [self.fromHex.position[1] * 142 + forskydning2 + 7, self.fromHex.position[0] * 40 + 9])
+		elif self.parent.mode == "selectAttack":
+			forskydning2 = 71 if (self.fromHex.position[0] % 2) != 0 else 0
+			self.parent.display.blit(self.cursorAttackGfx, [self.fromHex.position[1] * 142 + forskydning2 + 7, self.fromHex.position[0] * 40 + 9])
 		self.parent.display.blit(self.cursorGfx, [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9])
 		return 1
 
