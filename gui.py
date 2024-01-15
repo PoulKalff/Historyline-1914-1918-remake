@@ -165,7 +165,6 @@ class WeaponMenu():
 	def __init__(self, parent):
 		self.parent = parent
 		self.location = (50, 50)
-		self.weapons = []
 		self.cursorGfx = pygame.image.load('gfx/menuIcons/weaponMenuCursor.png')
 
 
@@ -179,60 +178,48 @@ class WeaponMenu():
 		self.contents = []
 		_focusedUnit = self.parent.interface.currentSquare().unit
 		for w in _focusedUnit.weaponsGfx:
-			self.weapons.append(pygame.transform.scale(w, (332, 25) ) if w else None)
-		_noOfWeapons = 0
+			self.contents.append([pygame.transform.scale(w, (332, 25) ) if w else None, None])
+		self.noOfWeapons = 0
 		for w in _focusedUnit.weapons:
 			if w != None:
-				_noOfWeapons += 1
-		self.focused = RangeIterator(_noOfWeapons)
+				self.noOfWeapons += 1
+		self.focused = RangeIterator(self.noOfWeapons)
+		# calculate rect for each weapon
+		for weaponNo in range(self.noOfWeapons):
+			_butLocation = self.location[1] + 4 + (weaponNo * 25)
+			self.contents[weaponNo][1] = pygame.Rect(self.location[0], _butLocation, 332, 25)
+
 
 
 	def checkInput(self):
 		for event in pygame.event.get():
 			mPos = pygame.mouse.get_pos()
 			# check mouseover
-			self.focusedArray = [0 for x in range(len(self.contents))]
-	#		for butNr in range(len(self.contents)):
-	#			if self.contents[butNr][2].collidepoint(mPos):
-	#				self.focused.count = butNr
-	#				self.focusedArray[butNr] = 1
+			for weaponNo in range(self.noOfWeapons):
+				if self.contents[weaponNo][1].collidepoint(mPos):
+					self.focused.count = weaponNo
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
 			# Keyboard
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:	# close menu
-					self.weapons = []
+					self.contents = []
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
 				elif event.key == pygame.K_w:
-					self.weapons = []
+					self.contents = []
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
 				elif event.key == pygame.K_UP:
 					self.focused.dec()
-					self.focusedArray = [0, 0, 0, 0]
-					self.focusedArray[self.focused.get()] = 1
-
-
-#					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
+					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
 					pygame.time.wait(50)
 				elif event.key == pygame.K_DOWN:
 					self.focused.inc()
-					self.focusedArray = [0, 0, 0, 0]
-					self.focusedArray[self.focused.get()] = 1
-
-
-
-#					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
+					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
 					pygame.time.wait(50)
 				elif event.key == pygame.K_RETURN:
 					self.endMenu(self.focused.get())
-
-
-
-# SPARKMIG!		:	Mangler at faa mus selection til at virke, ved ikke hvad self.focusedArray goer, maaske noget med samme?
-
-
 
 
 
@@ -240,12 +227,13 @@ class WeaponMenu():
 		sys.exit("Killed for DEV: User selected weapon number " + str( result ))
 
 
+
 	def draw(self):
 		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0] - 2, self.location[1] - 2, 336, 110))	# menu border
-		self.parent.display.blit(self.weapons[0], [self.location[0], self.location[1]])
-		self.parent.display.blit(self.weapons[1], [self.location[0], self.location[1] + 27])
-		self.parent.display.blit(self.weapons[2], [self.location[0], self.location[1] + 54])
-		self.parent.display.blit(self.weapons[3], [self.location[0], self.location[1] + 81])
+		self.parent.display.blit(self.contents[0][0], [self.location[0], self.location[1]])
+		self.parent.display.blit(self.contents[1][0], [self.location[0], self.location[1] + 27])
+		self.parent.display.blit(self.contents[2][0], [self.location[0], self.location[1] + 54])
+		self.parent.display.blit(self.contents[3][0], [self.location[0], self.location[1] + 81])
 		self.parent.display.blit(self.cursorGfx,  [self.location[0] - 2 , self.location[1] + (self.focused.get() * 27) - 2])
 
 
@@ -288,7 +276,6 @@ class ActionMenu():
 			_butLocation = self.location[0] + 4 + (butNr * 62)
 			self.contents[butNr][2] = pygame.Rect(_butLocation, self.location[1] + 4, 62, 52)
 		self.focusedArray = [0 for x in range(len(self.contents))]
-
 
 
 	def checkInput(self):
