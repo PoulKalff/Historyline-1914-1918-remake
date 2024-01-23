@@ -161,10 +161,13 @@ class Main():
 		# retrieve all data for calculation
 		distance = self.interface.calculateDistance(attackFromSquare.position, attackToSquare.position, weapon.rangeMax)
 		_enemyWeapons = [x for x in attackToSquare.unit.weapons if x]
-		enemyWeaponStrength = max([x.power for x in _enemyWeapons if x.ammo != 0])		# only use if 0
+		enemyWeaponStrength = max([x.power for x in _enemyWeapons if x.ammo != 0])		# only use if ammo is not 0
+
+
 
 
 		# Show data, for DEV
+		print()
 		print("Non-usable data:")
 		print("   Attack FROM: ", attackFromSquare.position)
 		print("   Attack TO:   ", attackToSquare.position)
@@ -177,15 +180,15 @@ class Main():
 		print("   Weapon power: ", str(weapon.power))
 		print("   Armor power:  ", str(attackFromSquare.unit.armour))
 		print("   Experience:   ", str(attackFromSquare.unit.experience))
-		print("   Terrain:      ", str("unknown"))
+		print("   Terrain:      ", str(attackFromSquare.battleModifier))
 		print("   Size:         ", str(attackFromSquare.unit.currentSize))
 		print("Enemy:")
 		print("   Weapon power: ", str(enemyWeaponStrength))
 		print("   Armor power:  ", str(attackToSquare.unit.armour))
 		print("   Experience:   ", str(attackToSquare.unit.experience))
-		print("   Terrain:      ", str("unknown"))
+		print("   Terrain:      ", str(attackToSquare.battleModifier))
 		print("   Size:         ", str(attackToSquare.unit.currentSize))
-
+		print()
 
 
 
