@@ -170,17 +170,17 @@ class WeaponMenu():
 
 	def create(self, attackingSquare):
 		""" recreate the menu, calculate which buttons to include, should be called each time cursor is moved """
-		self.attackingUnit = attackingSquare.unit
+		self.attackingSquare = attackingSquare
 		self.square = self.parent.interface.currentSquare()
 		self.location  = self.parent.interface.currentSquare(True)
 		self.location[0] += 110
 		self.location[1] -= 80
 		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
 		self.contents = []
-		for w in self.attackingUnit.weaponsGfx:
+		for w in self.attackingSquare.unit.weaponsGfx:
 			self.contents.append([pygame.transform.scale(w, (332, 25) ) if w else None, None])
 		self.noOfWeapons = 0
-		for w in self.attackingUnit.weapons:
+		for w in self.attackingSquare.unit.weapons:
 			if w != None:
 				self.noOfWeapons += 1
 		self.focused = RangeIterator(self.noOfWeapons)
@@ -224,7 +224,7 @@ class WeaponMenu():
 
 
 	def endMenu(self, result):
-		self.parent.calculateUnitBattleResult(self.attackingUnit, self.parent.interface.currentSquare().unit, self.attackingUnit.weapons[result])
+		self.parent.calculateUnitBattleResult(self.attackingSquare, self.parent.interface.currentSquare(), self.attackingSquare.unit.weapons[result])
 
 
 
@@ -323,14 +323,6 @@ class ActionMenu():
 			self.parent.interface.generateMap("attack")
 			self.parent.mode = "selectAttack"
 			self.parent.interface.fromHex = self.parent.interface.currentSquare()
-
-
-	#		sys.exit("THIS IS the attacker " +  str(self.parent.interface.fromHex.name))
-
-
-
-
-
 		elif _butID == 1:								# MOVE
 			self.parent.interface.generateMap("move")
 			self.parent.mode = "selectMoveTo"
@@ -721,6 +713,38 @@ class GUI():
 
 
 
+
+	def calculateDistance(self, _from, _to, _range):
+		""" calculates the distance from one hex to another """
+		paths = [[_from]]					# adding first step to matrix of all possible paths
+		visited = [_from] 			# all fields prev visted
+		validPaths = []
+		for x in range(_range):					# calculate 1 iteration per range
+			paths.sort(key=len)
+			newPaths = []
+			for p in reversed(paths):
+				lastField = p[-1]
+				neighbors = adjacentHexes(*lastField, self.mapWidth, self.mapHeight)
+				for n in reversed(neighbors):
+					square = self.getSquare(n)
+					if n in visited:				# We don't want paths to visit previously visited fields
+						neighbors.remove(n)
+				for n in neighbors:
+					new = copy.copy(p)
+					new.append(n)
+					newPaths.append(new)
+					visited.append(n)
+				paths.remove(p)			# remove currently processed path, as it is obsolete
+				for np in newPaths:				# searching for a match with target field
+					if np[-1] == _to and np not in validPaths:
+						validPaths.append(np)
+			paths += newPaths
+			paths.sort(key=len)
+		validPaths.sort(key=len)
+		return len(validPaths[0]) - 1
+
+
+
 	def findPath(self, _moveFrom, _moveTo):
 		""" calculates the path that a unit must take to get from one filed to the next """
 #		print("Unit must move from (%s) to (%s) :" % (_moveFrom, _moveTo))
@@ -825,3 +849,13 @@ class GUI():
 		pygame.display.update()
 		return 1
 
+
+
+
+# rangeTable = {40: 2, 31: 3, 21: 2, 12: 3, 30: 2, 1: 2, 20: 1, 11: 1, 10: 1, 60: 3, 51: 3, 41: 3, 32: 3, 22: 3, 13: 3, 3: 3, 72: 3, 50: 3}
+
+# def test(x,y):
+#    xDist = abs(x[0] - y[0])
+ #   yDist = abs(x[1] - y[1])
+  #  return(str(xDist) + str(yDist))
+ 
