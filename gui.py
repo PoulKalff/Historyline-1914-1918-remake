@@ -225,7 +225,8 @@ class WeaponMenu():
 
 	def endMenu(self, result):
 		self.parent.calculateUnitBattleResult(self.attackingSquare, self.parent.interface.currentSquare(), self.attackingSquare.unit.weapons[result])
-
+		self.parent.interface.generateMap()
+		self.parent.mode = "normal"
 
 
 	def draw(self):

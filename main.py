@@ -159,43 +159,81 @@ class Main():
 	def calculateUnitBattleResult(self, attackFromSquare, attackToSquare, weapon):
 		""" Handles the battle between to units """
 		# retrieve all data for calculation
-		distance = self.interface.calculateDistance(attackFromSquare.position, attackToSquare.position, weapon.rangeMax)
+		distance = self.interface.calculateDistance(attackFromSquare.position, attackToSquare.position, weapon.rangeMax) - 1
 		_enemyWeapons = [x for x in attackToSquare.unit.weapons if x]
-		enemyWeaponStrength = max([x.power for x in _enemyWeapons if x.ammo != 0])		# only use if ammo is not 0
+		_enemyWeaponsInRange = [x for x in _enemyWeapons if x.rangeMax >= distance]
+		enemyWeaponStrength = max([x.power for x in _enemyWeaponsInRange if x.ammo != 0]) if _enemyWeaponsInRange else 0
+		# Calculate battle
+		fBaseAttack = (weapon.power - attackToSquare.unit.armour)
+		fDistanceModified = fBaseAttack - (distance * 3)																	# (0 - 6 (theoretically infinitely))
+		fTerrainModified = fDistanceModified + ((attackFromSquare.battleModifier - attackToSquare.battleModifier) / 3)		# (0 - 100)
+		fExperienceModified = fTerrainModified + ((attackFromSquare.unit.experience - attackToSquare.unit.experience) * 3)	# 
+		fSizeModified = fExperienceModified + ((attackFromSquare.unit.currentSize - attackToSquare.unit.currentSize) * 3)	# 
+		fRndModified = fSizeModified + random.randint(-5, 5)
+		fFinal = int(fRndModified / 10) if fRndModified > 0 else 0
+		eBaseAttack = (enemyWeaponStrength - attackFromSquare.unit.armour)
+		eDistanceModified = eBaseAttack - (distance * 3)																	# (0 - 6 (theoretically infinitely))
+		eTerrainModified = eDistanceModified + ((attackToSquare.battleModifier - attackFromSquare.battleModifier) / 3)		# (0 - 100)
+		eExperienceModified = eTerrainModified + ((attackToSquare.unit.experience - attackFromSquare.unit.experience) * 3)	# 
+		eSizeModified = eExperienceModified + ((attackToSquare.unit.currentSize - attackFromSquare.unit.currentSize) * 3)	# 
+		eRndModified = eSizeModified + random.randint(-5, 5)
+		eFinal = int(eRndModified / 10) if eRndModified > 0 else 0
 
 
 
 
-		# Show data, for DEV
-		print()
-		print("Non-usable data:")
-		print("   Attack FROM: ", attackFromSquare.position)
-		print("   Attack TO:   ", attackToSquare.position)
-		print("   Attacker: ", str( attackFromSquare.unit.name ))
-		print("   Attacked: ", str( attackToSquare.unit.name ))
-		print("   Weapon:   ", str( weapon.name ))
-		print("Usable data:")
-		print("   Distance: ", str( distance ))
-		print("Friend:")
-		print("   Weapon power: ", str(weapon.power))
-		print("   Armor power:  ", str(attackFromSquare.unit.armour))
-		print("   Experience:   ", str(attackFromSquare.unit.experience))
-		print("   Terrain:      ", str(attackFromSquare.battleModifier))
-		print("   Size:         ", str(attackFromSquare.unit.currentSize))
-		print("Enemy:")
-		print("   Weapon power: ", str(enemyWeaponStrength))
-		print("   Armor power:  ", str(attackToSquare.unit.armour))
-		print("   Experience:   ", str(attackToSquare.unit.experience))
-		print("   Terrain:      ", str(attackToSquare.battleModifier))
-		print("   Size:         ", str(attackToSquare.unit.currentSize))
-		print()
+
+
+
+		# # Show data, for DEV
+		# print()
+		# print("Non-usable data:")
+		# print("   Attack FROM: ", attackFromSquare.position)
+		# print("   Attack TO:   ", attackToSquare.position)
+		# print("   Attacker: ", str( attackFromSquare.unit.name ))
+		# print("   Attacked: ", str( attackToSquare.unit.name ))
+		# print("   Weapon:   ", str( weapon.name ))
+		# print("Usable data:")
+		# print("   Distance: ", str( distance ))
+		# print("Friend:")
+		# print("   Weapon power: ", str(weapon.power))
+		# print("   Armor power:  ", str(attackFromSquare.unit.armour))
+		# print("   Experience:   ", str(attackFromSquare.unit.experience))
+		# print("   Terrain:      ", str(attackFromSquare.battleModifier))
+		# print("   Size:         ", str(attackFromSquare.unit.currentSize))
+		# print("Enemy:")
+		# print("   Weapon power: ", str(enemyWeaponStrength))
+		# print("   Armor power:  ", str(attackToSquare.unit.armour))
+		# print("   Experience:   ", str(attackToSquare.unit.experience))
+		# print("   Terrain:      ", str(attackToSquare.battleModifier))
+		# print("   Size:         ", str(attackToSquare.unit.currentSize))
+		# print()
+
+
+
+		print("Calculation (Friend): ")
+		print("   Base:         ", fBaseAttack)
+		print("   Distance:     ", fDistanceModified)
+		print("   Terrain:      ", fTerrainModified)
+		print("   Experience:   ", fExperienceModified)
+		print("   Size:         ", fSizeModified)
+		print("   Random:       ", fRndModified)
+		print("   Kills:        ", fFinal)
+		print("Calculation (Enemy): ")
+		print("   Base:         ", eBaseAttack)
+		print("   Distance:     ", eDistanceModified)
+		print("   Terrain:      ", eTerrainModified)
+		print("   Experience:   ", eExperienceModified)
+		print("   Size:         ", eSizeModified)
+		print("   Random:       ", eRndModified)
+		print("   Kills:        ", eFinal)
 
 
 
 
-		# calculate battle
+
+
 		# show battle
-		# update data and redraw
 
 
 
@@ -208,7 +246,32 @@ class Main():
 		#   show battle, graphically
 
 
-		sys.exit("Killed for DEV in main.calculateUnitBattleResult() ")
+	#	sys.exit("Killed for DEV in main.calculateUnitBattleResult() ")
+
+
+
+
+
+
+		# update game data
+		attackToSquare.unit.currentSize -= fFinal
+		if fFinal > 0 and attackFromSquare.unit.experience < 10:	# if it was hit
+			attackFromSquare.unit.experience += 1
+		if attackToSquare.unit.currentSize < 1:						# if it was killed
+			attackToSquare.unit.currentSize = 0
+			if attackFromSquare.unit.experience < 10:
+				attackFromSquare.unit.experience += 1
+			attackToSquare.unit = None
+			print("Unit died")																													# SHOW DEATH!!!!!
+		attackFromSquare.unit.currentSize -= eFinal
+		if eFinal > 0 and attackToSquare.unit.experience < 10:		# if it was hit
+			attackToSquare.unit.experience += 1
+		if attackFromSquare.unit.currentSize < 1:					# if it was killed
+			attackFromSquare.unit.currentSize = 0
+			if attackToSquare.unit.experience < 10:
+				attackToSquare.unit.experience += 1
+			attackFromSquare.unit = None
+			print("Unit died")																													# SHOW DEATH!!!!!
 		return True
 
 
