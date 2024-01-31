@@ -366,8 +366,8 @@ class GUI():
 		self.cursorAttackGfx = pygame.image.load('gfx/cursor_attacking.png')
 		self.hexBorder = pygame.image.load('gfx/hexBorder.png')
 		self.skillsMarker = pygame.image.load('gfx/skills_marker.png')
-		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
+		self.progressSquare = pygame.image.load('gfx/progress.png')
 		self.battleMenu = pygame.image.load('gfx/battleMenu.png')
 		self.flags = pygame.image.load('gfx/flags.png')
 		self.ranksGfx = pygame.image.load('gfx/ranksBig.png')
@@ -751,27 +751,31 @@ class GUI():
 
 	def drawTerrainGUI(self):
 		""" fetches cursor position and fills out info on unit and terrain """
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 421, 662, 118), 4)		# middle window border
-		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 425))
+		TerrainGUI = pygame.Surface((662, 118))
+		TerrainGUI.blit(self.backgroundTextureTerrain, (4, 4))
+		pygame.draw.rect(TerrainGUI, colors.almostBlack, (0, 0, 662, 118), 4)		# window border
 		square = self.currentSquare()
 		if not square.fogofwar:
-			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 421, 662, 113), 4)		# middle window border
-			self.parent.display.blit(self.backgroundTextureTerrain, (1128, 425))
-			self.parent.display.blit(self.movementModifierText, (1270, 440))
-			self.parent.display.blit(self.battleModifierText, (1270, 470))
-			self.parent.display.blit(self.sightModifierText, (1270, 500))
-			self.parent.display.blit(square.background, [1144, 441])
-			if square.infra:	self.parent.display.blit(square.infra, [1144, 441])
-			self.parent.display.blit(self.hexBorder, [1142, 439])
+			TerrainGUI.blit(self.movementModifierText, (176, 20))
+			TerrainGUI.blit(self.battleModifierText, (176, 50))
+			TerrainGUI.blit(self.sightModifierText, (176, 80))
+			TerrainGUI.blit(square.background, [49, 19])
+			if square.infra:	TerrainGUI.blit(square.infra, [49, 19])
+			TerrainGUI.blit(self.hexBorder, [47, 17])
 			if square.movementModifier != None:
-				self.parent.display.blit(self.progressBar, [1460, 439], (0, 0, square.movementModifier * 30, 20))
+				for x in range(square.movementModifier):
+					TerrainGUI.blit(self.progressSquare, (392 + (x * 20), 18))
 			else:
-				self.parent.display.blit(self.iProgressBar, [1460, 439])
+				TerrainGUI.blit(self.iProgressBar, [392, 18])
 			if square.battleModifier != None:
-				self.parent.display.blit(self.progressBar, [1460, 469], (0, 0, square.battleModifier * 3, 20))	
+				for x in range(int(square.battleModifier / 10)):
+					TerrainGUI.blit(self.progressSquare, (392 + (x * 20), 48))
 			else:
-				self.parent.display.blit(self.iProgressBar, [1460, 469])
-			self.parent.display.blit(self.progressBar, [1460, 499], (0, 0, square.sightModifier * 30, 20))
+				TerrainGUI.blit(self.iProgressBar, [392, 48])
+			for x in range(square.sightModifier):
+				TerrainGUI.blit(self.progressSquare, (392 + (x * 20), 78))
+		self.parent.display.blit(TerrainGUI, [1124, 421])
+		return 1
 
 
 

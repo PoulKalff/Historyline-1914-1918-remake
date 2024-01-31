@@ -258,8 +258,7 @@ obj.run()
 # - must not be able to move enemy units
 # - units do not move along shortest path
 #	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-# - Lav terrain-vinduet om til at blittes paa egen surface
-# - lav terrain-grafen om saa den er lavet af en raekke af firkanter
+
 
 
 
