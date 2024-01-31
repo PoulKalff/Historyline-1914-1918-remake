@@ -3,6 +3,7 @@ import json
 import time
 import copy
 import pygame
+import random
 import numpy as np
 import pygame.surfarray as surfarray
 from hlrData import *
@@ -224,9 +225,11 @@ class WeaponMenu():
 
 
 	def endMenu(self, result):
-		self.parent.calculateUnitBattleResult(self.attackingSquare, self.parent.interface.currentSquare(), self.attackingSquare.unit.weapons[result])
-		self.parent.interface.generateMap()
 		self.parent.mode = "normal"
+		self.parent.interface.generateMap()	# must generate and show clean map before showing battle
+		self.parent.interface.drawMap()
+		pygame.display.update()
+		self.parent.interface.handleBattle(self.attackingSquare, self.parent.interface.currentSquare(), self.attackingSquare.unit.weapons[result])
 
 
 	def draw(self):
@@ -365,8 +368,9 @@ class GUI():
 		self.skillsMarker = pygame.image.load('gfx/skills_marker.png')
 		self.progressBar = pygame.image.load('gfx/progressBar.png')
 		self.iProgressBar = pygame.image.load('gfx/progressBarI.png')
+		self.battleMenu = pygame.image.load('gfx/battleMenu.png')
 		self.flags = pygame.image.load('gfx/flags.png')
-		self.ranksGfx = pygame.image.load('gfx/ranks.png')
+		self.ranksGfx = pygame.image.load('gfx/ranksBig.png')
 		self.unitPanel = pygame.image.load('gfx/unit_panel.png')
 		self.unitSkills = pygame.image.load('gfx/skills.png')
 		self.backgroundTexture = pygame.image.load('gfx/steelTexture.png')
@@ -389,6 +393,136 @@ class GUI():
 		self.mapWidth = len(self.mainMap[0])
 		self.mapHeight = len(self.mainMap)
 		self.generateMap()
+
+
+
+
+	def handleBattle(self, attackFromSquare, attackToSquare, weapon):
+		""" Handles and shows the battle between to units """
+		# retrieve all data for calculation
+		_showBattleLoop = True
+		distance = self.calculateDistance(attackFromSquare.position, attackToSquare.position, weapon.rangeMax) - 1
+		_enemyWeapons = [x for x in attackToSquare.unit.weapons if x]
+		_enemyWeaponsInRange = [x for x in _enemyWeapons if x.rangeMax >= distance]
+		enemyWeaponStrength = max([x.power for x in _enemyWeaponsInRange if x.ammo != 0]) if _enemyWeaponsInRange else 0
+		# Calculate battle
+		fBaseAttack = (weapon.power - attackToSquare.unit.armour)
+		fDistanceModified = fBaseAttack - (distance * 3)																	# (0 - 6 (theoretically infinitely))
+		fTerrainModified = fDistanceModified + ((attackFromSquare.battleModifier - attackToSquare.battleModifier) / 3)		# (0 - 100)
+		fExperienceModified = fTerrainModified + ((attackFromSquare.unit.experience - attackToSquare.unit.experience) * 3)	# 
+		fSizeModified = fExperienceModified + ((attackFromSquare.unit.currentSize - attackToSquare.unit.currentSize) * 3)	# 
+		fRndModified = fSizeModified + random.randint(-5, 5)
+		fFinal = int(fRndModified / 10) if fRndModified > 0 else 0
+		eBaseAttack = (enemyWeaponStrength - attackFromSquare.unit.armour)
+		eDistanceModified = eBaseAttack - (distance * 3)																	# (0 - 6 (theoretically infinitely))
+		eTerrainModified = eDistanceModified + ((attackToSquare.battleModifier - attackFromSquare.battleModifier) / 3)		# (0 - 100)
+		eExperienceModified = eTerrainModified + ((attackToSquare.unit.experience - attackFromSquare.unit.experience) * 3)	# 
+		eSizeModified = eExperienceModified + ((attackToSquare.unit.currentSize - attackFromSquare.unit.currentSize) * 3)	# 
+		eRndModified = eSizeModified + random.randint(-5, 5)
+		eFinal = int(eRndModified / 10) if eRndModified > 0 else 0
+		# # Show data, for DEV
+		# print()
+		# print("Non-usable data:")
+		# print("   Attack FROM: ", attackFromSquare.position)
+		# print("   Attack TO:   ", attackToSquare.position)
+		# print("   Attacker: ", str( attackFromSquare.unit.name ))
+		# print("   Attacked: ", str( attackToSquare.unit.name ))
+		# print("   Weapon:   ", str( weapon.name ))
+		# print("Usable data:")
+		# print("   Distance: ", str( distance ))
+		# print("Friend:")
+		# print("   Weapon power: ", str(weapon.power))
+		# print("   Armor power:  ", str(attackFromSquare.unit.armour))
+		# print("   Experience:   ", str(attackFromSquare.unit.experience))
+		# print("   Terrain:      ", str(attackFromSquare.battleModifier))
+		# print("   Size:         ", str(attackFromSquare.unit.currentSize))
+		# print("Enemy:")
+		# print("   Weapon power: ", str(enemyWeaponStrength))
+		# print("   Armor power:  ", str(attackToSquare.unit.armour))
+		# print("   Experience:   ", str(attackToSquare.unit.experience))
+		# print("   Terrain:      ", str(attackToSquare.battleModifier))
+		# print("   Size:         ", str(attackToSquare.unit.currentSize))
+		# print()
+		print("Calculation (Friend): ")
+		print("   Base:         ", fBaseAttack)
+		print("   Distance:     ", fDistanceModified)
+		print("   Terrain:      ", fTerrainModified)
+		print("   Experience:   ", fExperienceModified)
+		print("   Size:         ", fSizeModified)
+		print("   Random:       ", fRndModified)
+		print("   Kills:        ", fFinal)
+		print("Calculation (Enemy): ")
+		print("   Base:         ", eBaseAttack)
+		print("   Distance:     ", eDistanceModified)
+		print("   Terrain:      ", eTerrainModified)
+		print("   Experience:   ", eExperienceModified)
+		print("   Size:         ", eSizeModified)
+		print("   Random:       ", eRndModified)
+		print("   Kills:        ", eFinal)
+		# show battle
+
+# 600 x 181
+
+
+
+		sparkMig = 1000
+		while _showBattleLoop:	# stay in loop while battle shown
+			battleMenu = self.battleMenu.copy()
+			battleMenu.blit(self.flags, [286, 48], (0, 0, 88, 88))
+			battleMenu.blit(self.flags, [426, 48], (88, 0, 88, 88))
+			battleMenu.blit(attackFromSquare.unit.mapIcon, [282, 44])
+			battleMenu.blit(attackToSquare.unit.mapIcon, [422, 44])
+			battleMenu.blit(self.ranksGfx, [20, 48], (attackFromSquare.unit.experience * 88, 0, 88, 88))
+			battleMenu.blit(self.ranksGfx, [692, 48], (attackToSquare.unit.experience * 88, 0, 88, 88))
+
+
+
+
+
+
+
+			self.parent.display.blit(battleMenu, [164, 200])			# menu background
+			pygame.display.update()
+
+			sparkMig -= 1
+			if sparkMig == 0:
+				_showBattleLoop = False
+
+
+
+
+
+
+
+
+		# update game data
+		attackToSquare.unit.currentSize -= fFinal
+		if fFinal > 0 and attackFromSquare.unit.experience < 10:	# if attacked was hit
+			attackFromSquare.unit.experience += 1
+		if attackToSquare.unit.currentSize < 1:						# if attacked was killed
+			attackToSquare.unit.currentSize = 0
+			if attackFromSquare.unit.experience < 10:
+				attackFromSquare.unit.experience += 1
+			attackToSquare.unit = None
+			# show death, if unite dies
+			print("Unit died")																													# SHOW DEATH!!!!!
+		attackFromSquare.unit.currentSize -= eFinal
+		if eFinal > 0 and attackToSquare.unit.experience < 10:		# if attacker was hit
+			attackToSquare.unit.experience += 1
+		if attackFromSquare.unit.currentSize < 1:					# if attacker was killed
+			attackFromSquare.unit.currentSize = 0
+			if attackToSquare.unit.experience < 10:
+				attackToSquare.unit.experience += 1
+			attackFromSquare.unit = None
+			print("Unit died")																													# SHOW DEATH!!!!!
+			# show death, if unite dies
+		return True
+
+
+
+
+
+
 
 
 
@@ -617,61 +751,63 @@ class GUI():
 
 	def drawTerrainGUI(self):
 		""" fetches cursor position and fills out info on unit and terrain """
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)		# middle window border
-		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
+		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 421, 662, 118), 4)		# middle window border
+		self.parent.display.blit(self.backgroundTextureTerrain, (1128, 425))
 		square = self.currentSquare()
 		if not square.fogofwar:
-			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 426, 662, 118), 4)		# middle window border
-			self.parent.display.blit(self.backgroundTextureTerrain, (1128, 430))
-			self.parent.display.blit(self.movementModifierText, (1270, 445))
-			self.parent.display.blit(self.battleModifierText, (1270, 475))
-			self.parent.display.blit(self.sightModifierText, (1270, 505))
-			self.parent.display.blit(square.background, [1144, 446])
-			if square.infra:	self.parent.display.blit(square.infra, [1144, 446])
-			self.parent.display.blit(self.hexBorder, [1142, 444])
+			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 421, 662, 113), 4)		# middle window border
+			self.parent.display.blit(self.backgroundTextureTerrain, (1128, 425))
+			self.parent.display.blit(self.movementModifierText, (1270, 440))
+			self.parent.display.blit(self.battleModifierText, (1270, 470))
+			self.parent.display.blit(self.sightModifierText, (1270, 500))
+			self.parent.display.blit(square.background, [1144, 441])
+			if square.infra:	self.parent.display.blit(square.infra, [1144, 441])
+			self.parent.display.blit(self.hexBorder, [1142, 439])
 			if square.movementModifier != None:
-				self.parent.display.blit(self.progressBar, [1460, 444], (0, 0, square.movementModifier * 30, 20))
+				self.parent.display.blit(self.progressBar, [1460, 439], (0, 0, square.movementModifier * 30, 20))
 			else:
-				self.parent.display.blit(self.iProgressBar, [1460, 444])
+				self.parent.display.blit(self.iProgressBar, [1460, 439])
 			if square.battleModifier != None:
-				self.parent.display.blit(self.progressBar, [1460, 474], (0, 0, square.battleModifier * 3, 20))	
+				self.parent.display.blit(self.progressBar, [1460, 469], (0, 0, square.battleModifier * 3, 20))	
 			else:
-				self.parent.display.blit(self.iProgressBar, [1460, 474])
-			self.parent.display.blit(self.progressBar, [1460, 504], (0, 0, square.sightModifier * 30, 20))
+				self.parent.display.blit(self.iProgressBar, [1460, 469])
+			self.parent.display.blit(self.progressBar, [1460, 499], (0, 0, square.sightModifier * 30, 20))
 
 
 
 	def drawUnitGUI(self):
-		pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 555, 662, 428), 4)						# lower window border
-		self.parent.display.blit(self.backgroundTextureUnit, (1128, 559))
+		unitGUI = pygame.Surface((662, 438))
+		unitGUI.blit(self.backgroundTextureUnit, (4, 4))
+		pygame.draw.rect(unitGUI, colors.almostBlack, (0, 0, 662, 438), 4)						# window border
 		square = self.currentSquare()
 		if not square.fogofwar and square.unit:
-			self.parent.display.blit(self.unitPanel, [1135, 570])
-			self.parent.display.blit(self.flags, [1145, 573], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
-			self.parent.display.blit(square.unit.mapIcon, [1141, 569])
-			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 763, 662, 58), 4)							# weapons borders 1
-			pygame.draw.rect(self.parent.display, colors.almostBlack, (1124, 871, 662, 58), 4)							# weapons borders 2
-			self.parent.display.blit(self.unitSkills, [1750, 565])
-			self.parent.display.blit(self.ranksGfx, [1156, 676], (square.unit.experience * 66, 0, 66, 66))
-			self.parent.display.blit(square.unit.picture, [1522, 573])
-			gfx = font20.render(square.unit.name, True, (208, 185, 140)); self.parent.display.blit(gfx, [1380 - (gfx.get_width() / 2), 575])
-			gfx = font20.render(square.unit.faction, True, (208, 185, 140)); self.parent.display.blit(gfx, [1380 - (gfx.get_width() / 2), 610])
-			gfx = font20.render(str(square.unit.sight), True, (208, 185, 140)); self.parent.display.blit(gfx, [1318 - (gfx.get_width() / 2), 662])
-			gfx = font20.render(str(square.unit.speed), True, (208, 185, 140)); self.parent.display.blit(gfx, [1392 - (gfx.get_width() / 2), 662])
-			gfx = font20.render(str(square.unit.currentSize), True, (208, 185, 140)); self.parent.display.blit(gfx, [1462 - (gfx.get_width() / 2), 662])
-			gfx = font20.render(str(square.unit.armour), True, (208, 185, 140)); self.parent.display.blit(gfx, [1318 - (gfx.get_width() / 2), 712])
-			gfx = font20.render(str(square.unit.weight), True, (208, 185, 140)); self.parent.display.blit(gfx, [1392 - (gfx.get_width() / 2), 712])
-			gfx = font20.render(str(square.unit.fuel), True, (208, 185, 140)); self.parent.display.blit(gfx, [1462 - (gfx.get_width() / 2), 712])
+			unitPanel = self.unitPanel.copy()
+			unitPanel.blit(self.flags, [3, 3], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
+			unitPanel.blit(square.unit.mapIcon, [-1, -1])
+			unitPanel.blit(self.ranksGfx, [4, 103], (square.unit.experience * 88, 0, 88, 88))
+			unitPanel.blit(square.unit.picture, [380, 3])
+			gfx = font20.render(square.unit.name, True, (208, 185, 140)); 				unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
+			gfx = font20.render(square.unit.faction, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
+			gfx = font20.render(str(square.unit.sight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(str(square.unit.speed), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(str(square.unit.currentSize), True, (208, 185, 140)); 	unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(str(square.unit.armour), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 155])
+			gfx = font20.render(str(square.unit.weight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 155])
+			gfx = font20.render(str(square.unit.fuel), True, (208, 185, 140)); 			unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 155])
 			# mark active skills
+			unitGUI.blit(self.unitSkills, [618, 11])
 			for x in square.unit.skills:
-				self.parent.display.blit(self.skillsMarker, [1748, 535 + (x * 28)])
+				unitGUI.blit(self.skillsMarker, [616, (x * 28) - 19])
 			# weapons
-			self.parent.display.blit(square.unit.weaponsGfx[0], [1128, 767])
-			self.parent.display.blit(square.unit.weaponsGfx[1], [1128, 821])
-			self.parent.display.blit(square.unit.weaponsGfx[2], [1128, 875])
-			self.parent.display.blit(square.unit.weaponsGfx[3], [1128, 929])
-
-
+			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 218, 662, 58), 4)							# weapons borders 1
+			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 326, 662, 58), 4)							# weapons borders 2
+			unitGUI.blit(square.unit.weaponsGfx[0], [4, 222])
+			unitGUI.blit(square.unit.weaponsGfx[1], [4, 276])
+			unitGUI.blit(square.unit.weaponsGfx[2], [4, 330])
+			unitGUI.blit(square.unit.weaponsGfx[3], [4, 384])
+			unitGUI.blit(unitPanel, [10, 10])
+		self.parent.display.blit(unitGUI, [1124, 545])
+		return 1
 
 
 
@@ -764,7 +900,7 @@ class GUI():
 							neighbors.remove(n)
 					elif square.fogofwar:			# if field not clear
 						neighbors.remove(n)
-					if n in visited:				# We don't want paths to visit previously visited fields
+					if n in visited and n in neighbors:				# We don't want paths to visit previously visited fields
 						neighbors.remove(n)
 				for n in neighbors:
 					new = copy.copy(p)
@@ -851,12 +987,3 @@ class GUI():
 		return 1
 
 
-
-
-# rangeTable = {40: 2, 31: 3, 21: 2, 12: 3, 30: 2, 1: 2, 20: 1, 11: 1, 10: 1, 60: 3, 51: 3, 41: 3, 32: 3, 22: 3, 13: 3, 3: 3, 72: 3, 50: 3}
-
-# def test(x,y):
-#    xDist = abs(x[0] - y[0])
- #   yDist = abs(x[1] - y[1])
-  #  return(str(xDist) + str(yDist))
- 
