@@ -404,7 +404,8 @@ class GUI():
 		distance = self.calculateDistance(attackFromSquare.position, attackToSquare.position, weapon.rangeMax) - 1
 		_enemyWeapons = [x for x in attackToSquare.unit.weapons if x]
 		_enemyWeaponsInRange = [x for x in _enemyWeapons if x.rangeMax >= distance]
-		enemyWeaponStrength = max([x.power for x in _enemyWeaponsInRange if x.ammo != 0]) if _enemyWeaponsInRange else 0
+		_enemyWeaponWithAmmo = [x for x in _enemyWeaponsInRange if x.ammo != 0] if _enemyWeaponsInRange else []
+		enemyWeapon = sorted(_enemyWeaponWithAmmo, key=lambda x: x.power, reverse=True)[0] if _enemyWeaponWithAmmo else None
 		# Calculate battle
 		fBaseAttack = (weapon.power - attackToSquare.unit.armour)
 		fDistanceModified = fBaseAttack - (distance * 3)																	# (0 - 6 (theoretically infinitely))
@@ -413,7 +414,7 @@ class GUI():
 		fSizeModified = fExperienceModified + ((attackFromSquare.unit.currentSize - attackToSquare.unit.currentSize) * 3)	# 
 		fRndModified = fSizeModified + random.randint(-5, 5)
 		fFinal = int(fRndModified / 10) if fRndModified > 0 else 0
-		eBaseAttack = (enemyWeaponStrength - attackFromSquare.unit.armour)
+		eBaseAttack = (enemyWeapon.power - attackFromSquare.unit.armour) if enemyWeapon else 0
 		eDistanceModified = eBaseAttack - (distance * 3)																	# (0 - 6 (theoretically infinitely))
 		eTerrainModified = eDistanceModified + ((attackToSquare.battleModifier - attackFromSquare.battleModifier) / 3)		# (0 - 100)
 		eExperienceModified = eTerrainModified + ((attackToSquare.unit.experience - attackFromSquare.unit.experience) * 3)	# 
@@ -437,64 +438,61 @@ class GUI():
 		# print("   Terrain:      ", str(attackFromSquare.battleModifier))
 		# print("   Size:         ", str(attackFromSquare.unit.currentSize))
 		# print("Enemy:")
-		# print("   Weapon power: ", str(enemyWeaponStrength))
+		# print("   Weapon power: ", str(enemyWeapon.power))
 		# print("   Armor power:  ", str(attackToSquare.unit.armour))
 		# print("   Experience:   ", str(attackToSquare.unit.experience))
 		# print("   Terrain:      ", str(attackToSquare.battleModifier))
 		# print("   Size:         ", str(attackToSquare.unit.currentSize))
 		# print()
-		print("Calculation (Friend): ")
-		print("   Base:         ", fBaseAttack)
-		print("   Distance:     ", fDistanceModified)
-		print("   Terrain:      ", fTerrainModified)
-		print("   Experience:   ", fExperienceModified)
-		print("   Size:         ", fSizeModified)
-		print("   Random:       ", fRndModified)
-		print("   Kills:        ", fFinal)
-		print("Calculation (Enemy): ")
-		print("   Base:         ", eBaseAttack)
-		print("   Distance:     ", eDistanceModified)
-		print("   Terrain:      ", eTerrainModified)
-		print("   Experience:   ", eExperienceModified)
-		print("   Size:         ", eSizeModified)
-		print("   Random:       ", eRndModified)
-		print("   Kills:        ", eFinal)
-		# show battle
-
-# 600 x 181
-
-
-
-		sparkMig = 1000
-		while _showBattleLoop:	# stay in loop while battle shown
+		# print("Calculation (Friend): ")
+		# print("   Base:         ", fBaseAttack)
+		# print("   Distance:     ", fDistanceModified)
+		# print("   Terrain:      ", fTerrainModified)
+		# print("   Experience:   ", fExperienceModified)
+		# print("   Size:         ", fSizeModified)
+		# print("   Random:       ", fRndModified)
+		# print("   Kills:        ", fFinal)
+		# print("Calculation (Enemy): ")
+		# print("   Base:         ", eBaseAttack)
+		# print("   Distance:     ", eDistanceModified)
+		# print("   Terrain:      ", eTerrainModified)
+		# print("   Experience:   ", eExperienceModified)
+		# print("   Size:         ", eSizeModified)
+		# print("   Random:       ", eRndModified)
+		# print("   Kills:        ", eFinal)
+		# show battle : make calculations needed inside loop
+		fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140));
+		toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140));
+		subFromWeapon = weapon.picture.subsurface((42, 0, 248, 49))
+		subToWeapon = enemyWeapon.picture.subsurface((42, 0, 248, 49)) if enemyWeapon else pygame.Surface((290, 49), pygame.SRCALPHA, 32)
+		fromWeapon = pygame.transform.scale(subFromWeapon, (146, 30))
+		toWeapon = pygame.transform.scale(subToWeapon, (146, 30))
+		_leftBarWidth = (40 + (fFinal - eFinal)) * 10
+		_rightBarWidth = 810 - _leftBarWidth
+		# create loop to show battle
+		for battleMenuFrame in range(100):
 			battleMenu = self.battleMenu.copy()
-			battleMenu.blit(self.flags, [286, 48], (0, 0, 88, 88))
-			battleMenu.blit(self.flags, [426, 48], (88, 0, 88, 88))
-			battleMenu.blit(attackFromSquare.unit.mapIcon, [282, 44])
-			battleMenu.blit(attackToSquare.unit.mapIcon, [422, 44])
-			battleMenu.blit(self.ranksGfx, [20, 48], (attackFromSquare.unit.experience * 88, 0, 88, 88))
-			battleMenu.blit(self.ranksGfx, [692, 48], (attackToSquare.unit.experience * 88, 0, 88, 88))
-
-
-
-
-
-
-
-			self.parent.display.blit(battleMenu, [164, 200])			# menu background
+			battleMenu.blit(self.flags, [286, 48], (0, 0, 88, 88))	# flags
+			battleMenu.blit(self.flags, [466, 48], (88, 0, 88, 88))
+			battleMenu.blit(attackFromSquare.unit.mapIcon, [282, 44])	# units
+			battleMenu.blit(attackToSquare.unit.mapIcon, [462, 44])
+			battleMenu.blit(self.ranksGfx, [20, 48], (attackFromSquare.unit.experience * 88, 0, 88, 88))	# exp
+			battleMenu.blit(self.ranksGfx, [732, 48], (attackToSquare.unit.experience * 88, 0, 88, 88))
+			battleMenu.blit(fromSize, [197 - (fromSize.get_width() / 2), 53])	# size
+			battleMenu.blit(toSize, [643 - (toSize.get_width() / 2), 53])
+			battleMenu.blit(fromWeapon, [124, 106])	# weapons
+			battleMenu.blit(toWeapon, [570, 106])
+			# Progress bars. Base length of each bar is 380, (+/- battle outcome * 10)
+			_progressbarLeft = pygame.Surface(((_leftBarWidth / 100) * battleMenuFrame, 14))
+			_progressbarRight = pygame.Surface(((_rightBarWidth / 100) * battleMenuFrame, 14))
+			_progressbarLeft.fill(colors.green)
+			_progressbarRight.fill(colors.red)
+			battleMenu.blit(_progressbarLeft, [20, 14])
+			battleMenu.blit(_progressbarRight, [820 - (_rightBarWidth / 100) * battleMenuFrame, 14])
+			self.parent.display.blit(battleMenu, [144, 200])			# menu background
 			pygame.display.update()
-
-			sparkMig -= 1
-			if sparkMig == 0:
-				_showBattleLoop = False
-
-
-
-
-
-
-
-
+			time.sleep(0.005)
+		time.sleep(2.5)
 		# update game data
 		attackToSquare.unit.currentSize -= fFinal
 		if fFinal > 0 and attackFromSquare.unit.experience < 10:	# if attacked was hit
@@ -504,7 +502,13 @@ class GUI():
 			if attackFromSquare.unit.experience < 10:
 				attackFromSquare.unit.experience += 1
 			attackToSquare.unit = None
-			# show death, if unite dies
+			# show death, if unit dies
+
+
+
+
+
+			
 			print("Unit died")																													# SHOW DEATH!!!!!
 		attackFromSquare.unit.currentSize -= eFinal
 		if eFinal > 0 and attackToSquare.unit.experience < 10:		# if attacker was hit
@@ -515,14 +519,9 @@ class GUI():
 				attackToSquare.unit.experience += 1
 			attackFromSquare.unit = None
 			print("Unit died")																													# SHOW DEATH!!!!!
-			# show death, if unite dies
+			# show death, if unit dies
+		self.generateMap()
 		return True
-
-
-
-
-
-
 
 
 
