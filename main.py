@@ -254,7 +254,9 @@ obj.run()
 
 # --- TODO --------------------------------------------------------------------------------------- 
 # - show contents of unit
-# - attack mode, show the attack
+
+# - attack mode, show blood if hurt?
+
 # - must not be able to move enemy units
 # - units do not move along shortest path
 #	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!

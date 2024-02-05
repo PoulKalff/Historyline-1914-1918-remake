@@ -157,6 +157,11 @@ class HexSquare():
 				self.battleModifier = 10
 
 
+	def getPixelCooords(self):
+		""" Returns the coords where the hex is drawn """
+		forskydning = 71 if (self.position[0] % 2) != 0 else 0
+		pixelCooords = [self.position[1] * 142 + forskydning + 7, self.position[0] * 40 + 9]
+		return pixelCooords
 
 
 
@@ -370,6 +375,8 @@ class GUI():
 		self.progressSquare = pygame.image.load('gfx/progress.png')
 		self.battleMenu = pygame.image.load('gfx/battleMenu.png')
 		self.flags = pygame.image.load('gfx/flags.png')
+		self.unitDeath= pygame.image.load('gfx/explosion.png')
+		self.unitHurt= pygame.image.load('gfx/skull_blood.png')
 		self.ranksGfx = pygame.image.load('gfx/ranksBig.png')
 		self.unitPanel = pygame.image.load('gfx/unit_panel.png')
 		self.unitSkills = pygame.image.load('gfx/skills.png')
@@ -460,7 +467,7 @@ class GUI():
 		# print("   Size:         ", eSizeModified)
 		# print("   Random:       ", eRndModified)
 		# print("   Kills:        ", eFinal)
-		# show battle : make calculations needed inside loop
+		# show battle : make calculations needed inside loop		
 		fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140));
 		toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140));
 		subFromWeapon = weapon.picture.subsurface((42, 0, 248, 49))
@@ -469,8 +476,34 @@ class GUI():
 		toWeapon = pygame.transform.scale(subToWeapon, (146, 30))
 		_leftBarWidth = (40 + (fFinal - eFinal)) * 10
 		_rightBarWidth = 810 - _leftBarWidth
+		_deaths = [False, False]						# raise flag if any of the units die
 		# create loop to show battle
-		for battleMenuFrame in range(100):
+		for frame in range(300):
+			if frame < 100:
+				barFrame = frame
+			elif frame == 100:
+				barFrame = 100
+				# update game data when bars are fully drawn
+				attackToSquare.unit.currentSize -= fFinal
+				if fFinal > 0 and attackFromSquare.unit.experience < 10:	# if attacked was hit
+					attackFromSquare.unit.experience += 1
+				if attackToSquare.unit.currentSize < 1:						# if attacked was killed
+					attackToSquare.unit.currentSize = 0
+					if attackFromSquare.unit.experience < 10:
+						attackFromSquare.unit.experience += 1
+					_deaths[0] = True																				# SHOW DEATH!!!!!
+				attackFromSquare.unit.currentSize -= eFinal
+				if eFinal > 0 and attackToSquare.unit.experience < 10:		# if attacker was hit
+					attackToSquare.unit.experience += 1
+				if attackFromSquare.unit.currentSize < 1:					# if attacker was killed
+					attackFromSquare.unit.currentSize = 0
+					if attackToSquare.unit.experience < 10:
+						attackToSquare.unit.experience += 1
+					_deaths[1] = True	
+				fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140));
+				toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140));
+			else:
+				barFrame = 100
 			battleMenu = self.battleMenu.copy()
 			battleMenu.blit(self.flags, [286, 48], (0, 0, 88, 88))	# flags
 			battleMenu.blit(self.flags, [466, 48], (88, 0, 88, 88))
@@ -483,44 +516,38 @@ class GUI():
 			battleMenu.blit(fromWeapon, [124, 106])	# weapons
 			battleMenu.blit(toWeapon, [570, 106])
 			# Progress bars. Base length of each bar is 380, (+/- battle outcome * 10)
-			_progressbarLeft = pygame.Surface(((_leftBarWidth / 100) * battleMenuFrame, 14))
-			_progressbarRight = pygame.Surface(((_rightBarWidth / 100) * battleMenuFrame, 14))
+			_progressbarLeft = pygame.Surface(((_leftBarWidth / 100) * barFrame, 14))
+			_progressbarRight = pygame.Surface(((_rightBarWidth / 100) * barFrame, 14))
 			_progressbarLeft.fill(colors.green)
 			_progressbarRight.fill(colors.red)
 			battleMenu.blit(_progressbarLeft, [20, 14])
-			battleMenu.blit(_progressbarRight, [820 - (_rightBarWidth / 100) * battleMenuFrame, 14])
-			self.parent.display.blit(battleMenu, [144, 200])			# menu background
+			battleMenu.blit(_progressbarRight, [820 - (_rightBarWidth / 100) * barFrame, 14])
+			self.parent.display.blit(battleMenu, [144, 800])			# menu background
 			pygame.display.update()
 			time.sleep(0.005)
-		time.sleep(2.5)
-		# update game data
-		attackToSquare.unit.currentSize -= fFinal
-		if fFinal > 0 and attackFromSquare.unit.experience < 10:	# if attacked was hit
-			attackFromSquare.unit.experience += 1
-		if attackToSquare.unit.currentSize < 1:						# if attacked was killed
-			attackToSquare.unit.currentSize = 0
-			if attackFromSquare.unit.experience < 10:
-				attackFromSquare.unit.experience += 1
+		self.drawMap()
+		pygame.display.update()
+		# handle any player death
+		if _deaths[0]:
+			coords = attackToSquare.getPixelCooords()
+			for d in range(9):
+				self.parent.display.blit(self.unitDeath, [coords[0] + 12, coords[1] + 4], (d * 96, 0, 96, 96))
+				pygame.display.update()
+				time.sleep(0.1)
 			attackToSquare.unit = None
-			# show death, if unit dies
-
-
-
-
-
-			
-			print("Unit died")																													# SHOW DEATH!!!!!
-		attackFromSquare.unit.currentSize -= eFinal
-		if eFinal > 0 and attackToSquare.unit.experience < 10:		# if attacker was hit
-			attackToSquare.unit.experience += 1
-		if attackFromSquare.unit.currentSize < 1:					# if attacker was killed
-			attackFromSquare.unit.currentSize = 0
-			if attackToSquare.unit.experience < 10:
-				attackToSquare.unit.experience += 1
+			self.generateMap()
+			self.drawMap()
+			pygame.display.update()
+		if _deaths[1]:
+			coords = attackFromSquare.getPixelCooords()
+			for d in range(9):
+				self.parent.display.blit(self.unitDeath, [coords[0] + 12, coords[1] + 4], (d * 96, 0, 96, 96))
+				pygame.display.update()
+				time.sleep(0.1)
 			attackFromSquare.unit = None
-			print("Unit died")																													# SHOW DEATH!!!!!
-			# show death, if unit dies
-		self.generateMap()
+			self.generateMap()
+			self.drawMap()
+			pygame.display.update()
 		return True
 
 
