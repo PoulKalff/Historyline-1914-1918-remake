@@ -253,9 +253,8 @@ obj.run()
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - show contents of unit
-
-# - attack mode, show blood if hurt?
+# - show contents of unit 		# gui.py, line 340
+#	- enter buildings
 
 # - must not be able to move enemy units
 # - units do not move along shortest path

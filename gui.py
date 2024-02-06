@@ -338,6 +338,14 @@ class ActionMenu():
 			self.parent.interface.fromHex = self.parent.interface.currentSquare()
 		elif _butID == 2:								# CONTENT
 			self.parent.mode = "showContent"
+
+
+
+
+
+
+
+			
 			sys.exit('notImplemented Exception: Content')
 		elif _butID == 3:								# RETURN
 			self.parent.mode = "normal"
@@ -458,7 +466,7 @@ class GUI():
 		# print("   Experience:   ", fExperienceModified)
 		# print("   Size:         ", fSizeModified)
 		# print("   Random:       ", fRndModified)
-		# print("   Kills:        ", fFinal)
+		print("   Kills:        ", fFinal)
 		# print("Calculation (Enemy): ")
 		# print("   Base:         ", eBaseAttack)
 		# print("   Distance:     ", eDistanceModified)
@@ -466,7 +474,7 @@ class GUI():
 		# print("   Experience:   ", eExperienceModified)
 		# print("   Size:         ", eSizeModified)
 		# print("   Random:       ", eRndModified)
-		# print("   Kills:        ", eFinal)
+		print("   Kills:        ", eFinal)
 		# show battle : make calculations needed inside loop		
 		fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140));
 		toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140));
@@ -527,11 +535,24 @@ class GUI():
 			time.sleep(0.005)
 		self.drawMap()
 		pygame.display.update()
+		tCoords = attackToSquare.getPixelCooords()
+		fCoords = attackFromSquare.getPixelCooords()
+		# show players hurt
+		if fFinal:
+			self.parent.display.blit(self.unitHurt, [tCoords[0] + 24, tCoords[1] + 12], (fFinal * 72, 0, 72, 72))
+			pygame.display.update()
+			time.sleep(1)		
+		if eFinal:
+			self.parent.display.blit(self.unitHurt, [fCoords[0] + 24, fCoords[1] + 12], (eFinal * 72, 0, 72, 72))
+			pygame.display.update()
+			time.sleep(1)
+		self.generateMap()
+		self.drawMap()
+		pygame.display.update()
 		# handle any player death
 		if _deaths[0]:
-			coords = attackToSquare.getPixelCooords()
 			for d in range(9):
-				self.parent.display.blit(self.unitDeath, [coords[0] + 12, coords[1] + 4], (d * 96, 0, 96, 96))
+				self.parent.display.blit(self.unitDeath, [tCoords[0] + 12, tCoords[1] + 4], (d * 96, 0, 96, 96))
 				pygame.display.update()
 				time.sleep(0.1)
 			attackToSquare.unit = None
@@ -539,9 +560,8 @@ class GUI():
 			self.drawMap()
 			pygame.display.update()
 		if _deaths[1]:
-			coords = attackFromSquare.getPixelCooords()
 			for d in range(9):
-				self.parent.display.blit(self.unitDeath, [coords[0] + 12, coords[1] + 4], (d * 96, 0, 96, 96))
+				self.parent.display.blit(self.unitDeath, [fCoords[0] + 12, fCoords[1] + 4], (d * 96, 0, 96, 96))
 				pygame.display.update()
 				time.sleep(0.1)
 			attackFromSquare.unit = None
