@@ -227,6 +227,8 @@ class Main():
 				self.interface.actionMenu.checkInput()
 			elif self.mode == "weaponMenu":
 				self.interface.weaponMenu.checkInput()
+			elif self.mode == "showContent":
+				self.interface.contentMenu.checkInput()
 			else:
 				self.checkInput()
 			self.interface.draw()

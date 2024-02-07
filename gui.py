@@ -43,7 +43,8 @@ class Unit():
 			self.armour = data['armour']
 			self.speed = data['speed']
 			self.weight = data['weight']
-			self.storage= data['storage']
+			self.storageMax = data['storageMax']
+			self.storageActual = 0
 			self.sight = data['sight']
 			self.fuel = data['fuel']
 			self.experience = 0
@@ -136,6 +137,13 @@ class HexSquare():
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
+		if hexType == 'hqN' or hexType == 'cmpN':
+			self.content = []
+			self.storageMax = 50
+			self.storageActual = 0
+			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
+		else:
+			self.content = False
 		if infrastructure:
 			self.infra = infraIcons[infrastructure]
 			self.bgGrey.blit(greyscale(self.infra), (0,0))	# grayscale and blit any infrastructure on the hidden filed gfx
@@ -162,6 +170,103 @@ class HexSquare():
 		forskydning = 71 if (self.position[0] % 2) != 0 else 0
 		pixelCooords = [self.position[1] * 142 + forskydning + 7, self.position[0] * 40 + 9]
 		return pixelCooords
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ContentMenu():
+	""" Representation of menu showing content of building or units """
+
+	def __init__(self, parent):
+		self.parent = parent
+		self.location = (950, 50)
+		self.contents = []
+		self.frame = pygame.image.load('gfx/content_frame.png')
+
+
+
+	def create(self, holdingUnit):
+		""" Set picture and text """
+		actualContentText = font30.render(str(holdingUnit.storageMax), True, colors.red) 
+		maxContentText    = font30.render(str(holdingUnit.storageActual), True, colors.red) 
+		self.frame.blit(holdingUnit.picture, [36, 40])
+		self.frame.blit(actualContentText, (384 - (actualContentText.get_width() / 2), 80))
+		self.frame.blit(maxContentText,    (384 - (maxContentText.get_width() / 2), 180))
+
+
+
+	def checkInput(self):
+		for event in pygame.event.get():
+			mPos = pygame.mouse.get_pos()
+			# check mouseover
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				self.endMenu(self.focused.get())
+			# Keyboard
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_ESCAPE:	# close menu
+					self.contents = []
+					self.parent.mode = "normal"
+					self.parent.holdEscape = True
+				elif event.key == pygame.K_w:
+					self.contents = []
+					self.parent.mode = "normal"
+					self.parent.holdEscape = True
+				elif event.key == pygame.K_UP:
+					self.focused.dec()
+					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
+					pygame.time.wait(50)
+				elif event.key == pygame.K_DOWN:
+					self.focused.inc()
+					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
+					pygame.time.wait(50)
+				elif event.key == pygame.K_RETURN:
+					self.endMenu(self.focused.get())
+
+
+
+	def endMenu(self, result):
+		self.parent.mode = "normal"
+		self.parent.interface.generateMap()	# must generate and show clean map before showing battle
+		self.parent.interface.drawMap()
+		pygame.display.update()
+
+
+	def draw(self):
+		self.parent.display.blit(self.frame, [self.location[0], self.location[1]])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -276,7 +381,7 @@ class ActionMenu():
 		if _focusedUnit.weapons != [None, None, None, None]:		# DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
 			if self.parent.interface.markAttackableSquares(True):
 				self.contents.append(self.buttonAttack)
-		if _focusedUnit.storage:
+		if _focusedUnit.storageMax:
 			self.contents.append(self.buttonContain)
 		self.contents.append(self.buttonExit)
 		self.focused = RangeIterator(len(self.contents))
@@ -337,16 +442,15 @@ class ActionMenu():
 			self.parent.mode = "selectMoveTo"
 			self.parent.interface.fromHex = self.parent.interface.currentSquare()
 		elif _butID == 2:								# CONTENT
+			_unit = self.parent.interface.currentSquare().unit
+			self.parent.interface.contentMenu.create(_unit)
 			self.parent.mode = "showContent"
+			print(_unit)
 
 
 
 
-
-
-
-			
-			sys.exit('notImplemented Exception: Content')
+	#		sys.exit('notImplemented Exception: Content')
 		elif _butID == 3:								# RETURN
 			self.parent.mode = "normal"
 
@@ -394,6 +498,7 @@ class GUI():
 		self.semiTransparent = pygame.image.load('gfx/hexTypes/hex_semiTransparent.png')
 		self.actionMenu = ActionMenu(self.parent)
 		self.weaponMenu = WeaponMenu(self.parent)
+		self.contentMenu = ContentMenu(self.parent)
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		# texts
@@ -466,7 +571,7 @@ class GUI():
 		# print("   Experience:   ", fExperienceModified)
 		# print("   Size:         ", fSizeModified)
 		# print("   Random:       ", fRndModified)
-		print("   Kills:        ", fFinal)
+		# print("   Kills:        ", fFinal)
 		# print("Calculation (Enemy): ")
 		# print("   Base:         ", eBaseAttack)
 		# print("   Distance:     ", eDistanceModified)
@@ -474,7 +579,7 @@ class GUI():
 		# print("   Experience:   ", eExperienceModified)
 		# print("   Size:         ", eSizeModified)
 		# print("   Random:       ", eRndModified)
-		print("   Kills:        ", eFinal)
+		# print("   Kills:        ", eFinal)
 		# show battle : make calculations needed inside loop		
 		fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140));
 		toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140));
@@ -710,8 +815,10 @@ class GUI():
 		self.drawUnitGUI()
 		if self.parent.mode == "actionMenu":
 			self.actionMenu.draw()
-		if self.parent.mode == "weaponMenu":
+		elif self.parent.mode == "weaponMenu":
 			self.weaponMenu.draw()
+		elif self.parent.mode == "showContent":
+			self.contentMenu.draw()
 
 
 
