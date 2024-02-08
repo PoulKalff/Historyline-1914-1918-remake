@@ -130,8 +130,11 @@ class Main():
 	def handleSelection(self):
 		""" Handles user selection by SPACE or MOUSE """
 		cursorHex = self.interface.currentSquare()
-		if self.mode == "normal":
-			if cursorHex.unit:
+		if cursorHex.content != False:
+			self.interface.contentMenu.create(cursorHex)
+			self.mode = "showContent"
+		elif self.mode == "normal":
+			if cursorHex.unit and cursorHex.unit.faction == self.playerSide:
 				self.interface.actionMenu.create()
 				self.mode = "actionMenu"
 		elif self.mode == "selectMoveTo":
@@ -241,7 +244,7 @@ class Main():
 
 
 #check arguments
-parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=120))
+parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=120))
 parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
 parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields")
 args = parser.parse_args()
@@ -256,17 +259,15 @@ obj.run()
 
 # --- TODO --------------------------------------------------------------------------------------- 
 # - show contents of unit 		# gui.py, line 340
-#	- enter buildings
-
-# - must not be able to move enemy units
-# - units do not move along shortest path
-#	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-
+#	- unit can enter buildings and other units
+# - rewrite loading of level. Should happen in main, and it should be possible to select a level
 
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
+# - units do not move along shortest path
+#	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 # - 
 
 

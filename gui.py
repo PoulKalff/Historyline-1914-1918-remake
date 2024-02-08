@@ -137,9 +137,16 @@ class HexSquare():
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
-		if hexType == 'hqN' or hexType == 'cmpN':
+		if hexType == 'hqN':
+			self.name = "Headquarters"
 			self.content = []
 			self.storageMax = 50
+			self.storageActual = 0
+			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
+		elif hexType == 'cmpN':
+			self.name = "Depot"
+			self.content = []
+			self.storageMax = 40
 			self.storageActual = 0
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
 		else:
@@ -173,20 +180,6 @@ class HexSquare():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class ContentMenu():
 	""" Representation of menu showing content of building or units """
 
@@ -200,11 +193,14 @@ class ContentMenu():
 
 	def create(self, holdingUnit):
 		""" Set picture and text """
-		actualContentText = font30.render(str(holdingUnit.storageMax), True, colors.red) 
-		maxContentText    = font30.render(str(holdingUnit.storageActual), True, colors.red) 
-		self.frame.blit(holdingUnit.picture, [36, 40])
-		self.frame.blit(actualContentText, (384 - (actualContentText.get_width() / 2), 80))
-		self.frame.blit(maxContentText,    (384 - (maxContentText.get_width() / 2), 180))
+		nameText = font20.render(str(holdingUnit.name), True, colors.white)
+		actualContentText = font20.render(str(holdingUnit.storageMax), True, colors.red) 
+		maxContentText    = font20.render(str(holdingUnit.storageActual), True, colors.red)
+		self._frame = self.frame.copy()
+		self._frame.blit(holdingUnit.picture,	(36, 40))
+		self._frame.blit(nameText, 				(384 - (nameText.get_width() / 2), 55))
+		self._frame.blit(actualContentText,		(384 - (actualContentText.get_width() / 2), 132))
+		self._frame.blit(maxContentText,			(384 - (maxContentText.get_width() / 2), 201))
 
 
 
@@ -245,7 +241,7 @@ class ContentMenu():
 
 
 	def draw(self):
-		self.parent.display.blit(self.frame, [self.location[0], self.location[1]])
+		self.parent.display.blit(self._frame, [self.location[0], self.location[1]])
 
 
 
