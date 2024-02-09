@@ -186,13 +186,16 @@ class ContentMenu():
 	def __init__(self, parent):
 		self.parent = parent
 		self.location = (950, 50)
+		self.cursorPos = [(43, 578), (106, 542), (169, 578), (232, 542), (295, 578), (358, 542), (421, 578)]
 		self.contents = []
 		self.frame = pygame.image.load('gfx/content_frame.png')
+		self.cursorGfx = pygame.image.load('gfx/cursor_content.png')
 
 
 
 	def create(self, holdingUnit):
 		""" Set picture and text """
+		self.focused = RangeIterator(7)
 		nameText = font20.render(str(holdingUnit.name), True, colors.white)
 		actualContentText = font20.render(str(holdingUnit.storageMax), True, colors.red) 
 		maxContentText    = font20.render(str(holdingUnit.storageActual), True, colors.red)
@@ -210,6 +213,12 @@ class ContentMenu():
 			# check mouseover
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
+
+
+# Must be able to SELECT HEX with mouse!!
+
+
+
 			# Keyboard
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:	# close menu
@@ -220,13 +229,17 @@ class ContentMenu():
 					self.contents = []
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
-				elif event.key == pygame.K_UP:
+				elif event.key == pygame.K_LEFT:
 					self.focused.dec()
-					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
+					x1, y1 = self.cursorPos[self.focused.get()]
+					x2, y2 = self.location
+					pygame.mouse.set_pos(x1 + x2 + 50, y1 + y2 + 50)
 					pygame.time.wait(50)
-				elif event.key == pygame.K_DOWN:
+				elif event.key == pygame.K_RIGHT:
 					self.focused.inc()
-					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
+					x1, y1 = self.cursorPos[self.focused.get()]
+					x2, y2 = self.location
+					pygame.mouse.set_pos(x1 + x2 + 50, y1 + y2 + 50)
 					pygame.time.wait(50)
 				elif event.key == pygame.K_RETURN:
 					self.endMenu(self.focused.get())
@@ -241,7 +254,10 @@ class ContentMenu():
 
 
 	def draw(self):
-		self.parent.display.blit(self._frame, [self.location[0], self.location[1]])
+		_frame = self._frame.copy()
+		_frame.blit(self.cursorGfx, self.cursorPos[self.focused.get()])
+		self.parent.display.blit(_frame, [self.location[0], self.location[1]])
+
 
 
 
