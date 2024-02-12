@@ -186,8 +186,9 @@ class ContentMenu():
 	def __init__(self, parent):
 		self.parent = parent
 		self.location = (950, 50)
-		self.cursorPos = [(43, 578), (106, 542), (169, 578), (232, 542), (295, 578), (358, 542), (421, 578)]
 		self.contents = []
+		self.xPos = 36
+		self.yPos = 543 
 		self.frame = pygame.image.load('gfx/content_frame.png')
 		self.cursorGfx = pygame.image.load('gfx/cursor_content.png')
 
@@ -195,7 +196,7 @@ class ContentMenu():
 
 	def create(self, holdingUnit):
 		""" Set picture and text """
-		self.focused = RangeIterator(7)
+		self.focused = [RangeIterator(9), RangeIterator(2)]
 		nameText = font20.render(str(holdingUnit.name), True, colors.white)
 		actualContentText = font20.render(str(holdingUnit.storageMax), True, colors.red) 
 		maxContentText    = font20.render(str(holdingUnit.storageActual), True, colors.red)
@@ -203,7 +204,7 @@ class ContentMenu():
 		self._frame.blit(holdingUnit.picture,	(36, 40))
 		self._frame.blit(nameText, 				(384 - (nameText.get_width() / 2), 55))
 		self._frame.blit(actualContentText,		(384 - (actualContentText.get_width() / 2), 132))
-		self._frame.blit(maxContentText,			(384 - (maxContentText.get_width() / 2), 201))
+		self._frame.blit(maxContentText,		(384 - (maxContentText.get_width() / 2), 201))
 
 
 
@@ -211,14 +212,20 @@ class ContentMenu():
 		for event in pygame.event.get():
 			mPos = pygame.mouse.get_pos()
 			# check mouseover
+#			for weaponNo in range(self.noOfWeapons):
+#				if self.contents[weaponNo][1].collidepoint(mPos):
+#					self.focused.count = weaponNo
+
+
+# Must be able to select with mouse. Get grid coord
+
+
+
+
+
+
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
-
-
-# Must be able to SELECT HEX with mouse!!
-
-
-
 			# Keyboard
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:	# close menu
@@ -230,32 +237,35 @@ class ContentMenu():
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
 				elif event.key == pygame.K_LEFT:
-					self.focused.dec()
-					x1, y1 = self.cursorPos[self.focused.get()]
-					x2, y2 = self.location
-					pygame.mouse.set_pos(x1 + x2 + 50, y1 + y2 + 50)
+					self.focused[0].dec()
 					pygame.time.wait(50)
 				elif event.key == pygame.K_RIGHT:
-					self.focused.inc()
-					x1, y1 = self.cursorPos[self.focused.get()]
-					x2, y2 = self.location
-					pygame.mouse.set_pos(x1 + x2 + 50, y1 + y2 + 50)
+					self.focused[0].inc()
+					pygame.time.wait(50)
+				elif event.key == pygame.K_UP:
+					self.focused[1].dec()
+					pygame.time.wait(50)
+				elif event.key == pygame.K_DOWN:
+					self.focused[1].inc()
 					pygame.time.wait(50)
 				elif event.key == pygame.K_RETURN:
 					self.endMenu(self.focused.get())
+				self.xPos = 36 + (self.focused[0].get() * 50) 
+				self.yPos = 543 + (self.focused[1].get() * 50)
+				pygame.mouse.set_pos(self.location[0] + self.xPos + 35, self.location[1] + self.yPos + 35)
 
 
 
 	def endMenu(self, result):
 		self.parent.mode = "normal"
-		self.parent.interface.generateMap()	# must generate and show clean map before showing battle
 		self.parent.interface.drawMap()
 		pygame.display.update()
 
 
+
 	def draw(self):
 		_frame = self._frame.copy()
-		_frame.blit(self.cursorGfx, self.cursorPos[self.focused.get()])
+		_frame.blit(self.cursorGfx, (self.xPos, self.yPos))
 		self.parent.display.blit(_frame, [self.location[0], self.location[1]])
 
 
