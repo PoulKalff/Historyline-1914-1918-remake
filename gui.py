@@ -724,7 +724,7 @@ class GUI():
 				elif self.currentSquare().unit.weight + self.mainMap[x][y].unit.storageActual > self.mainMap[x][y].unit.storageMax:			# if not enough room 
 					obstructed.append((x,y))
 			elif self.mainMap[x][y].movementModifier == None:
-				if self.mainMap[x][y].content != []:			# if hex has a storage
+				if type(self.mainMap[x][y].content) != list:			# if hex has a storage
 					obstructed.append((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
@@ -1171,6 +1171,8 @@ class GUI():
 
 
 			print("HEX", toHex.content, toHex.storageActual)
+#			print(dir(toHex))
+#			print(toHex.storageMax)
 
 
 		elif toHex.unit and _unitMoved.weight + toHex.unit.storageActual <= toHex.unit.storageMax:			# if enough room 
