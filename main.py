@@ -130,13 +130,14 @@ class Main():
 	def handleSelection(self):
 		""" Handles user selection by SPACE or MOUSE """
 		cursorHex = self.interface.currentSquare()
-		if cursorHex.content != False:
-			self.interface.contentMenu.create(cursorHex)
-			self.mode = "showContent"
-		elif self.mode == "normal":
-			if cursorHex.unit and cursorHex.unit.faction == self.playerSide:
-				self.interface.actionMenu.create()
-				self.mode = "actionMenu"
+		if self.mode == "normal":
+			if cursorHex.content != False:	# if square has content ability
+				self.interface.contentMenu.create(cursorHex)
+				self.mode = "showContent"
+			else:
+				if cursorHex.unit and cursorHex.unit.faction == self.playerSide:
+					self.interface.actionMenu.create()
+					self.mode = "actionMenu"
 		elif self.mode == "selectMoveTo":
 			if cursorHex.fogofwar:				# if field is clear, execute move, else cancel move and return to normal mode
 				self.interface.generateMap()
@@ -236,6 +237,9 @@ class Main():
 				self.checkInput()
 			self.interface.draw()
 			pygame.display.update()
+
+	#		print(str(self.mode))
+
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
@@ -258,8 +262,8 @@ obj.run()
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - show contents of unit 		# gui.py, line 340
-#	- unit can enter buildings and other units
+# - show contents of unit
+#	- unit can enter buildings and other units ..... make unit disappear on move and then add it to content
 # - rewrite loading of level. Should happen in main, and it should be possible to select a level
 
 

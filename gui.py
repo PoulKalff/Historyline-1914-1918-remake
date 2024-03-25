@@ -54,6 +54,8 @@ class Unit():
 			self.maxSize = 10		# all units size 10?
 			self.currentSize = 10
 			self.faction = 'Central Powers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'Entente Cordial'
+			if self.storageMax > 0:
+				self.content = []
 			for w in data['weapons']:
 				if w:
 					self.weapons.append(Weapon(w))
@@ -717,9 +719,13 @@ class GUI():
 			if self.mainMap[x][y].fogofwar != 0:
 				obstructed.append((x,y))
 			elif self.mainMap[x][y].unit:
-				obstructed.append((x,y))
+				if self.mainMap[x][y].unit.storageMax == 0:		# do not remove units that has storage
+					obstructed.append((x,y))
+				elif self.currentSquare().unit.weight + self.mainMap[x][y].unit.storageActual > self.mainMap[x][y].unit.storageMax:			# if not enough room 
+					obstructed.append((x,y))
 			elif self.mainMap[x][y].movementModifier == None:
-				obstructed.append((x,y))
+				if self.mainMap[x][y].content != []:			# if hex has a storage
+					obstructed.append((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
 			movableSquares.remove(pos)
@@ -1158,8 +1164,28 @@ class GUI():
 						frameCoord[1] -= 5
 			pixelCoordXfrom = pixelCoordXto
 			pixelCoordYfrom = pixelCoordYto
-		# move the unit to its new hex in the map matrix, generate and display new map with unit
-		toHex.unit = _unitMoved
+		# check if target has content
+		if toHex.content != False:
+			toHex.content.append(_unitMoved)
+			toHex.storageActual += _unitMoved.weight
+
+
+			print("HEX", toHex.content, toHex.storageActual)
+
+
+		elif toHex.unit and _unitMoved.weight + toHex.unit.storageActual <= toHex.unit.storageMax:			# if enough room 
+			toHex.unit.content.append(_unitMoved)
+			toHex.unit.storageActual += _unitMoved.weight
+
+
+			print(toHex.unit.content, toHex.unit.storageActual)
+
+
+
+
+		else:
+			toHex.unit = _unitMoved
+		# generate and display new map with unit
 		self.generateMap()
 		self.drawMap()
 		pygame.display.update()
