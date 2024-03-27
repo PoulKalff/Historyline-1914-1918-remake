@@ -2,6 +2,7 @@ import sys
 import json
 import time
 import copy
+import math
 import pygame
 import random
 import numpy as np
@@ -78,6 +79,7 @@ class Unit():
 							arr[i, j] = [56, 72, 36]
 						elif np.array_equal(arr[i, j], [180, 148, 124]):
 							arr[i, j] = [88, 104, 36]
+			self.contentIcon = rot_center(rawIcon, 180) if self.faction == 'Central Powers' else rawIcon 	# preserve samll icon to show in content
 			rawIcon = pygame.transform.scale2x(rawIcon)
 			self.allIcons = [	rawIcon,
 								rot_center(rawIcon, 60),
@@ -188,7 +190,6 @@ class ContentMenu():
 	def __init__(self, parent):
 		self.parent = parent
 		self.location = (950, 50)
-		self.contents = []
 		self.xPos = 36
 		self.yPos = 543 
 		self.frame = pygame.image.load('gfx/content_frame.png')
@@ -198,6 +199,7 @@ class ContentMenu():
 
 	def create(self, holdingUnit):
 		""" Set picture and text """
+		self.content = holdingUnit.content
 		self.focused = [RangeIterator(9), RangeIterator(2)]
 		nameText = font20.render(str(holdingUnit.name), True, colors.white)
 		actualContentText = font20.render(str(holdingUnit.storageMax), True, colors.red) 
@@ -214,28 +216,29 @@ class ContentMenu():
 		for event in pygame.event.get():
 			mPos = pygame.mouse.get_pos()
 			# check mouseover
-#			for weaponNo in range(self.noOfWeapons):
-#				if self.contents[weaponNo][1].collidepoint(mPos):
-#					self.focused.count = weaponNo
-
-
-# Must be able to select with mouse. Get grid coord
-
-
-
-
-
-
+			if 989 < mPos[0] < 1436 and 596 < mPos[1] < 694:
+				squareX = math.floor((mPos[0] - 989) / 50)
+				squareY = math.floor((mPos[1] - 596) / 50)
+				self.xPos = 36 + (squareX * 50) 
+				self.yPos = 543 + (squareY * 50)
+				self.focused[0].count = squareX
+				self.focused[1].count = squareY
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				self.endMenu(self.focused.get())
+				pass
+
+
+
+#				print(pygame.mouse.get_pos())
+#				do what? Start a submenu?
+
+
+
 			# Keyboard
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:	# close menu
-					self.contents = []
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
 				elif event.key == pygame.K_w:
-					self.contents = []
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
 				elif event.key == pygame.K_LEFT:
@@ -267,6 +270,22 @@ class ContentMenu():
 
 	def draw(self):
 		_frame = self._frame.copy()
+
+
+
+#		print(self.content)
+		for no, unit in enumerate(self.content):
+			row = no % 2
+			column = math.floor(no / 2)
+#			print(no, unit, (column, row))
+#			print(self.xPos, self.yPos)
+			_frame.blit(unit.contentIcon, [38 + (column * 50), 545 + (row * 50)])
+#			print(unit.allIcons[0])
+
+	# SPARKMIG!		
+
+
+
 		_frame.blit(self.cursorGfx, (self.xPos, self.yPos))
 		self.parent.display.blit(_frame, [self.location[0], self.location[1]])
 

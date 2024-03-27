@@ -262,7 +262,8 @@ obj.run()
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - show contents of unit
+# - show data of contents of unit
+# - enable content-units to move out of content
 # - rewrite loading of level. Should happen in main, and it should be possible to select a level
 
 
@@ -272,6 +273,7 @@ obj.run()
 # - units do not move along shortest path
 #	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 # - units cannot move to grey/previsously seen hexes
+# - Hex with depots should never be grayed out (and neither should surrounding hexes)
 
 
 
