@@ -1168,23 +1168,11 @@ class GUI():
 		if toHex.content != False:
 			toHex.content.append(_unitMoved)
 			toHex.storageActual += _unitMoved.weight
-
-
 			print("HEX", toHex.content, toHex.storageActual)
-#			print(dir(toHex))
-#			print(toHex.storageMax)
-
-
 		elif toHex.unit and _unitMoved.weight + toHex.unit.storageActual <= toHex.unit.storageMax:			# if enough room 
 			toHex.unit.content.append(_unitMoved)
 			toHex.unit.storageActual += _unitMoved.weight
-
-
 			print(toHex.unit.content, toHex.unit.storageActual)
-
-
-
-
 		else:
 			toHex.unit = _unitMoved
 		# generate and display new map with unit

@@ -263,7 +263,6 @@ obj.run()
 
 # --- TODO --------------------------------------------------------------------------------------- 
 # - show contents of unit
-#	- unit can enter buildings and other units ..... make unit disappear on move and then add it to content
 # - rewrite loading of level. Should happen in main, and it should be possible to select a level
 
 
@@ -272,7 +271,7 @@ obj.run()
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - units do not move along shortest path
 #	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-# - 
+# - units cannot move to grey/previsously seen hexes
 
 
 
