@@ -56,7 +56,7 @@ class Unit():
 			self.currentSize = 10
 			self.faction = 'Central Powers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'Entente Cordial'
 			if self.storageMax > 0:
-				self.content = []
+				self.content = [[False for x in range(9)], [False for x in range(9)]]
 			for w in data['weapons']:
 				if w:
 					self.weapons.append(Weapon(w))
@@ -143,13 +143,13 @@ class HexSquare():
 		self.sightModifier = bgTilesModifiers[hexType][2]
 		if hexType == 'hqN':
 			self.name = "Headquarters"
-			self.content = []
+			self.content = [[False for x in range(9)], [False for x in range(9)]]
 			self.storageMax = 50
 			self.storageActual = 0
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
 		elif hexType == 'cmpN':
 			self.name = "Depot"
-			self.content = []
+			self.content = [[False for x in range(9)], [False for x in range(9)]]
 			self.storageMax = 40
 			self.storageActual = 0
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
@@ -228,8 +228,8 @@ class ContentMenu():
 
 
 
-#				print(pygame.mouse.get_pos())
-#				do what? Start a submenu?
+				print("Generate and show the submenu")
+				sys.exit()
 
 
 
@@ -270,46 +270,58 @@ class ContentMenu():
 
 	def draw(self):
 		_frame = self._frame.copy()
+		for y in range(9):
+			for x in range(2):
+				if self.content[x][y]:
+					_frame.blit(self.content[x][y].contentIcon, [38 + (y * 50), 545 + (x * 50)])
+		# draw info for highlighted unit, if any
+		focusX = self.focused[0].count
+		focusY = self.focused[1].count
 
 
 
-#		print(self.content)
-		for no, unit in enumerate(self.content):
-			row = no % 2
-			column = math.floor(no / 2)
-#			print(no, unit, (column, row))
-#			print(self.xPos, self.yPos)
-			_frame.blit(unit.contentIcon, [38 + (column * 50), 545 + (row * 50)])
-#			print(unit.allIcons[0])
+		# update unit name and info
+		if self.content[focusY][focusX]:
+			_unit = self.content[focusY][focusX]
+			unitGUI = pygame.Surface((662, 438))
+			unitGUI.blit(self.parent.interface.backgroundTextureUnit, (4, 4))
+			unitPanel = self.parent.interface.unitPanel.copy()
+			unitPanel.blit(self.parent.interface.flags, [3, 3], (self.parent.interface.flagIndex[_unit.country] * 88, 0, 88, 88))
+			unitPanel.blit(_unit.mapIcon, [-1, -1])
+			unitPanel.blit(self.parent.interface.ranksGfx, [4, 103], (_unit.experience * 88, 0, 88, 88))
+			unitPanel.blit(_unit.picture, [380, 3])
+			gfx = font20.render(_unit.name, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
+			gfx = font20.render(_unit.faction, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
+			gfx = font20.render(str(_unit.sight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(str(_unit.speed), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(str(_unit.currentSize), True, (208, 185, 140)); unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(str(_unit.armour), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 155])
+			gfx = font20.render(str(_unit.weight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 155])
+			gfx = font20.render(str(_unit.fuel), True, (208, 185, 140)); 		unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 155])
+			# mark active skills
+			unitGUI.blit(self.parent.interface.unitSkills, [618, 11])
+			for x in _unit.skills:
+				unitGUI.blit(self.parent.interface.skillsMarker, [616, (x * 28) - 19])
+			# weapons
+			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 218, 662, 58), 4)							# weapons borders 1
+			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 326, 662, 58), 4)							# weapons borders 2
+			unitGUI.blit(_unit.weaponsGfx[0], [4, 222])
+			unitGUI.blit(_unit.weaponsGfx[1], [4, 276])
+			unitGUI.blit(_unit.weaponsGfx[2], [4, 330])
+			unitGUI.blit(_unit.weaponsGfx[3], [4, 384])
+			unitGUI.blit(unitPanel, [10, 10])
+			_frame.blit(pygame.transform.scale(unitGUI, (452, 285)), [36, 237])
 
-	# SPARKMIG!		
 
 
 
+
+
+
+		# draw cursor
 		_frame.blit(self.cursorGfx, (self.xPos, self.yPos))
 		self.parent.display.blit(_frame, [self.location[0], self.location[1]])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		return
 
 
 
@@ -488,12 +500,6 @@ class ActionMenu():
 			_unit = self.parent.interface.currentSquare().unit
 			self.parent.interface.contentMenu.create(_unit)
 			self.parent.mode = "showContent"
-			print(_unit)
-
-
-
-
-	#		sys.exit('notImplemented Exception: Content')
 		elif _butID == 3:								# RETURN
 			self.parent.mode = "normal"
 
@@ -1011,7 +1017,6 @@ class GUI():
 			unitGUI.blit(square.unit.weaponsGfx[3], [4, 384])
 			unitGUI.blit(unitPanel, [10, 10])
 		self.parent.display.blit(unitGUI, [1124, 545])
-		return 1
 
 
 
@@ -1184,14 +1189,21 @@ class GUI():
 			pixelCoordXfrom = pixelCoordXto
 			pixelCoordYfrom = pixelCoordYto
 		# check if target has content
+		_delivered = False
 		if toHex.content != False:
-			toHex.content.append(_unitMoved)
-			toHex.storageActual += _unitMoved.weight
-			print("HEX", toHex.content, toHex.storageActual)
+			for y in range(9):
+				for x in range(2):
+					if not _delivered and not toHex.content[x][y]:
+						_delivered = True
+						toHex.content[x][y] =_unitMoved			# NB! Unit is lost if unit its full, should not be possible
+						toHex.storageActual += _unitMoved.weight
 		elif toHex.unit and _unitMoved.weight + toHex.unit.storageActual <= toHex.unit.storageMax:			# if enough room 
-			toHex.unit.content.append(_unitMoved)
-			toHex.unit.storageActual += _unitMoved.weight
-			print(toHex.unit.content, toHex.unit.storageActual)
+			for y in range(9):
+				for x in range(2):
+					if not _delivered and not toHex.unit.content[x][y]:
+						_delivered = True
+						toHex.unit.content[x][y] =_unitMoved	# NB! Unit is lost if unit its full, must be handled
+						toHex.unit.storageActual += _unitMoved.weight
 		else:
 			toHex.unit = _unitMoved
 		# generate and display new map with unit
