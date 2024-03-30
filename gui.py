@@ -194,6 +194,7 @@ class ContentMenu():
 		self.yPos = 543 
 		self.frame = pygame.image.load('gfx/content_frame.png')
 		self.cursorGfx = pygame.image.load('gfx/cursor_content.png')
+		self.actionMenu = ActionMenu(self.parent)
 
 
 
@@ -211,60 +212,63 @@ class ContentMenu():
 		self._frame.blit(maxContentText,		(384 - (maxContentText.get_width() / 2), 201))
 
 
+	def reset(self):
+		""" Move marker to 0,0 """
+		self.focused[0].count = 0
+		self.focused[1].count = 0
+
 
 	def checkInput(self):
-		for event in pygame.event.get():
-			mPos = pygame.mouse.get_pos()
-			# check mouseover
-			if 989 < mPos[0] < 1436 and 596 < mPos[1] < 694:
-				squareX = math.floor((mPos[0] - 989) / 50)
-				squareY = math.floor((mPos[1] - 596) / 50)
-				self.xPos = 36 + (squareX * 50) 
-				self.yPos = 543 + (squareY * 50)
-				self.focused[0].count = squareX
-				self.focused[1].count = squareY
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				pass
+		if self.actionMenu.active:
+			self.actionMenu.checkInput()
+		else:
+			for event in pygame.event.get():
+				mPos = pygame.mouse.get_pos()
+				# check mouseover
+				if 989 < mPos[0] < 1436 and 596 < mPos[1] < 694:
+					squareX = math.floor((mPos[0] - 989) / 50)
+					squareY = math.floor((mPos[1] - 596) / 50)
+					self.xPos = 36 + (squareX * 50) 
+					self.yPos = 543 + (squareY * 50)
+					self.focused[0].count = squareX
+					self.focused[1].count = squareY
+					if event.type == pygame.MOUSEBUTTONDOWN:
+						if self.parent.mouseClick.tick() < 500:						# if doubleclick detected
+							self.endMenu()
+				# Keyboard
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_ESCAPE:	# close menu
+						self.parent.mode = "normal"
+						self.parent.holdEscape = True
+					elif event.key == pygame.K_w:
+						self.parent.mode = "normal"
+						self.parent.holdEscape = True
+					elif event.key == pygame.K_LEFT:
+						self.focused[0].dec()
+						pygame.time.wait(50)
+					elif event.key == pygame.K_RIGHT:
+						self.focused[0].inc()
+						pygame.time.wait(50)
+					elif event.key == pygame.K_UP:
+						self.focused[1].dec()
+						pygame.time.wait(50)
+					elif event.key == pygame.K_DOWN:
+						self.focused[1].inc()
+						pygame.time.wait(50)
+					elif event.key == pygame.K_RETURN:
+						self.endMenu()
+					self.xPos = 36 + (self.focused[0].get() * 50) 
+					self.yPos = 543 + (self.focused[1].get() * 50)
+					pygame.mouse.set_pos(self.location[0] + self.xPos + 35, self.location[1] + self.yPos + 35)
 
 
-
-				print("Generate and show the submenu")
-				sys.exit()
-
-
-
-			# Keyboard
-			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:	# close menu
-					self.parent.mode = "normal"
-					self.parent.holdEscape = True
-				elif event.key == pygame.K_w:
-					self.parent.mode = "normal"
-					self.parent.holdEscape = True
-				elif event.key == pygame.K_LEFT:
-					self.focused[0].dec()
-					pygame.time.wait(50)
-				elif event.key == pygame.K_RIGHT:
-					self.focused[0].inc()
-					pygame.time.wait(50)
-				elif event.key == pygame.K_UP:
-					self.focused[1].dec()
-					pygame.time.wait(50)
-				elif event.key == pygame.K_DOWN:
-					self.focused[1].inc()
-					pygame.time.wait(50)
-				elif event.key == pygame.K_RETURN:
-					self.endMenu(self.focused.get())
-				self.xPos = 36 + (self.focused[0].get() * 50) 
-				self.yPos = 543 + (self.focused[1].get() * 50)
-				pygame.mouse.set_pos(self.location[0] + self.xPos + 35, self.location[1] + self.yPos + 35)
-
-
-
-	def endMenu(self, result):
-		self.parent.mode = "normal"
-		self.parent.interface.drawMap()
-		pygame.display.update()
+	def endMenu(self):
+		if self.content[self.focused[1].count][self.focused[0].count]:
+			self.parent.interface.fromContent = (self.focused[1].count, self.focused[0].count)	# index of unit to move
+			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
+			# subtract weight
+			_weight = self.parent.interface.currentSquare().unit.content[self.focused[1].count][self.focused[0].count].weight
+			self.parent.interface.currentSquare().unit.storageActual -= _weight
 
 
 
@@ -277,9 +281,6 @@ class ContentMenu():
 		# draw info for highlighted unit, if any
 		focusX = self.focused[0].count
 		focusY = self.focused[1].count
-
-
-
 		# update unit name and info
 		if self.content[focusY][focusX]:
 			_unit = self.content[focusY][focusX]
@@ -311,16 +312,12 @@ class ContentMenu():
 			unitGUI.blit(_unit.weaponsGfx[3], [4, 384])
 			unitGUI.blit(unitPanel, [10, 10])
 			_frame.blit(pygame.transform.scale(unitGUI, (452, 285)), [36, 237])
-
-
-
-
-
-
-
 		# draw cursor
 		_frame.blit(self.cursorGfx, (self.xPos, self.yPos))
 		self.parent.display.blit(_frame, [self.location[0], self.location[1]])
+		# show menu, if activated
+		if self.actionMenu.active:
+			self.actionMenu.draw()
 		return
 
 
@@ -415,11 +412,24 @@ class ActionMenu():
 	def __init__(self, parent):
 		self.parent = parent
 		self.location = (50, 50)
-		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'),		None, 0]
-		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'),		None, 1]
-		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'),	None, 2]
-		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'),		None, 3]
+		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'),		None, 1]
+		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'),		None, 2]
+		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'),	None, 3]
+		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'),		None, 4]
+		self.active = False
 
+
+	def createSimple(self, location):
+		""" recreate the menu to be used in content """
+		self.location  = location
+		self.contents = [self.buttonMove, self.buttonExit]
+		self.focused = RangeIterator(len(self.contents))
+		self.menuWidth = 8 + (len(self.contents) * 62)
+		for butNr in range(len(self.contents)):
+			_butLocation = self.location[0] + 4 + (butNr * 62)
+			self.contents[butNr][2] = pygame.Rect(_butLocation, self.location[1] + 4, 62, 52)
+		self.focusedArray = [0 for x in range(len(self.contents))]
+		self.active = True			# currently only used in content!
 
 
 	def create(self):
@@ -447,6 +457,7 @@ class ActionMenu():
 		self.focusedArray = [0 for x in range(len(self.contents))]
 
 
+
 	def checkInput(self):
 		""" Checks and responds to input from keyboard """
 		for event in pygame.event.get():
@@ -457,6 +468,8 @@ class ActionMenu():
 				if self.contents[butNr][2].collidepoint(mPos):
 					self.focused.count = butNr
 					self.focusedArray[butNr] = 1
+			if not 1 in self.focusedArray:	# reset count, if no button down
+				self.focused.count = 0
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
 			# Keyboard
@@ -465,16 +478,15 @@ class ActionMenu():
 					self.parent.holdEscape = True
 					self.parent.mode = "normal"
 					self.focused.count = 0
-					self.focusedArray = [1, 0, 0, 0]
 				elif event.key == pygame.K_LEFT:
 					self.focused.dec()
-					self.focusedArray = [0, 0, 0, 0]
+					self.focusedArray = [0 for x in range(len(self.contents))]
 					self.focusedArray[self.focused.get()] = 1
 					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
 					pygame.time.wait(50)
 				elif event.key == pygame.K_RIGHT:
 					self.focused.inc()
-					self.focusedArray = [0, 0, 0, 0]
+					self.focusedArray = [0 for x in range(len(self.contents))]
 					self.focusedArray[self.focused.get()] = 1
 					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
 					pygame.time.wait(50)
@@ -483,25 +495,28 @@ class ActionMenu():
 
 
 
-
-
 	def endMenu(self, result):
 		""" execute action selected in the action menu """
-		_butID = self.contents[result][3]
-		if _butID == 0:									# ATTACK
-			self.parent.interface.generateMap("attack")
-			self.parent.mode = "selectAttack"
-			self.parent.interface.fromHex = self.parent.interface.currentSquare()
-		elif _butID == 1:								# MOVE
-			self.parent.interface.generateMap("move")
-			self.parent.mode = "selectMoveTo"
-			self.parent.interface.fromHex = self.parent.interface.currentSquare()
-		elif _butID == 2:								# CONTENT
-			_unit = self.parent.interface.currentSquare().unit
-			self.parent.interface.contentMenu.create(_unit)
-			self.parent.mode = "showContent"
-		elif _butID == 3:								# RETURN
-			self.parent.mode = "normal"
+		if 1 in self.focusedArray:
+			_butID = self.contents[result][3]
+			if _butID == 1:									# ATTACK
+				self.parent.interface.generateMap("attack")
+				self.parent.mode = "selectAttack"
+				self.parent.interface.fromHex = self.parent.interface.currentSquare()
+			elif _butID == 2:								# MOVE
+				self.parent.interface.generateMap("move")
+				self.parent.mode = "selectMoveTo"
+				self.parent.interface.fromHex = self.parent.interface.currentSquare()
+				self.active = False
+			elif _butID == 3:								# CONTENT
+				_unit = self.parent.interface.currentSquare().unit
+				self.parent.interface.contentMenu.create(_unit)
+				self.parent.mode = "showContent"
+			elif _butID == 4:								# RETURN
+				if self.active:		# hack!
+					self.active = False
+				else:
+					self.parent.mode = "normal"
 
 
 
@@ -550,6 +565,7 @@ class GUI():
 		self.contentMenu = ContentMenu(self.parent)
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
+		self.fromContent = False 	# flag, shows moveUnit to not move the unit of current hex
 		# texts
 		self.movementModifierText = font20.render('Movement Penalty', True, colors.black) 	# [movementModifierText, rMovementModifierText]
 		self.battleModifierText = font20.render('Battle Advantage', True, colors.black)		#[battleModifierText, rBattleModifierText]
@@ -729,7 +745,10 @@ class GUI():
 	def markMovableSquares(self):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
 			Must be called each time player selects move """
-		unitSpeed = self.currentSquare().unit.speed
+		if self.fromContent:
+			unitSpeed = self.parent.interface.contentMenu.content[self.fromContent[0]][self.fromContent[1]].speed
+		else:
+			unitSpeed = self.currentSquare().unit.speed
 		self.movingFrom = self.currentSquare()
 		x, y = self.movingFrom.position
 		withinRange = [(x,y)]	# coord of self
@@ -871,6 +890,7 @@ class GUI():
 		elif self.parent.mode == "weaponMenu":
 			self.weaponMenu.draw()
 		elif self.parent.mode == "showContent":
+			self.contentMenu.reset()
 			self.contentMenu.draw()
 
 
@@ -1135,8 +1155,13 @@ class GUI():
 		fromHex = self.mainMap[xFrom][yFrom]
 		toHex = self.mainMap[xTo][yTo]
 		# remove unit from matrix and save it, display map without unit
-		_unitMoved = fromHex.unit
-		fromHex.unit = None
+		if self.fromContent:
+			_unitMoved = self.parent.interface.contentMenu.content[self.fromContent[0]][self.fromContent[1]]
+			self.parent.interface.contentMenu.content[self.fromContent[0]][self.fromContent[1]] = False
+			self.fromContent = False
+		else:
+			_unitMoved = fromHex.unit
+			fromHex.unit = None
 		self.generateMap()
 		for coord in movePath:
 			x, y = coord

@@ -139,7 +139,7 @@ class Main():
 					self.interface.actionMenu.create()
 					self.mode = "actionMenu"
 		elif self.mode == "selectMoveTo":
-			if cursorHex.fogofwar:				# if field is clear, execute move, else cancel move and return to normal mode
+			if cursorHex.fogofwar:				# if field is not clear, cancel move and return to normal mode, else execute move
 				self.interface.generateMap()
 				self.mode = "normal"
 			else:
@@ -237,9 +237,7 @@ class Main():
 				self.checkInput()
 			self.interface.draw()
 			pygame.display.update()
-
-	#		print(str(self.mode))
-
+#			print(str(self.mode))
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
@@ -262,7 +260,6 @@ obj.run()
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - show data of contents of unit
 # - enable content-units to move out of content
 # - rewrite loading of level. Should happen in main, and it should be possible to select a level
 
