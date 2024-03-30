@@ -15,6 +15,19 @@ colors = colorList
 
 # --- Classes -------------------------------------------------------------------------------------
 
+class Content():
+	""" Representation of content of a unit or hex """
+
+	def __init__(self, _max):
+		self.units = [[False for x in range(9)], [False for x in range(9)]]
+		self.storageMax = _max
+
+	def storageActual(self):
+		row1 = sum([x.weight for x in self.units[0] if x])
+		row2 = sum([x.weight for x in self.units[1] if x])
+		return row1 + row2
+
+
 
 class Weapon():
 	""" Representation of one weapon """
@@ -44,8 +57,6 @@ class Unit():
 			self.armour = data['armour']
 			self.speed = data['speed']
 			self.weight = data['weight']
-			self.storageMax = data['storageMax']
-			self.storageActual = 0
 			self.sight = data['sight']
 			self.fuel = data['fuel']
 			self.experience = 0
@@ -55,8 +66,7 @@ class Unit():
 			self.maxSize = 10		# all units size 10?
 			self.currentSize = 10
 			self.faction = 'Central Powers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'Entente Cordial'
-			if self.storageMax > 0:
-				self.content = [[False for x in range(9)], [False for x in range(9)]]
+			self.content = Content(data['storageMax']) if data['storageMax'] > 0 else False
 			for w in data['weapons']:
 				if w:
 					self.weapons.append(Weapon(w))
@@ -79,7 +89,7 @@ class Unit():
 							arr[i, j] = [56, 72, 36]
 						elif np.array_equal(arr[i, j], [180, 148, 124]):
 							arr[i, j] = [88, 104, 36]
-			self.contentIcon = rot_center(rawIcon, 180) if self.faction == 'Central Powers' else rawIcon 	# preserve samll icon to show in content
+			self.contentIcon = rot_center(rawIcon, 180) if self.faction == 'Central Powers' else rawIcon 	# preserve small icon to show in content
 			rawIcon = pygame.transform.scale2x(rawIcon)
 			self.allIcons = [	rawIcon,
 								rot_center(rawIcon, 60),
@@ -143,16 +153,12 @@ class HexSquare():
 		self.sightModifier = bgTilesModifiers[hexType][2]
 		if hexType == 'hqN':
 			self.name = "Headquarters"
-			self.content = [[False for x in range(9)], [False for x in range(9)]]
-			self.storageMax = 50
-			self.storageActual = 0
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
+			self.content = Content(50)
 		elif hexType == 'cmpN':
 			self.name = "Depot"
-			self.content = [[False for x in range(9)], [False for x in range(9)]]
-			self.storageMax = 40
-			self.storageActual = 0
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
+			self.content = Content(40)
 		else:
 			self.content = False
 		if infrastructure:
@@ -203,8 +209,8 @@ class ContentMenu():
 		self.content = holdingUnit.content
 		self.focused = [RangeIterator(9), RangeIterator(2)]
 		nameText = font20.render(str(holdingUnit.name), True, colors.white)
-		actualContentText = font20.render(str(holdingUnit.storageMax), True, colors.red) 
-		maxContentText    = font20.render(str(holdingUnit.storageActual), True, colors.red)
+		actualContentText = font20.render(str(holdingUnit.content.storageMax), True, colors.red) 
+		maxContentText    = font20.render(str(holdingUnit.content.storageActual()), True, colors.red)
 		self._frame = self.frame.copy()
 		self._frame.blit(holdingUnit.picture,	(36, 40))
 		self._frame.blit(nameText, 				(384 - (nameText.get_width() / 2), 55))
@@ -263,27 +269,23 @@ class ContentMenu():
 
 
 	def endMenu(self):
-		if self.content[self.focused[1].count][self.focused[0].count]:
+		if self.content.units[self.focused[1].count][self.focused[0].count]:
 			self.parent.interface.fromContent = (self.focused[1].count, self.focused[0].count)	# index of unit to move
 			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
-			# subtract weight
-			_weight = self.parent.interface.currentSquare().unit.content[self.focused[1].count][self.focused[0].count].weight
-			self.parent.interface.currentSquare().unit.storageActual -= _weight
-
 
 
 	def draw(self):
 		_frame = self._frame.copy()
 		for y in range(9):
 			for x in range(2):
-				if self.content[x][y]:
-					_frame.blit(self.content[x][y].contentIcon, [38 + (y * 50), 545 + (x * 50)])
+				if self.content.units[x][y]:
+					_frame.blit(self.content.units[x][y].contentIcon, [38 + (y * 50), 545 + (x * 50)])
 		# draw info for highlighted unit, if any
 		focusX = self.focused[0].count
 		focusY = self.focused[1].count
 		# update unit name and info
-		if self.content[focusY][focusX]:
-			_unit = self.content[focusY][focusX]
+		if self.content.units[focusY][focusX]:
+			_unit = self.content.units[focusY][focusX]
 			unitGUI = pygame.Surface((662, 438))
 			unitGUI.blit(self.parent.interface.backgroundTextureUnit, (4, 4))
 			unitPanel = self.parent.interface.unitPanel.copy()
@@ -446,7 +448,7 @@ class ActionMenu():
 		if _focusedUnit.weapons != [None, None, None, None]:		# DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
 			if self.parent.interface.markAttackableSquares(True):
 				self.contents.append(self.buttonAttack)
-		if _focusedUnit.storageMax:
+		if _focusedUnit.content:
 			self.contents.append(self.buttonContain)
 		self.contents.append(self.buttonExit)
 		self.focused = RangeIterator(len(self.contents))
@@ -746,7 +748,7 @@ class GUI():
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
 			Must be called each time player selects move """
 		if self.fromContent:
-			unitSpeed = self.parent.interface.contentMenu.content[self.fromContent[0]][self.fromContent[1]].speed
+			unitSpeed = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]].speed
 		else:
 			unitSpeed = self.currentSquare().unit.speed
 		self.movingFrom = self.currentSquare()
@@ -760,23 +762,28 @@ class GUI():
 		movableSquares.remove(self.movingFrom.position)
 		obstructed = []
 		for x, y in movableSquares:
-			if self.mainMap[x][y].fogofwar != 0:
+			if self.mainMap[x][y].fogofwar != 0 and self.mainMap[x][y].fogofwar != 2:
 				obstructed.append((x,y))
 			elif self.mainMap[x][y].unit:
-				if self.mainMap[x][y].unit.storageMax == 0:		# do not remove units that has storage
-					obstructed.append((x,y))
-				elif self.currentSquare().unit.weight + self.mainMap[x][y].unit.storageActual > self.mainMap[x][y].unit.storageMax:			# if not enough room 
-					obstructed.append((x,y))
-			elif self.mainMap[x][y].movementModifier == None:
-				if type(self.mainMap[x][y].content) != list:			# if hex has a storage
+				if self.mainMap[x][y].unit.faction != self.parent.playerSide:
+					obstructed.append((x,y))		# remove if opposing units
+				else:
+					if self.mainMap[x][y].unit.content:		# if unit has storage, check if enough room
+						if self.currentSquare().unit.weight + self.mainMap[x][y].unit.content.storageActual() > self.mainMap[x][y].unit.content.storageMax: 
+							obstructed.append((x,y))
+					else:
+						obstructed.append((x,y))
+			if self.mainMap[x][y].movementModifier == None:
+				if self.mainMap[x][y].content == False:			# if hex does not have a storage
 					obstructed.append((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
-			movableSquares.remove(pos)
+			if pos in movableSquares: 
+				movableSquares.remove(pos)
 		# mark squares not possible to target 
 		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
-				if self.mainMap[x][y].fogofwar == 0 and (x,y) not in movableSquares:
+				if self.mainMap[x][y].fogofwar != 1 and (x,y) not in movableSquares:
 					self.mainMap[x][y].fogofwar = 3
 
 
@@ -1127,7 +1134,7 @@ class GUI():
 					if square.unit:
 						if square.unit.faction != "Central Powers":		# if they are not ours
 							neighbors.remove(n)
-					elif square.fogofwar:			# if field not clear
+					elif square.fogofwar != 0 and square.fogofwar != 2:			# if field not clear
 						neighbors.remove(n)
 					if n in visited and n in neighbors:				# We don't want paths to visit previously visited fields
 						neighbors.remove(n)
@@ -1156,8 +1163,8 @@ class GUI():
 		toHex = self.mainMap[xTo][yTo]
 		# remove unit from matrix and save it, display map without unit
 		if self.fromContent:
-			_unitMoved = self.parent.interface.contentMenu.content[self.fromContent[0]][self.fromContent[1]]
-			self.parent.interface.contentMenu.content[self.fromContent[0]][self.fromContent[1]] = False
+			_unitMoved = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]]
+			self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]] = False
 			self.fromContent = False
 		else:
 			_unitMoved = fromHex.unit
@@ -1215,20 +1222,18 @@ class GUI():
 			pixelCoordYfrom = pixelCoordYto
 		# check if target has content
 		_delivered = False
-		if toHex.content != False:
+		if toHex.content:
 			for y in range(9):
 				for x in range(2):
-					if not _delivered and not toHex.content[x][y]:
+					if not _delivered and not toHex.content.units[x][y]:
 						_delivered = True
-						toHex.content[x][y] =_unitMoved			# NB! Unit is lost if unit its full, should not be possible
-						toHex.storageActual += _unitMoved.weight
-		elif toHex.unit and _unitMoved.weight + toHex.unit.storageActual <= toHex.unit.storageMax:			# if enough room 
+						toHex.content.units[x][y] =_unitMoved			# NB! Unit is lost if unit its full, should not be possible
+		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room 
 			for y in range(9):
 				for x in range(2):
-					if not _delivered and not toHex.unit.content[x][y]:
+					if not _delivered and not toHex.unit.content.units[x][y]:
 						_delivered = True
-						toHex.unit.content[x][y] =_unitMoved	# NB! Unit is lost if unit its full, must be handled
-						toHex.unit.storageActual += _unitMoved.weight
+						toHex.unit.content.units[x][y] =_unitMoved
 		else:
 			toHex.unit = _unitMoved
 		# generate and display new map with unit

@@ -139,14 +139,14 @@ class Main():
 					self.interface.actionMenu.create()
 					self.mode = "actionMenu"
 		elif self.mode == "selectMoveTo":
-			if cursorHex.fogofwar:				# if field is not clear, cancel move and return to normal mode, else execute move
-				self.interface.generateMap()
-				self.mode = "normal"
-			else:
+			if cursorHex.fogofwar == 0 or cursorHex.fogofwar == 2:				# if field is clear, execute move, else cancel move and return to normal mode	
 				moveFrom = self.interface.movingFrom.position
 				moveTo = cursorHex.position
 				movePath = self.interface.findPath(moveFrom, moveTo)
 				self.interface.executeMove(movePath)
+				self.mode = "normal"
+			else:
+				self.interface.generateMap()
 				self.mode = "normal"
 		elif self.mode == "selectAttack":
 			if cursorHex.fogofwar:				# if field is clear, show menu selection menu, else cancel move and return to normal mode
@@ -260,17 +260,15 @@ obj.run()
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - enable content-units to move out of content
 # - rewrite loading of level. Should happen in main, and it should be possible to select a level
-
+# 		- self.playerSide er hardcoded!
+# - OWN hex with depots should never be grayed out (and neither should surrounding hexes)
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - units do not move along shortest path
 #	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-# - units cannot move to grey/previsously seen hexes
-# - Hex with depots should never be grayed out (and neither should surrounding hexes)
 
 
 
