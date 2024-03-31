@@ -19,7 +19,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.70'		# contents done
+version = '0.70.1'		# can take depots
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -211,6 +211,10 @@ class Main():
 			self.test[1] -= 1
 		elif keysPressed[pygame.K_KP2]:
 			self.test[1] += 1
+		elif keysPressed[pygame.K_d]:
+			print(self.interface.mainMap[5][0].name, self.interface.mainMap[5][0].owner)
+			print(self.interface.mainMap[18][5].name, self.interface.mainMap[18][5].owner)
+			sys.exit()
 		# ------------------------------------- test end ---------------------------------------
 		elif keysPressed[pygame.K_PAGEUP]:
 			self.interface.mapView = [0, 0]
@@ -246,6 +250,7 @@ parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpForma
 parser.add_argument('levelMap')
 parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
 parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields")
+parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show entire map")
 args = parser.parse_args()
 
 #check if map exists
@@ -268,7 +273,7 @@ obj =  Main(args)
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - Own hex with depots should never be grayed out (and neither should surrounding hexes)
+# - only cavalery and infantry can take depots
 
 
 

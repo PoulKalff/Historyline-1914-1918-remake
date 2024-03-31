@@ -534,14 +534,6 @@ def greyscale(surface: pygame.Surface):
 	return surface_copy
 
 
-def changeDepotColours(image, faction):     # 0: None, 1: CentralPowers, 2: Allies
-	""" overwrites the colours on the depot/HQ hex """
-	colImage = pygame.image.load('gfx/hexTypes/depotOwnership.png')
-	cutoutImage = colImage.subsurface((0, faction * 6, 35, 6))
-	image.blit(cutoutImage, (31, 14))
-	return image
-
-
 def adjacentHexes(x, y, maxX, maxY):
 	""" returns a list of 6 pairs of coords of the hexes that borders hex of coord given """
 	checked = []

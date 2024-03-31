@@ -12,6 +12,7 @@ from hlrData import *
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 colors = colorList
+players = {'None' : 0, 'Central Powers' : 1, 'Entente Cordial' : 2}
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -133,8 +134,6 @@ class Unit():
 
 
 
-
-
 class HexSquare():
 	""" Representation of one hex """
 
@@ -155,13 +154,13 @@ class HexSquare():
 			self.name = "Headquarters"
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
 			self.owner = owner if owner else 0		# 0 for None, 1 for Entente, 2 for CP 
-			self.background = changeDepotColours(self.background, self.owner)
+			self.updateDepotColours(self.owner)
 			self.content = Content(50)
 		elif hexType == 'cmpN':
 			self.name = "Depot"
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
 			self.owner = owner if owner else 0		# 0 for None, 1 for Entente, 2 for CP
-			self.background = changeDepotColours(self.background, self.owner)
+			self.updateDepotColours(self.owner)
 			self.content = Content(40)
 		else:
 			self.content = False
@@ -184,6 +183,16 @@ class HexSquare():
 			elif infrastructure.startswith("trench"):
 				self.movementModifier = 10
 				self.battleModifier = 10
+
+
+	def updateDepotColours(self, _owner):     # 0: None, 1: CentralPowers, 2: Allies
+		""" overwrites the colours on the depot/HQ hex """
+		colImage = pygame.image.load('gfx/hexTypes/depotOwnership.png')
+		cutoutImage = colImage.subsurface((0, _owner * 6, 35, 6))
+
+		_bg = self.background.copy()
+		_bg.blit(cutoutImage, (31, 14))
+		self.background = _bg
 
 
 	def getPixelCooords(self):
@@ -847,6 +856,7 @@ class GUI():
 	def calculateFOW(self):
 		""" checks each hexSquare on the map and marks it as visible if it can be seen by any friendly unit 
 			must be called each time player moves a piece"""
+		depotSquares = []
 		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				self.mainMap[x][y].fogofwar = 2 if self.mainMap[x][y].seen else 1
@@ -865,11 +875,27 @@ class GUI():
 								self.mainMap[c[0]][c[1]].seen = True
 							except:
 								print("Coordinate exceed map size in calculateFOW():", c)
+				if hasattr(self.mainMap[x][y], 'owner') and self.mainMap[x][y].owner == players[self.parent.playerSide]:
+					depotSquares.append((x, y))
+					neighbors = adjacentHexes(x, y, self.mapWidth, self.mapHeight)
+					for n in neighbors:
+						depotSquares.append(n)
+		# mark all squares around depots/HQ as visible
+		for x, y in depotSquares:
+			self.mainMap[x][y].fogofwar = 0
+		# --- FOR TEST --- Reveal whole map ------------------------------------------------
+		if self.parent.cmdArgs.reveal:
+			for x in range(self.mapHeight):
+				for y in range(len(self.mainMap[x])):
+					self.mainMap[x][y].fogofwar = 0
+		# --- FOR TEST --- Reveal whole map ------------------------------------------------
+
 
 
 	def getSquare(self, coord):
 		""" returns the hexSquare with the given coordinates"""
 		return self.mainMap[coord[0]][coord[1]]
+
 
 
 	def currentSquare(self, coords = False):
@@ -1236,12 +1262,9 @@ class GUI():
 					if not _delivered and not toHex.content.units[x][y]:
 						_delivered = True
 						toHex.content.units[x][y] =_unitMoved			# NB! Unit is lost if unit its full, should not be possible
-						# change flag of Hex
-						toHex.background = changeDepotColours(toHex.background, 1 if self.parent.playerSide == "Central Powers" else 2)
-
-
-
-
+						# change ownership and flag of Hex
+						toHex.owner = 1 if self.parent.playerSide == "Central Powers" else 2
+						toHex.updateDepotColours(toHex.owner)
 		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room. unit entered
 			for y in range(9):
 				for x in range(2):
