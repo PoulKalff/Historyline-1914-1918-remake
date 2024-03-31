@@ -138,7 +138,7 @@ class Unit():
 class HexSquare():
 	""" Representation of one hex """
 
-	def __init__(self, pos, hexType, infrastructure, unit):
+	def __init__(self, pos, hexType, infrastructure, unit, owner = None):
 		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
 		self.bgGrey = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
 		self.bgHidden = self.bgGrey.copy()
@@ -154,10 +154,14 @@ class HexSquare():
 		if hexType == 'hqN':
 			self.name = "Headquarters"
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
+			self.owner = owner if owner else 0		# 0 for None, 1 for Entente, 2 for CP 
+			self.background = changeDepotColours(self.background, self.owner)
 			self.content = Content(50)
 		elif hexType == 'cmpN':
 			self.name = "Depot"
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
+			self.owner = owner if owner else 0		# 0 for None, 1 for Entente, 2 for CP
+			self.background = changeDepotColours(self.background, self.owner)
 			self.content = Content(40)
 		else:
 			self.content = False
@@ -533,16 +537,9 @@ class ActionMenu():
 class GUI():
 	""" Representation of the background """
 
-	def __init__(self, parent, levelNo):
+	def __init__(self, parent):
 		self.parent = parent
-		self.mainMap = []
-		# read data
-		with open('levels/level' + str(levelNo) + '.json') as json_file:
-			jsonLevelData = json.load(json_file)
-		self.squareWidth = len(jsonLevelData["tiles"]["line1"])			# 8 for level 1
-		self.squareHeight = len(jsonLevelData["tiles"])					# 47 for level 1
-		self.pixelWidth = self.squareWidth * 142
-		self.pixelHeight = self.squareHeight * 40
+		# load constants
 		self.flagIndex = {'Germany' : 0, 'France' : 1}
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.cursorFromGfx = pygame.image.load('gfx/cursor_from.png')
@@ -567,11 +564,22 @@ class GUI():
 		self.contentMenu = ContentMenu(self.parent)
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
+		self.mainMap = []
 		self.fromContent = False 	# flag, shows moveUnit to not move the unit of current hex
-		# texts
+		# gfxTexts
 		self.movementModifierText = font20.render('Movement Penalty', True, colors.black) 	# [movementModifierText, rMovementModifierText]
 		self.battleModifierText = font20.render('Battle Advantage', True, colors.black)		#[battleModifierText, rBattleModifierText]
 		self.sightModifierText = font20.render('Sight Hindrance', True, colors.black)				# [sightModifierText, rSightModifierText]
+		# load map data
+		with open(parent.cmdArgs.mapPath) as json_file:
+			jsonLevelData = json.load(json_file)
+		self.parent.playerSide = jsonLevelData["faction"]
+		self.parent.mapName = jsonLevelData["name"]
+		self.parent.mapNumber = jsonLevelData["levelNo"]
+		self.squareWidth = len(jsonLevelData["tiles"]["line1"])			# 8 for level 1
+		self.squareHeight = len(jsonLevelData["tiles"])					# 47 for level 1
+		self.pixelWidth = self.squareWidth * 142
+		self.pixelHeight = self.squareHeight * 40
 		for nrX, value in enumerate(jsonLevelData['tiles'].values()):
 			line = []
 			for nrY, square in enumerate(value):
@@ -1222,13 +1230,19 @@ class GUI():
 			pixelCoordYfrom = pixelCoordYto
 		# check if target has content
 		_delivered = False
-		if toHex.content:
+		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
 			for y in range(9):
 				for x in range(2):
 					if not _delivered and not toHex.content.units[x][y]:
 						_delivered = True
 						toHex.content.units[x][y] =_unitMoved			# NB! Unit is lost if unit its full, should not be possible
-		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room 
+						# change flag of Hex
+						toHex.background = changeDepotColours(toHex.background, 1 if self.parent.playerSide == "Central Powers" else 2)
+
+
+
+
+		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room. unit entered
 			for y in range(9):
 				for x in range(2):
 					if not _delivered and not toHex.unit.content.units[x][y]:

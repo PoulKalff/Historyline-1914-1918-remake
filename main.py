@@ -19,7 +19,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.54'		# units move almost completed
+version = '0.70'		# contents done
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -41,17 +41,13 @@ class Main():
 		self.mouseClick = pygame.time.Clock()
 		self.holdEscape = False
 		self.mode = "normal"		# selection mode: normal, actionMenu, weaponMenu, selectMoveTo, moveTo, selectAttack, attack
-
-
-	def run(self):
 		self.initGame()
 		self.loop()
 
 
 	def initGame(self):
 		self.running = True
-		self.playerSide = 'Central Powers'			# hardcoded, for now
-		self.interface = GUI(self, 1)
+		self.interface = GUI(self)
 		self.test = [0, 0]
 
 
@@ -247,12 +243,24 @@ class Main():
 
 #check arguments
 parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=120))
+parser.add_argument('levelMap')
 parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
 parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields")
 args = parser.parse_args()
 
+#check if map exists
+args.mapPath = "levels/" + args.levelMap + ".json"
+if not os.path.exists(args.mapPath):
+	print("\n  The level '" + str(args.levelMap) + "' does not exist.")
+	print("    These are the level files:")
+	levelFiles = os.listdir("levels")
+	for l in levelFiles:
+		print("      ", l)
+	print()
+	sys.exit()
+
+# run game
 obj =  Main(args)
-obj.run()
 
 
 
@@ -260,16 +268,14 @@ obj.run()
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - rewrite loading of level. Should happen in main, and it should be possible to select a level
-# 		- self.playerSide er hardcoded!
-# - OWN hex with depots should never be grayed out (and neither should surrounding hexes)
+# - Own hex with depots should never be grayed out (and neither should surrounding hexes)
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - units do not move along shortest path
 #	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-
+# - cannot move units below first screen
 
 
 # --- NOTES --------------------------------------------------------------------------------------
