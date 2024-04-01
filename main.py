@@ -20,6 +20,7 @@ from hlrData import *
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 version = '0.70.1'		# can take depots
+players = {'None' : 0, 'Central Powers' : 1, 'Entente Cordial' : 2}
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -128,8 +129,9 @@ class Main():
 		cursorHex = self.interface.currentSquare()
 		if self.mode == "normal":
 			if cursorHex.content != False:	# if square has content ability
-				self.interface.contentMenu.create(cursorHex)
-				self.mode = "showContent"
+				if cursorHex.owner == players[self.playerSide]:
+					self.interface.contentMenu.create(cursorHex)
+					self.mode = "showContent"
 			else:
 				if cursorHex.unit and cursorHex.unit.faction == self.playerSide:
 					self.interface.actionMenu.create()
@@ -250,7 +252,7 @@ parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpForma
 parser.add_argument('levelMap')
 parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
 parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields")
-parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show entire map")
+parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show entire map (for DEV)")
 args = parser.parse_args()
 
 #check if map exists
@@ -273,19 +275,18 @@ obj =  Main(args)
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - only cavalery and infantry can take depots
+# - move units below first screen
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - units do not move along shortest path
 #	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-# - cannot move units below first screen
 
 
 # --- NOTES --------------------------------------------------------------------------------------
-# - 
-
+# - should rethink playerside / owner. Not sure what is the idea behind original design. Player vs Opponent is one thing, but how does it compare to Entente vs CentralPowers?
+# - should allow user to see un-owned depots (problem that units cannot be un-owned?)
 
 
 

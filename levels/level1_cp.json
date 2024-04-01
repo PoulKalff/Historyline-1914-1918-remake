@@ -8,7 +8,7 @@
 					"line3":	[["stream24","",""],["grass","road25",""],["forest","",""],["forest","",""],["forest","",""],["forest","",""],["grass","",""],["forest","",""]],
 					"line4":	[["stream25","road36","CP_lArtillery"],["grass","road25","CP_cavalry"],["grass","","CP_bunker"],["forest","",""],["forest","",""],["house","",""],["grass","",""]],
 					"line5":	[["forest","",""],["stream25","",""],["grass","road35",""],["forest","",""],["hills","",""],["grass","",""],["grass","",""],["forest","",""]],
-					"line6":	[["hqN","","",1],["stream35","",""],["grass","","EC_infantry"],["grass","","CP_infantry"],["hills","",""],["grass","",""],["forest","",""]],
+					"line6":	[["hqN","","", [1]],["stream35","",""],["grass","","EC_infantry"],["grass","","CP_infantry"],["hills","",""],["grass","",""],["forest","",""]],
 					"line7":	[["hqNW","",""],["hqNE","",""],["grass","road36","CP_supplyCar"],["grass","","CP_eliteInf"],["grass","","CP_eliteInf"],["hills","",""],["grass","","CP_cavalry"],["forest","",""]],
 					"line8":	[["hqC","",""],["stream36","",""],["grass","",""],["grass","","CP_infantry"],["forest","",""],["grass","",""],["forest","",""]],
 					"line9":	[["hqSW","",""],["hqSE","",""],["grass","road236","CP_supplyCar"],["grass","","CP_infantry"],["grass","","CP_infantry"],["grass","",""],["grass","",""],["forest","",""]],
@@ -21,7 +21,13 @@
 					"line16":	[["forest","",""],["grass","",""],["grass","",""],["grass","",""],["mountain","",""],["grass","",""],["hills","",""]],
 					"line17":	[["forest","",""],["forest","",""],["forest","",""],["grass","",""],["grass","",""],["grass","road346",""],["stone","",""],["mountain","",""]],
 					"line18":	[["forest","",""],["forest","",""],["grass","",""],["grass","",""],["grass","path14",""],["grass","",""],["mountain","",""]],
-					"line19":	[["forest","",""],["forest","",""],["forest","",""],["grass","",""],["grass","path14",""],["cmpN","",""],["mountain","",""],["forest","",""]],
+					"line19":	[["forest","",""],["forest","",""],["forest","",""],["grass","",""],["grass","path14",""],["cmpN","",""
+
+
+
+						,[0, ["CP_lArtillery", "CP_supplyCar"]]
+
+					],["mountain","",""],["forest","",""]],
 					"line20":	[["forest","",""],["hills","",""],["grass","",""],["grass","path14",""],["cmpW","",""],["cmpE","",""],["hills","",""]],
 					"line21":	[["forest","",""],["forest","",""],["grass","",""],["grass","path14",""],["grass","",""],["cmpS","",""],["hills","",""],["hills","",""]],
 					"line22":	[["forest","",""],["forest","",""],["grass","path13",""],["grass","",""],["house","",""],["forest","",""],["grass","",""]],
@@ -44,7 +50,7 @@
 					"line39":	[["forest","",""],["house","",""],["stone","",""],["hills","",""],["hills","",""],["grass","road25","EC_infantry"],["grass","",""],["hills","",""]],
 					"line40":	[["hills","",""],["hills","",""],["stone","",""],["grass","",""],["mud","","EC_bunker"],["grass","road35",""],["stone","",""]],
 					"line41":	[["forest","",""],["stone","",""],["stone","",""],["stone","",""],["mud","","EC_eliteInf"],["mud","",""],["grass","",""],["grass","",""]],
-					"line42":	[["forest","",""],["forest","",""],["grass","",""],["grass","",""],["mud","",""],["hqN","","",2],["grass","",""]],
+					"line42":	[["forest","",""],["forest","",""],["grass","",""],["grass","",""],["mud","",""],["hqN","","",[2]],["grass","",""]],
 					"line43":	[["mountain","",""],["forest","",""],["forest","",""],["grass","",""],["hills","",""],["hqNW","",""],["hqNE","",""],["grass","",""]],
 					"line44":	[["mountN","",""],["forest","",""],["hills","",""],["hills","",""],["hills","",""],["hqC","",""],["house","",""]],
 					"line45":	[["mountW","",""],["mountE","",""],["forest","",""],["forest","",""],["hills","",""],["hqSW","",""],["hqSE","",""],["hills","",""]],

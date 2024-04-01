@@ -5,543 +5,14 @@ import copy
 import math
 import pygame
 import random
-import numpy as np
 import pygame.surfarray as surfarray
 from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-colors = colorList
 players = {'None' : 0, 'Central Powers' : 1, 'Entente Cordial' : 2}
 
 # --- Classes -------------------------------------------------------------------------------------
-
-class Content():
-	""" Representation of content of a unit or hex """
-
-	def __init__(self, _max):
-		self.units = [[False for x in range(9)], [False for x in range(9)]]
-		self.storageMax = _max
-
-	def storageActual(self):
-		row1 = sum([x.weight for x in self.units[0] if x])
-		row2 = sum([x.weight for x in self.units[1] if x])
-		return row1 + row2
-
-
-
-class Weapon():
-	""" Representation of one weapon """
-
-	def __init__(self, key):
-		if key:
-			data = weaponsParameters[key]
-			self.name = data['name']	
-			self.rangeMin = data['rangeMin']
-			self.rangeMax = data['rangeMax']
-			self.power = data['power']
-			self.air = data['air']
-			self.ground = data['ground']
-			self.water = data['water']
-			self.ammo = data['ammo']
-			self.picture = data['picture']
-
-
-class Unit():
-	""" Representation of one unit	"""
-
-	def __init__(self, key):
-		if key:
-			data = unitsParameters[key]
-			self.name = data['name']
-			self.country = data['country']
-			self.armour = data['armour']
-			self.speed = data['speed']
-			self.weight = data['weight']
-			self.sight = data['sight']
-			self.fuel = data['fuel']
-			self.experience = 0
-			self.skills = data['skills']
-			self.weapons = []
-			self.weaponsGfx = []
-			self.maxSize = 10		# all units size 10?
-			self.currentSize = 10
-			self.faction = 'Central Powers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'Entente Cordial'
-			self.content = Content(data['storageMax']) if data['storageMax'] > 0 else False
-			for w in data['weapons']:
-				if w:
-					self.weapons.append(Weapon(w))
-				else:
-					self.weapons.append(None)
-			self.picture = data['picture']
-			rawIcon = data['icon']
-			# if central powers, rotate and colourize icon
-			if self.faction == 'Central Powers':
-				arr = pygame.surfarray.pixels3d(rawIcon)
-				for i in range(48):
-					for j in range(48): # loop over the 2d array
-						if np.array_equal(arr[i, j], [164, 132, 112]):
-							arr[i, j] = [72, 88, 52]
-						elif np.array_equal(arr[i, j], [80, 68, 52]):
-							arr[i, j] = [24, 40, 20]
-						elif np.array_equal(arr[i, j], [216, 188, 160]):
-							arr[i, j] = [148, 168, 100]
-						elif np.array_equal(arr[i, j], [144, 112,  88]):
-							arr[i, j] = [56, 72, 36]
-						elif np.array_equal(arr[i, j], [180, 148, 124]):
-							arr[i, j] = [88, 104, 36]
-			self.contentIcon = rot_center(rawIcon, 180) if self.faction == 'Central Powers' else rawIcon 	# preserve small icon to show in content
-			rawIcon = pygame.transform.scale2x(rawIcon)
-			self.allIcons = [	rawIcon,
-								rot_center(rawIcon, 60),
-								rot_center(rawIcon, 120),
-								rot_center(rawIcon, 180),
-								rot_center(rawIcon, 240),
-								rot_center(rawIcon, 300),
-							 ]
-			self.mapIcon = self.allIcons[3] if self.faction == 'Central Powers' else self.allIcons[0]
-			self.updateWeaponsGfx()
-
-
-	def updateWeaponsGfx(self):
-		""" Creates the gfx for all weapons, based on the self.weapons """
-		self.weaponsGfx = []	# reset
-		for y in range(4):
-			weapon = self.weapons[y]
-			if weapon:
-				_weaponGfx = weapon.picture.copy()
-				# render weapon gfx background
-				if weapon.ammo:
-					# render ammo
-					ammoText = font30.render(str(weapon.ammo), True, colors.grey, colors.almostBlack)
-					rAmmoText = ammoText.get_rect()
-					rAmmoText.topleft = (12, 10)
-					pygame.draw.rect(_weaponGfx, colors.almostBlack, (0, 0, 41, 50), 0)
-					_weaponGfx.blit(ammoText, rAmmoText)
-				# render power
-				powerText = font20.render(str(weapon.power), True, colors.grey)
-				rPowerText = powerText.get_rect()
-				rPowerText.topleft = (312, 30)
-				_weaponGfx.blit(powerText, rPowerText)
-				# render range
-				powerText = font20.render(str(weapon.rangeMin) + ' - ' + str(weapon.rangeMax), True, colors.grey)
-				rPowerText = powerText.get_rect()
-				rPowerText.topleft = (601, 30)
-				_weaponGfx.blit(powerText, rPowerText)
-				self.weaponsGfx.append(_weaponGfx)
-			else:
-				self.weaponsGfx.append(pygame.image.load('gfx/weapons/empty.png'))
-
-
-
-class HexSquare():
-	""" Representation of one hex """
-
-	def __init__(self, pos, hexType, infrastructure, unit, owner = None):
-		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
-		self.bgGrey = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
-		self.bgHidden = self.bgGrey.copy()
-		self.bgHidden.blit(bgTiles['unseen'], (0,0))							# Never seen by player (mapcolour, with outline)
-		self.seen = False										# has the square ever been visible?
-		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
-		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
-		self.fogofwar = None									# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
-		self.position = pos
-		self.movementModifier = bgTilesModifiers[hexType][0]
-		self.battleModifier = bgTilesModifiers[hexType][1]
-		self.sightModifier = bgTilesModifiers[hexType][2]
-		if hexType == 'hqN':
-			self.name = "Headquarters"
-			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
-			self.owner = owner if owner else 0		# 0 for None, 1 for Entente, 2 for CP 
-			self.updateDepotColours(self.owner)
-			self.content = Content(50)
-		elif hexType == 'cmpN':
-			self.name = "Depot"
-			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
-			self.owner = owner if owner else 0		# 0 for None, 1 for Entente, 2 for CP
-			self.updateDepotColours(self.owner)
-			self.content = Content(40)
-		else:
-			self.content = False
-		if infrastructure:
-			self.infra = infraIcons[infrastructure]
-			self.bgGrey.blit(greyscale(self.infra), (0,0))	# grayscale and blit any infrastructure on the hidden filed gfx
-			if infrastructure.startswith("road"):
-				self.movementModifier = 0
-				self.battleModifier = 0
-			elif infrastructure.startswith("path"):
-				self.movementModifier = 1
-				self.battleModifier = 0
-			elif infrastructure.startswith("bridge"):
-				self.movementModifier = 1
-				self.battleModifier = 0
-			elif infrastructure.startswith("rail"):
-				self.movementModifier = 0
-			elif infrastructure.startswith("barbed"):
-				self.movementModifier = 10
-			elif infrastructure.startswith("trench"):
-				self.movementModifier = 10
-				self.battleModifier = 10
-
-
-	def updateDepotColours(self, _owner):     # 0: None, 1: CentralPowers, 2: Allies
-		""" overwrites the colours on the depot/HQ hex """
-		colImage = pygame.image.load('gfx/hexTypes/depotOwnership.png')
-		cutoutImage = colImage.subsurface((0, _owner * 6, 35, 6))
-
-		_bg = self.background.copy()
-		_bg.blit(cutoutImage, (31, 14))
-		self.background = _bg
-
-
-	def getPixelCooords(self):
-		""" Returns the coords where the hex is drawn """
-		forskydning = 71 if (self.position[0] % 2) != 0 else 0
-		pixelCooords = [self.position[1] * 142 + forskydning + 7, self.position[0] * 40 + 9]
-		return pixelCooords
-
-
-
-class ContentMenu():
-	""" Representation of menu showing content of building or units """
-
-	def __init__(self, parent):
-		self.parent = parent
-		self.location = (950, 50)
-		self.xPos = 36
-		self.yPos = 543 
-		self.frame = pygame.image.load('gfx/content_frame.png')
-		self.cursorGfx = pygame.image.load('gfx/cursor_content.png')
-		self.actionMenu = ActionMenu(self.parent)
-
-
-
-	def create(self, holdingUnit):
-		""" Set picture and text """
-		self.content = holdingUnit.content
-		self.focused = [RangeIterator(9), RangeIterator(2)]
-		nameText = font20.render(str(holdingUnit.name), True, colors.white)
-		actualContentText = font20.render(str(holdingUnit.content.storageMax), True, colors.red) 
-		maxContentText    = font20.render(str(holdingUnit.content.storageActual()), True, colors.red)
-		self._frame = self.frame.copy()
-		self._frame.blit(holdingUnit.picture,	(36, 40))
-		self._frame.blit(nameText, 				(384 - (nameText.get_width() / 2), 55))
-		self._frame.blit(actualContentText,		(384 - (actualContentText.get_width() / 2), 132))
-		self._frame.blit(maxContentText,		(384 - (maxContentText.get_width() / 2), 201))
-
-
-	def reset(self):
-		""" Move marker to 0,0 """
-		self.focused[0].count = 0
-		self.focused[1].count = 0
-
-
-	def checkInput(self):
-		if self.actionMenu.active:
-			self.actionMenu.checkInput()
-		else:
-			for event in pygame.event.get():
-				mPos = pygame.mouse.get_pos()
-				# check mouseover
-				if 989 < mPos[0] < 1436 and 596 < mPos[1] < 694:
-					squareX = math.floor((mPos[0] - 989) / 50)
-					squareY = math.floor((mPos[1] - 596) / 50)
-					self.xPos = 36 + (squareX * 50) 
-					self.yPos = 543 + (squareY * 50)
-					self.focused[0].count = squareX
-					self.focused[1].count = squareY
-					if event.type == pygame.MOUSEBUTTONDOWN:
-						if self.parent.mouseClick.tick() < 500:						# if doubleclick detected
-							self.endMenu()
-				# Keyboard
-				if event.type == pygame.KEYDOWN:
-					if event.key == pygame.K_ESCAPE:	# close menu
-						self.parent.mode = "normal"
-						self.parent.holdEscape = True
-					elif event.key == pygame.K_w:
-						self.parent.mode = "normal"
-						self.parent.holdEscape = True
-					elif event.key == pygame.K_LEFT:
-						self.focused[0].dec()
-						pygame.time.wait(50)
-					elif event.key == pygame.K_RIGHT:
-						self.focused[0].inc()
-						pygame.time.wait(50)
-					elif event.key == pygame.K_UP:
-						self.focused[1].dec()
-						pygame.time.wait(50)
-					elif event.key == pygame.K_DOWN:
-						self.focused[1].inc()
-						pygame.time.wait(50)
-					elif event.key == pygame.K_RETURN:
-						self.endMenu()
-					self.xPos = 36 + (self.focused[0].get() * 50) 
-					self.yPos = 543 + (self.focused[1].get() * 50)
-					pygame.mouse.set_pos(self.location[0] + self.xPos + 35, self.location[1] + self.yPos + 35)
-
-
-	def endMenu(self):
-		if self.content.units[self.focused[1].count][self.focused[0].count]:
-			self.parent.interface.fromContent = (self.focused[1].count, self.focused[0].count)	# index of unit to move
-			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
-
-
-	def draw(self):
-		_frame = self._frame.copy()
-		for y in range(9):
-			for x in range(2):
-				if self.content.units[x][y]:
-					_frame.blit(self.content.units[x][y].contentIcon, [38 + (y * 50), 545 + (x * 50)])
-		# draw info for highlighted unit, if any
-		focusX = self.focused[0].count
-		focusY = self.focused[1].count
-		# update unit name and info
-		if self.content.units[focusY][focusX]:
-			_unit = self.content.units[focusY][focusX]
-			unitGUI = pygame.Surface((662, 438))
-			unitGUI.blit(self.parent.interface.backgroundTextureUnit, (4, 4))
-			unitPanel = self.parent.interface.unitPanel.copy()
-			unitPanel.blit(self.parent.interface.flags, [3, 3], (self.parent.interface.flagIndex[_unit.country] * 88, 0, 88, 88))
-			unitPanel.blit(_unit.mapIcon, [-1, -1])
-			unitPanel.blit(self.parent.interface.ranksGfx, [4, 103], (_unit.experience * 88, 0, 88, 88))
-			unitPanel.blit(_unit.picture, [380, 3])
-			gfx = font20.render(_unit.name, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
-			gfx = font20.render(_unit.faction, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
-			gfx = font20.render(str(_unit.sight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 105])
-			gfx = font20.render(str(_unit.speed), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 105])
-			gfx = font20.render(str(_unit.currentSize), True, (208, 185, 140)); unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 105])
-			gfx = font20.render(str(_unit.armour), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 155])
-			gfx = font20.render(str(_unit.weight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 155])
-			gfx = font20.render(str(_unit.fuel), True, (208, 185, 140)); 		unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 155])
-			# mark active skills
-			unitGUI.blit(self.parent.interface.unitSkills, [618, 11])
-			for x in _unit.skills:
-				unitGUI.blit(self.parent.interface.skillsMarker, [616, (x * 28) - 19])
-			# weapons
-			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 218, 662, 58), 4)							# weapons borders 1
-			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 326, 662, 58), 4)							# weapons borders 2
-			unitGUI.blit(_unit.weaponsGfx[0], [4, 222])
-			unitGUI.blit(_unit.weaponsGfx[1], [4, 276])
-			unitGUI.blit(_unit.weaponsGfx[2], [4, 330])
-			unitGUI.blit(_unit.weaponsGfx[3], [4, 384])
-			unitGUI.blit(unitPanel, [10, 10])
-			_frame.blit(pygame.transform.scale(unitGUI, (452, 285)), [36, 237])
-		# draw cursor
-		_frame.blit(self.cursorGfx, (self.xPos, self.yPos))
-		self.parent.display.blit(_frame, [self.location[0], self.location[1]])
-		# show menu, if activated
-		if self.actionMenu.active:
-			self.actionMenu.draw()
-		return
-
-
-
-class WeaponMenu():
-	""" Representation of the games' weapon menu """
-
-	def __init__(self, parent):
-		self.parent = parent
-		self.location = (50, 50)
-		self.cursorGfx = pygame.image.load('gfx/menuIcons/weaponMenuCursor.png')
-
-
-	def create(self, attackingSquare):
-		""" recreate the menu, calculate which buttons to include, should be called each time cursor is moved """
-		self.attackingSquare = attackingSquare
-		self.square = self.parent.interface.currentSquare()
-		self.location  = self.parent.interface.currentSquare(True)
-		self.location[0] += 110
-		self.location[1] -= 80
-		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
-		self.contents = []
-		for w in self.attackingSquare.unit.weaponsGfx:
-			self.contents.append([pygame.transform.scale(w, (332, 25) ) if w else None, None])
-		self.noOfWeapons = 0
-		for w in self.attackingSquare.unit.weapons:
-			if w != None:
-				self.noOfWeapons += 1
-		self.focused = RangeIterator(self.noOfWeapons)
-		# calculate rect for each weapon
-		for weaponNo in range(self.noOfWeapons):
-			_butLocation = self.location[1] + 4 + (weaponNo * 25)
-			self.contents[weaponNo][1] = pygame.Rect(self.location[0], _butLocation, 332, 25)
-
-
-
-	def checkInput(self):
-		for event in pygame.event.get():
-			mPos = pygame.mouse.get_pos()
-			# check mouseover
-			for weaponNo in range(self.noOfWeapons):
-				if self.contents[weaponNo][1].collidepoint(mPos):
-					self.focused.count = weaponNo
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				self.endMenu(self.focused.get())
-			# Keyboard
-			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:	# close menu
-					self.contents = []
-					self.parent.mode = "normal"
-					self.parent.holdEscape = True
-				elif event.key == pygame.K_w:
-					self.contents = []
-					self.parent.mode = "normal"
-					self.parent.holdEscape = True
-				elif event.key == pygame.K_UP:
-					self.focused.dec()
-					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
-					pygame.time.wait(50)
-				elif event.key == pygame.K_DOWN:
-					self.focused.inc()
-					pygame.mouse.set_pos(self.location[0] + 325, self.location[1] + 18 + (self.focused.get() * 25))
-					pygame.time.wait(50)
-				elif event.key == pygame.K_RETURN:
-					self.endMenu(self.focused.get())
-
-
-
-	def endMenu(self, result):
-		self.parent.mode = "normal"
-		self.parent.interface.generateMap()	# must generate and show clean map before showing battle
-		self.parent.interface.drawMap()
-		pygame.display.update()
-		self.parent.interface.handleBattle(self.attackingSquare, self.parent.interface.currentSquare(), self.attackingSquare.unit.weapons[result])
-
-
-	def draw(self):
-		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0] - 2, self.location[1] - 2, 336, 110))	# menu border
-		self.parent.display.blit(self.contents[0][0], [self.location[0], self.location[1]])
-		self.parent.display.blit(self.contents[1][0], [self.location[0], self.location[1] + 27])
-		self.parent.display.blit(self.contents[2][0], [self.location[0], self.location[1] + 54])
-		self.parent.display.blit(self.contents[3][0], [self.location[0], self.location[1] + 81])
-		self.parent.display.blit(self.cursorGfx,  [self.location[0] - 2 , self.location[1] + (self.focused.get() * 27) - 2])
-
-
-
-
-
-class ActionMenu():
-	""" Representation of the games' action menu """
-
-	def __init__(self, parent):
-		self.parent = parent
-		self.location = (50, 50)
-		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'),		None, 1]
-		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'),		None, 2]
-		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'),	None, 3]
-		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'),		None, 4]
-		self.active = False
-
-
-	def createSimple(self, location):
-		""" recreate the menu to be used in content """
-		self.location  = location
-		self.contents = [self.buttonMove, self.buttonExit]
-		self.focused = RangeIterator(len(self.contents))
-		self.menuWidth = 8 + (len(self.contents) * 62)
-		for butNr in range(len(self.contents)):
-			_butLocation = self.location[0] + 4 + (butNr * 62)
-			self.contents[butNr][2] = pygame.Rect(_butLocation, self.location[1] + 4, 62, 52)
-		self.focusedArray = [0 for x in range(len(self.contents))]
-		self.active = True			# currently only used in content!
-
-
-	def create(self):
-		""" recreate the menu, calculate which buttons to include, should be called each time cursor is moved """
-		self.square = self.parent.interface.currentSquare()
-		self.location  = self.parent.interface.currentSquare(True)
-		self.location[0] += 110
-		self.location[1] -= 30
-		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
-		self.contents = []
-		_focusedUnit = self.parent.interface.currentSquare().unit
-		if _focusedUnit.speed:
-			self.contents.append(self.buttonMove)
-		if _focusedUnit.weapons != [None, None, None, None]:		# DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
-			if self.parent.interface.markAttackableSquares(True):
-				self.contents.append(self.buttonAttack)
-		if _focusedUnit.content:
-			self.contents.append(self.buttonContain)
-		self.contents.append(self.buttonExit)
-		self.focused = RangeIterator(len(self.contents))
-		self.menuWidth = 8 + (len(self.contents) * 62)
-		for butNr in range(len(self.contents)):
-			_butLocation = self.location[0] + 4 + (butNr * 62)
-			self.contents[butNr][2] = pygame.Rect(_butLocation, self.location[1] + 4, 62, 52)
-		self.focusedArray = [0 for x in range(len(self.contents))]
-
-
-
-	def checkInput(self):
-		""" Checks and responds to input from keyboard """
-		for event in pygame.event.get():
-			mPos = pygame.mouse.get_pos()
-			# check mouseover
-			self.focusedArray = [0 for x in range(len(self.contents))]
-			for butNr in range(len(self.contents)):
-				if self.contents[butNr][2].collidepoint(mPos):
-					self.focused.count = butNr
-					self.focusedArray[butNr] = 1
-			if not 1 in self.focusedArray:	# reset count, if no button down
-				self.focused.count = 0
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				self.endMenu(self.focused.get())
-			# Keyboard
-			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:	# close menu
-					self.parent.holdEscape = True
-					self.parent.mode = "normal"
-					self.focused.count = 0
-				elif event.key == pygame.K_LEFT:
-					self.focused.dec()
-					self.focusedArray = [0 for x in range(len(self.contents))]
-					self.focusedArray[self.focused.get()] = 1
-					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
-					pygame.time.wait(50)
-				elif event.key == pygame.K_RIGHT:
-					self.focused.inc()
-					self.focusedArray = [0 for x in range(len(self.contents))]
-					self.focusedArray[self.focused.get()] = 1
-					pygame.mouse.set_pos(self.location[0] + 55 + (self.focused.get() * 62), self.location[1]  + 45)
-					pygame.time.wait(50)
-				elif event.key == pygame.K_RETURN:
-					self.endMenu(self.focused.get())
-
-
-
-	def endMenu(self, result):
-		""" execute action selected in the action menu """
-		if 1 in self.focusedArray:
-			_butID = self.contents[result][3]
-			if _butID == 1:									# ATTACK
-				self.parent.interface.generateMap("attack")
-				self.parent.mode = "selectAttack"
-				self.parent.interface.fromHex = self.parent.interface.currentSquare()
-			elif _butID == 2:								# MOVE
-				self.parent.interface.generateMap("move")
-				self.parent.mode = "selectMoveTo"
-				self.parent.interface.fromHex = self.parent.interface.currentSquare()
-				self.active = False
-			elif _butID == 3:								# CONTENT
-				_unit = self.parent.interface.currentSquare().unit
-				self.parent.interface.contentMenu.create(_unit)
-				self.parent.mode = "showContent"
-			elif _butID == 4:								# RETURN
-				if self.active:		# hack!
-					self.active = False
-				else:
-					self.parent.mode = "normal"
-
-
-
-	def draw(self):
-		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], self.menuWidth, 60), 4)	# menu border
-		for butNr in range(len(self.contents)):
-			self.parent.display.blit(self.contents[butNr][self.focusedArray[butNr]],  self.contents[butNr][2])
-
-
-
 
 class GUI():
 	""" Representation of the background """
@@ -765,13 +236,13 @@ class GUI():
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
 			Must be called each time player selects move """
 		if self.fromContent:
-			unitSpeed = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]].speed
+			movingUnit = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]]
 		else:
-			unitSpeed = self.currentSquare().unit.speed
+			movingUnit = self.currentSquare().unit
 		self.movingFrom = self.currentSquare()
 		x, y = self.movingFrom.position
 		withinRange = [(x,y)]	# coord of self
-		for iteration in range(unitSpeed):
+		for iteration in range(movingUnit.speed):
 			for coord in set(withinRange):
 				neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
 				withinRange += neighbors
@@ -782,7 +253,7 @@ class GUI():
 			if self.mainMap[x][y].fogofwar != 0 and self.mainMap[x][y].fogofwar != 2:
 				obstructed.append((x,y))
 			elif self.mainMap[x][y].unit:
-				if self.mainMap[x][y].unit.faction != self.parent.playerSide:
+				if movingUnit.faction != self.parent.playerSide:
 					obstructed.append((x,y))		# remove if opposing units
 				else:
 					if self.mainMap[x][y].unit.content:		# if unit has storage, check if enough room
@@ -790,9 +261,13 @@ class GUI():
 							obstructed.append((x,y))
 					else:
 						obstructed.append((x,y))
+			# handle depot access
 			if self.mainMap[x][y].movementModifier == None:
 				if self.mainMap[x][y].content == False:			# if hex does not have a storage
 					obstructed.append((x,y))
+				elif self.mainMap[x][y].owner != 0 and self.mainMap[x][y].owner != players[self.parent.playerSide]:		# if hex does have a storage, is it the enemys
+					if not 1 in movingUnit.skills:	# mark hex only if moving unit can capture
+						obstructed.append((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
 			if pos in movableSquares: 
@@ -802,6 +277,7 @@ class GUI():
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].fogofwar != 1 and (x,y) not in movableSquares:
 					self.mainMap[x][y].fogofwar = 3
+
 
 
 
@@ -1257,20 +733,12 @@ class GUI():
 		# check if target has content
 		_delivered = False
 		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
-			for y in range(9):
-				for x in range(2):
-					if not _delivered and not toHex.content.units[x][y]:
-						_delivered = True
-						toHex.content.units[x][y] =_unitMoved			# NB! Unit is lost if unit its full, should not be possible
-						# change ownership and flag of Hex
-						toHex.owner = 1 if self.parent.playerSide == "Central Powers" else 2
-						toHex.updateDepotColours(toHex.owner)
-		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room. unit entered
-			for y in range(9):
-				for x in range(2):
-					if not _delivered and not toHex.unit.content.units[x][y]:
-						_delivered = True
-						toHex.unit.content.units[x][y] =_unitMoved
+			toHex.content.addUnit(_unitMoved)
+			# change ownership and flag of Hex
+			toHex.owner = 1 if self.parent.playerSide == "Central Powers" else 2
+			toHex.updateDepotColours(toHex.owner)
+		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room, unit entered
+			toHex.unit.content.addUnit(_unitMoved)
 		else:
 			toHex.unit = _unitMoved
 		# generate and display new map with unit
