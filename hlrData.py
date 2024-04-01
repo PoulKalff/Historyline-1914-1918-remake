@@ -580,6 +580,25 @@ class colors:
 	historylineLight =  (107, 105, 90)
 
 
+
+class Info():
+	""" contains all info about the active game """
+
+	nameDict =  {	0 : 'None', 
+					1 : 'Central Powers', 
+					2 : 'Entente Cordial', 
+						'None' : 0, 
+						'Central Powers' : 1, 
+						'Entente Cordial' : 2 }
+
+	def __init__(self, _mapName, _mapNo, _player):
+		self.player = self.nameDict[_player]
+		self.opponent = 1 if self.player == 2 else 1
+		self.mapName = _mapName
+		self.mapNumber = _mapNo
+
+
+
 class Content():
 	""" Representation of content of a unit or hex """
 
@@ -638,7 +657,7 @@ class Unit():
 			self.weaponsGfx = []
 			self.maxSize = 10		# all units size 10?
 			self.currentSize = 10
-			self.faction = 'Central Powers' if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 'Entente Cordial'
+			self.faction = 1 if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 2
 			self.content = Content(data['storageMax']) if data['storageMax'] > 0 else False
 			for w in data['weapons']:
 				if w:
@@ -648,7 +667,7 @@ class Unit():
 			self.picture = data['picture']
 			rawIcon = data['icon']
 			# if central powers, rotate and colourize icon
-			if self.faction == 'Central Powers':
+			if self.faction == 1:
 				arr = pygame.surfarray.pixels3d(rawIcon)
 				for i in range(48):
 					for j in range(48): # loop over the 2d array
@@ -884,7 +903,7 @@ class ContentMenu():
 			unitPanel.blit(self.parent.interface.ranksGfx, [4, 103], (_unit.experience * 88, 0, 88, 88))
 			unitPanel.blit(_unit.picture, [380, 3])
 			gfx = font20.render(_unit.name, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
-			gfx = font20.render(_unit.faction, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
+			gfx = font20.render(self.parent.info.nameDict[_unit.faction], True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
 			gfx = font20.render(str(_unit.sight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 105])
 			gfx = font20.render(str(_unit.speed), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 105])
 			gfx = font20.render(str(_unit.currentSize), True, (208, 185, 140)); unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 105])

@@ -8,10 +8,6 @@ import random
 import pygame.surfarray as surfarray
 from hlrData import *
 
-# --- Variables / Ressources ----------------------------------------------------------------------
-
-players = {'None' : 0, 'Central Powers' : 1, 'Entente Cordial' : 2}
-
 # --- Classes -------------------------------------------------------------------------------------
 
 class GUI():
@@ -53,9 +49,7 @@ class GUI():
 		# load map data
 		with open(parent.cmdArgs.mapPath) as json_file:
 			jsonLevelData = json.load(json_file)
-		self.parent.playerSide = jsonLevelData["faction"]
-		self.parent.mapName = jsonLevelData["name"]
-		self.parent.mapNumber = jsonLevelData["levelNo"]
+		self.parent.info = Info(jsonLevelData["mapName"], jsonLevelData["mapNo"], jsonLevelData["player"])
 		self.squareWidth = len(jsonLevelData["tiles"]["line1"])			# 8 for level 1
 		self.squareHeight = len(jsonLevelData["tiles"])					# 47 for level 1
 		self.pixelWidth = self.squareWidth * 142
@@ -253,11 +247,11 @@ class GUI():
 			if self.mainMap[x][y].fogofwar != 0 and self.mainMap[x][y].fogofwar != 2:
 				obstructed.append((x,y))
 			elif self.mainMap[x][y].unit:
-				if movingUnit.faction != self.parent.playerSide:
+				if movingUnit.faction != self.parent.info.player:
 					obstructed.append((x,y))		# remove if opposing units
 				else:
 					if self.mainMap[x][y].unit.content:		# if unit has storage, check if enough room
-						if self.currentSquare().unit.weight + self.mainMap[x][y].unit.content.storageActual() > self.mainMap[x][y].unit.content.storageMax: 
+						if movingUnit.weight + self.mainMap[x][y].unit.content.storageActual() > self.mainMap[x][y].unit.content.storageMax: 
 							obstructed.append((x,y))
 					else:
 						obstructed.append((x,y))
@@ -265,7 +259,7 @@ class GUI():
 			if self.mainMap[x][y].movementModifier == None:
 				if self.mainMap[x][y].content == False:			# if hex does not have a storage
 					obstructed.append((x,y))
-				elif self.mainMap[x][y].owner != 0 and self.mainMap[x][y].owner != players[self.parent.playerSide]:		# if hex does have a storage, is it the enemys
+				elif self.mainMap[x][y].owner != 0 and self.mainMap[x][y].owner != self.parent.info.player:		# if hex does have a storage, is it the enemys
 					if not 1 in movingUnit.skills:	# mark hex only if moving unit can capture
 						obstructed.append((x,y))
 		# remove obstacaled squares
@@ -316,7 +310,7 @@ class GUI():
 		for x, y in attackableSquares:
 			if self.mainMap[x][y].fogofwar == 0:
 				if self.mainMap[x][y].unit:
-					if self.mainMap[x][y].unit.faction != self.parent.playerSide:
+					if self.mainMap[x][y].unit.faction != self.parent.info.player:
 						attackableEnemySquares.append((x,y))
 		if check:
 			return bool(attackableEnemySquares)
@@ -339,7 +333,7 @@ class GUI():
 		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].unit:
-					if self.mainMap[x][y].unit.faction == self.parent.playerSide:			# only mark visible if it is our own unit
+					if self.mainMap[x][y].unit.faction == self.parent.info.player:			# only mark visible if it is our own unit
 						withinSight = [(x,y)]	# coord of self
 						for iteration in range(self.mainMap[x][y].unit.sight):
 							for coord in set(withinSight):
@@ -351,7 +345,7 @@ class GUI():
 								self.mainMap[c[0]][c[1]].seen = True
 							except:
 								print("Coordinate exceed map size in calculateFOW():", c)
-				if hasattr(self.mainMap[x][y], 'owner') and self.mainMap[x][y].owner == players[self.parent.playerSide]:
+				if hasattr(self.mainMap[x][y], 'owner') and self.mainMap[x][y].owner == self.parent.info.player:
 					depotSquares.append((x, y))
 					neighbors = adjacentHexes(x, y, self.mapWidth, self.mapHeight)
 					for n in neighbors:
@@ -534,7 +528,7 @@ class GUI():
 			unitPanel.blit(self.ranksGfx, [4, 103], (square.unit.experience * 88, 0, 88, 88))
 			unitPanel.blit(square.unit.picture, [380, 3])
 			gfx = font20.render(square.unit.name, True, (208, 185, 140)); 				unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
-			gfx = font20.render(square.unit.faction, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
+			gfx = font20.render(self.parent.info.nameDict[square.unit.faction], True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
 			gfx = font20.render(str(square.unit.sight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 105])
 			gfx = font20.render(str(square.unit.speed), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 105])
 			gfx = font20.render(str(square.unit.currentSize), True, (208, 185, 140)); 	unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 105])
@@ -627,7 +621,7 @@ class GUI():
 		return len(validPaths[0]) - 1
 
 
-
+ 
 	def findPath(self, _moveFrom, _moveTo):
 		""" calculates the path that a unit must take to get from one filed to the next """
 #		print("Unit must move from (%s) to (%s) :" % (_moveFrom, _moveTo))
@@ -642,7 +636,7 @@ class GUI():
 				for n in reversed(neighbors):
 					square = self.getSquare(n)
 					if square.unit:
-						if square.unit.faction != "Central Powers":		# if they are not ours
+						if square.unit.faction != self.parent.info.player:		# if they are not ours
 							neighbors.remove(n)
 					elif square.fogofwar != 0 and square.fogofwar != 2:			# if field not clear
 						neighbors.remove(n)
@@ -735,7 +729,7 @@ class GUI():
 		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
 			toHex.content.addUnit(_unitMoved)
 			# change ownership and flag of Hex
-			toHex.owner = 1 if self.parent.playerSide == "Central Powers" else 2
+			toHex.owner = self.parent.info.player
 			toHex.updateDepotColours(toHex.owner)
 		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room, unit entered
 			toHex.unit.content.addUnit(_unitMoved)

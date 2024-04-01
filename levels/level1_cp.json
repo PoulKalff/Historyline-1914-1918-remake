@@ -1,7 +1,7 @@
 {
-	"name" :	 "Level1Map",
-	"levelNo" :	 1,
-	"faction" : "Central Powers",
+	"mapName" :	 "Level1Map",
+	"mapNo" :	 1,
+	"player" : "Central Powers",
 	"tiles" :	 { 
 					"line1":	[["hills","",""],["forest","",""],["forest","",""],["forest","",""],["forest","",""],["forest","",""],["grass","",""],["forest","",""]],
 					"line2":	[["grass","road236",""],["grass","",""],["forest","",""],["forest","",""],["forest","",""],["house","",""],["hills","",""]],
@@ -21,13 +21,7 @@
 					"line16":	[["forest","",""],["grass","",""],["grass","",""],["grass","",""],["mountain","",""],["grass","",""],["hills","",""]],
 					"line17":	[["forest","",""],["forest","",""],["forest","",""],["grass","",""],["grass","",""],["grass","road346",""],["stone","",""],["mountain","",""]],
 					"line18":	[["forest","",""],["forest","",""],["grass","",""],["grass","",""],["grass","path14",""],["grass","",""],["mountain","",""]],
-					"line19":	[["forest","",""],["forest","",""],["forest","",""],["grass","",""],["grass","path14",""],["cmpN","",""
-
-
-
-						,[0, ["CP_lArtillery", "CP_supplyCar"]]
-
-					],["mountain","",""],["forest","",""]],
+					"line19":	[["forest","",""],["forest","",""],["forest","",""],["grass","",""],["grass","path14",""],["cmpN","",""],["mountain","",""],["forest","",""]],
 					"line20":	[["forest","",""],["hills","",""],["grass","",""],["grass","path14",""],["cmpW","",""],["cmpE","",""],["hills","",""]],
 					"line21":	[["forest","",""],["forest","",""],["grass","",""],["grass","path14",""],["grass","",""],["cmpS","",""],["hills","",""],["hills","",""]],
 					"line22":	[["forest","",""],["forest","",""],["grass","path13",""],["grass","",""],["house","",""],["forest","",""],["grass","",""]],
