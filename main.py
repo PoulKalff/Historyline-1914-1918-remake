@@ -19,7 +19,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.71'		# crewrote .info
+version = '0.72.1'		# move units below first screen
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -212,8 +212,11 @@ class Main():
 		elif keysPressed[pygame.K_KP2]:
 			self.test[1] += 1
 		elif keysPressed[pygame.K_d]:
-			print(self.interface.mainMap[5][0].name, self.interface.mainMap[5][0].owner)
-			print(self.interface.mainMap[18][5].name, self.interface.mainMap[18][5].owner)
+#			print(self.interface.mainMap[5][0].name, self.interface.mainMap[5][0].owner)
+#			print(self.interface.mainMap[18][5].name, self.interface.mainMap[18][5].owner)
+#			obj = self.interface.mainMap[45][6]
+			print(obj.position)
+			print(  self.interface.currentSquare().position  )
 			sys.exit()
 		# ------------------------------------- test end ---------------------------------------
 		elif keysPressed[pygame.K_PAGEUP]:
@@ -238,6 +241,7 @@ class Main():
 			self.interface.draw()
 			pygame.display.update()
 #			print(str(self.mode))
+#			print("External",  self.interface.currentSquare().position  )
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
@@ -273,7 +277,14 @@ obj =  Main(args)
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - move units below first screen
+# . must not be able to enter opponents content units
+# - Move in turns
+#	. animation of depot/hq taken
+# 	. must win if HQ taken
+# 	- create opponenet AI
+
+# - move calculation goes to fuckmode in lowest part of screen?
+
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 

@@ -369,14 +369,8 @@ class GUI():
 
 
 	def currentSquare(self, coords = False):
-		""" returns the currently hightlighted hexSquare """
+		""" returns the currently hightlighted hexSquare ABSOLUTE, i.e. the HEX sqare number on map, not on screen """
 		mapCursor = [self.cursorPos[0] + self.mapView[0], self.cursorPos[1]  + self.mapView[1]]
-		# prevent cursor exiting map
-		if mapCursor[0] < 0: mapCursor[0] = 0
-		if mapCursor[0] > 7: mapCursor[0] = 7
-		if mapCursor[1] < 0: mapCursor[1] = 0
-		if mapCursor[1] > 22: mapCursor[1] = 21
-		# return result
 		if coords:
 			# get the pixel coordinates from the hex coordinates
 			forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
@@ -384,7 +378,6 @@ class GUI():
 			return pixelCooords
 		else:
 			return self.mainMap[mapCursor[1]][mapCursor[0]]
-
 
 
 
@@ -656,7 +649,6 @@ class GUI():
 			paths.sort(key=len)
 
 
-
 	def executeMove(self, movePath):
 		""" Shows the movement of a unit along the path given by the points in the path, then updates map data """
 		self.parent.mode = "normal"
@@ -701,8 +693,8 @@ class GUI():
 				frameCoord = [pixelCoordYfrom, pixelCoordXfrom]
 				for x in range(8):
 					# show frame
-					self.drawMap()
-					self.parent.display.blit(_unitMoved.allIcons[rotation], [frameCoord[0], frameCoord[1]])		# must blit unit.allIcons[0-5]
+					self.drawMap()														# Below is compensation for map scrolled down! Horizontal is not tested!
+					self.parent.display.blit(_unitMoved.allIcons[rotation], [frameCoord[0]  - ( 48 * self.mapView[0] ), frameCoord[1] - ( 40 * self.mapView[1] )])		# must blit unit.allIcons[0-5]
 					pygame.display.update()
 					pygame.time.wait(20)
 					# use rotation to calculatenext frame
