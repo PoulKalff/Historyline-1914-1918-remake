@@ -234,8 +234,8 @@ class GUI():
 		else:
 			movingUnit = self.currentSquare().unit
 		self.movingFrom = self.currentSquare()
-		x, y = self.movingFrom.position
-		withinRange = [(x,y)]	# coord of self
+		xFrom, yFrom = self.movingFrom.position
+		withinRange = [(xFrom, yFrom)]	# coord of self
 		for iteration in range(movingUnit.speed):
 			for coord in set(withinRange):
 				neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
@@ -253,6 +253,8 @@ class GUI():
 					if self.mainMap[x][y].unit.content:		# if unit has storage, check if enough room
 						if movingUnit.weight + self.mainMap[x][y].unit.content.storageActual() > self.mainMap[x][y].unit.content.storageMax: 
 							obstructed.append((x,y))
+						elif self.mainMap[x][y].unit.faction != self.parent.info.player:	# If not our unit
+							obstructed.append((x,y))
 					else:
 						obstructed.append((x,y))
 			# handle depot access
@@ -264,14 +266,21 @@ class GUI():
 						obstructed.append((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
-			if pos in movableSquares: 
+			if pos in movableSquares:
 				movableSquares.remove(pos)
 		# mark squares not possible to target 
 		for x in range(self.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].fogofwar != 1 and (x,y) not in movableSquares:
 					self.mainMap[x][y].fogofwar = 3
-
+		# mark inacessible and too far paths
+		print(movableSquares)
+		for square in movableSquares:
+			result = self.findPath((xFrom, yFrom), square)
+			if not result:
+				self.mainMap[square[0]][square[1]].fogofwar = 3
+			elif len(result) - 1 > movingUnit.speed :
+				self.mainMap[square[0]][square[1]].fogofwar = 3
 
 
 
@@ -646,7 +655,8 @@ class GUI():
 #						print("Calculated path is", np)
 						return np
 			paths += newPaths
-			paths.sort(key=len)
+			if not paths:
+				return False
 
 
 	def executeMove(self, movePath):

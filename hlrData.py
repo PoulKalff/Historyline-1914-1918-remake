@@ -13,18 +13,17 @@ font50 = pygame.font.Font('freesansbold.ttf', 50)
 font60 = pygame.font.Font('freesansbold.ttf', 60)
 
 
-bgTilesModifiers =  {   'test'          :   [10, 20, 10],           # movement penalty (0-10),  battle advantage (0-100), sight hindrance (0-10)
-						'forest'        :   [6, 43, 8],
-						'grass'         :   [2, 4, 0],
-						'hills'         :   [4, 52, 8],
+bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cost (0 = not accessible) (0-10),  battle advantage (0-100), sight hindrance (0-10)
+						'grass'         :   [1, 4, 0],
+						'hills'         :   [2, 52, 8],
 						'house'         :   [None, None, 2],
 						'mud'           :   [3, 38, 0],
-						'stone'         :   [3, 27, 0],
-						'mountain'      :   [10, 63, 10],
+						'stone'         :   [2, 27, 0],
+						'mountain'      :   [5, 63, 10],
 						'water'         :   [0, 0, 0],
 						'waterStones'   :   [None, None, 0],
 						'trenches'      :   [None, None, 0],    # no map tile yet
-						'barbedWire'    :   [9, 0, 1],          # no map tile yet
+						'barbedWire'    :   [3, 0, 1],          # no map tile yet
 						'hqN'           :   [None, None, 7],
 						'hqS'           :   [None, None, 7],
 						'hqC'           :   [None, None, 7],
@@ -549,12 +548,16 @@ def adjacentHexes(x, y, maxX, maxY):
 		neighbors = [(x - 1, y + 1), (x + 1, y + 1), (x + 2, y), (x + 1, y), (x - 1, y), (x - 2, y)]
 	else:
 		neighbors = [(x - 1, y), (x + 1, y), (x + 2, y), (x + 1, y - 1), (x - 1, y - 1), (x - 2, y)]
-		maxX -= 1
 	# filter invalid coordinates
 	for coord in neighbors:
 		if coord[0] > -1 and coord[0] < maxY:
-			if coord[1] > -1 and coord[1] < maxX:
-				checked.append(coord)
+			if coord[1] > -1:
+				if coord[0] % 2 == 0:
+					if coord[1] < maxX:
+						checked.append(coord)
+				else:
+					if coord[1] < maxX - 1:
+						checked.append(coord)
 	return checked
 
 
@@ -584,7 +587,7 @@ class colors:
 class Info():
 	""" contains all info about the active game """
 
-	nameDict =  {	0 : 'None', 
+	nameDict =  {   0 : 'None', 
 					1 : 'Central Powers', 
 					2 : 'Entente Cordial', 
 						'None' : 0, 
@@ -627,7 +630,7 @@ class Weapon():
 	def __init__(self, key):
 		if key:
 			data = weaponsParameters[key]
-			self.name = data['name']	
+			self.name = data['name']    
 			self.rangeMin = data['rangeMin']
 			self.rangeMax = data['rangeMax']
 			self.power = data['power']
@@ -639,7 +642,7 @@ class Weapon():
 
 
 class Unit():
-	""" Representation of one unit	"""
+	""" Representation of one unit  """
 
 	def __init__(self, key):
 		if key:
@@ -655,7 +658,7 @@ class Unit():
 			self.skills = data['skills']
 			self.weapons = []
 			self.weaponsGfx = []
-			self.maxSize = 10		# all units size 10?
+			self.maxSize = 10       # all units size 10?
 			self.currentSize = 10
 			self.faction = 1 if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 2
 			self.content = Content(data['storageMax']) if data['storageMax'] > 0 else False
@@ -681,9 +684,9 @@ class Unit():
 							arr[i, j] = [56, 72, 36]
 						elif numpy.array_equal(arr[i, j], [180, 148, 124]):
 							arr[i, j] = [88, 104, 36]
-			self.contentIcon = rot_center(rawIcon, 180) if self.faction == 'Central Powers' else rawIcon 	# preserve small icon to show in content
+			self.contentIcon = rot_center(rawIcon, 180) if self.faction == 'Central Powers' else rawIcon    # preserve small icon to show in content
 			rawIcon = pygame.transform.scale2x(rawIcon)
-			self.allIcons = [	rawIcon,
+			self.allIcons = [   rawIcon,
 								rot_center(rawIcon, 60),
 								rot_center(rawIcon, 120),
 								rot_center(rawIcon, 180),
@@ -696,7 +699,7 @@ class Unit():
 
 	def updateWeaponsGfx(self):
 		""" Creates the gfx for all weapons, based on the self.weapons """
-		self.weaponsGfx = []	# reset
+		self.weaponsGfx = []    # reset
 		for y in range(4):
 			weapon = self.weapons[y]
 			if weapon:
@@ -728,15 +731,15 @@ class Unit():
 class HexSquare():
 	""" Representation of one hex """
 
-	def __init__(self, pos, hexType, infrastructure, unit, content = None):		# content = [owner, [unit, unit, ..]]
-		self.background = bgTiles[hexType]	 										# The fundamental type of hex, e.g. Forest
-		self.bgGrey = greyscale(bgTiles[hexType])	 										# Seen by player, but currently hidden (Grayscaled)
+	def __init__(self, pos, hexType, infrastructure, unit, content = None):     # content = [owner, [unit, unit, ..]]
+		self.background = bgTiles[hexType]                                          # The fundamental type of hex, e.g. Forest
+		self.bgGrey = greyscale(bgTiles[hexType])                                           # Seen by player, but currently hidden (Grayscaled)
 		self.bgHidden = self.bgGrey.copy()
-		self.bgHidden.blit(bgTiles['unseen'], (0,0))							# Never seen by player (mapcolour, with outline)
-		self.seen = False										# has the square ever been visible?
-		self.infra = None											# one of 1) Road, 2) Path, 3) Railroad 4) Trenches 	(overlay gfx)
-		self.unit = Unit(unit) if unit else None						# any unit occupying the square, e.g. Infantry
-		self.fogofwar = None									# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
+		self.bgHidden.blit(bgTiles['unseen'], (0,0))                            # Never seen by player (mapcolour, with outline)
+		self.seen = False                                       # has the square ever been visible?
+		self.infra = None                                           # one of 1) Road, 2) Path, 3) Railroad 4) Trenches  (overlay gfx)
+		self.unit = Unit(unit) if unit else None                        # any unit occupying the square, e.g. Infantry
+		self.fogofwar = None                                    # one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
 		self.position = pos
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
@@ -744,7 +747,7 @@ class HexSquare():
 		if hexType == 'hqN':
 			self.name = "Headquarters"
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
-			self.owner = content[0] if content else 0		# 0 for None, 1 for Entente, 2 for CP 
+			self.owner = content[0] if content else 0       # 0 for None, 1 for Entente, 2 for CP 
 			self.updateDepotColours(self.owner)
 			self.content = Content(50)
 			if content and len(content) == 2:
@@ -753,7 +756,7 @@ class HexSquare():
 		elif hexType == 'cmpN':
 			self.name = "Depot"
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
-			self.owner = content[0] if content else 0		# 0 for None, 1 for Entente, 2 for CP 
+			self.owner = content[0] if content else 0       # 0 for None, 1 for Entente, 2 for CP 
 			self.updateDepotColours(self.owner)
 			self.content = Content(40)
 			if content and len(content) == 2:
@@ -763,7 +766,7 @@ class HexSquare():
 			self.content = False
 		if infrastructure:
 			self.infra = infraIcons[infrastructure]
-			self.bgGrey.blit(greyscale(self.infra), (0,0))	# grayscale and blit any infrastructure on the hidden filed gfx
+			self.bgGrey.blit(greyscale(self.infra), (0,0))  # grayscale and blit any infrastructure on the hidden filed gfx
 			if infrastructure.startswith("road"):
 				self.movementModifier = 0
 				self.battleModifier = 0
@@ -821,10 +824,10 @@ class ContentMenu():
 		actualContentText = font20.render(str(holdingUnit.content.storageMax), True, colors.red) 
 		maxContentText    = font20.render(str(holdingUnit.content.storageActual()), True, colors.red)
 		self._frame = self.frame.copy()
-		self._frame.blit(holdingUnit.picture,	(36, 40))
-		self._frame.blit(nameText, 				(384 - (nameText.get_width() / 2), 55))
-		self._frame.blit(actualContentText,		(384 - (actualContentText.get_width() / 2), 132))
-		self._frame.blit(maxContentText,		(384 - (maxContentText.get_width() / 2), 201))
+		self._frame.blit(holdingUnit.picture,   (36, 40))
+		self._frame.blit(nameText,              (384 - (nameText.get_width() / 2), 55))
+		self._frame.blit(actualContentText,     (384 - (actualContentText.get_width() / 2), 132))
+		self._frame.blit(maxContentText,        (384 - (maxContentText.get_width() / 2), 201))
 
 
 	def reset(self):
@@ -848,11 +851,11 @@ class ContentMenu():
 					self.focused[0].count = squareX
 					self.focused[1].count = squareY
 					if event.type == pygame.MOUSEBUTTONDOWN:
-						if self.parent.mouseClick.tick() < 500:						# if doubleclick detected
+						if self.parent.mouseClick.tick() < 500:                     # if doubleclick detected
 							self.endMenu()
 				# Keyboard
 				if event.type == pygame.KEYDOWN:
-					if event.key == pygame.K_ESCAPE:	# close menu
+					if event.key == pygame.K_ESCAPE:    # close menu
 						self.parent.mode = "normal"
 						self.parent.holdEscape = True
 					elif event.key == pygame.K_w:
@@ -879,7 +882,7 @@ class ContentMenu():
 
 	def endMenu(self):
 		if self.content.units[self.focused[1].count][self.focused[0].count]:
-			self.parent.interface.fromContent = (self.focused[1].count, self.focused[0].count)	# index of unit to move
+			self.parent.interface.fromContent = (self.focused[1].count, self.focused[0].count)  # index of unit to move
 			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
 
 
@@ -902,21 +905,21 @@ class ContentMenu():
 			unitPanel.blit(_unit.mapIcon, [-1, -1])
 			unitPanel.blit(self.parent.interface.ranksGfx, [4, 103], (_unit.experience * 88, 0, 88, 88))
 			unitPanel.blit(_unit.picture, [380, 3])
-			gfx = font20.render(_unit.name, True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
-			gfx = font20.render(self.parent.info.nameDict[_unit.faction], True, (208, 185, 140)); 			unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
-			gfx = font20.render(str(_unit.sight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 105])
-			gfx = font20.render(str(_unit.speed), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(_unit.name, True, (208, 185, 140));             unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
+			gfx = font20.render(self.parent.info.nameDict[_unit.faction], True, (208, 185, 140));           unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 50])
+			gfx = font20.render(str(_unit.sight), True, (208, 185, 140));       unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 105])
+			gfx = font20.render(str(_unit.speed), True, (208, 185, 140));       unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 105])
 			gfx = font20.render(str(_unit.currentSize), True, (208, 185, 140)); unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 105])
-			gfx = font20.render(str(_unit.armour), True, (208, 185, 140)); 		unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 155])
-			gfx = font20.render(str(_unit.weight), True, (208, 185, 140)); 		unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 155])
-			gfx = font20.render(str(_unit.fuel), True, (208, 185, 140)); 		unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 155])
+			gfx = font20.render(str(_unit.armour), True, (208, 185, 140));      unitPanel.blit(gfx, [175 - (gfx.get_width() / 2), 155])
+			gfx = font20.render(str(_unit.weight), True, (208, 185, 140));      unitPanel.blit(gfx, [249 - (gfx.get_width() / 2), 155])
+			gfx = font20.render(str(_unit.fuel), True, (208, 185, 140));        unitPanel.blit(gfx, [323 - (gfx.get_width() / 2), 155])
 			# mark active skills
 			unitGUI.blit(self.parent.interface.unitSkills, [618, 11])
 			for x in _unit.skills:
 				unitGUI.blit(self.parent.interface.skillsMarker, [616, (x * 28) - 19])
 			# weapons
-			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 218, 662, 58), 4)							# weapons borders 1
-			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 326, 662, 58), 4)							# weapons borders 2
+			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 218, 662, 58), 4)                         # weapons borders 1
+			pygame.draw.rect(unitGUI, colors.almostBlack, (0, 326, 662, 58), 4)                         # weapons borders 2
 			unitGUI.blit(_unit.weaponsGfx[0], [4, 222])
 			unitGUI.blit(_unit.weaponsGfx[1], [4, 276])
 			unitGUI.blit(_unit.weaponsGfx[2], [4, 330])
@@ -976,7 +979,7 @@ class WeaponMenu():
 				self.endMenu(self.focused.get())
 			# Keyboard
 			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:	# close menu
+				if event.key == pygame.K_ESCAPE:    # close menu
 					self.contents = []
 					self.parent.mode = "normal"
 					self.parent.holdEscape = True
@@ -999,14 +1002,14 @@ class WeaponMenu():
 
 	def endMenu(self, result):
 		self.parent.mode = "normal"
-		self.parent.interface.generateMap()	# must generate and show clean map before showing battle
+		self.parent.interface.generateMap() # must generate and show clean map before showing battle
 		self.parent.interface.drawMap()
 		pygame.display.update()
 		self.parent.interface.handleBattle(self.attackingSquare, self.parent.interface.currentSquare(), self.attackingSquare.unit.weapons[result])
 
 
 	def draw(self):
-		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0] - 2, self.location[1] - 2, 336, 110))	# menu border
+		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0] - 2, self.location[1] - 2, 336, 110)) # menu border
 		self.parent.display.blit(self.contents[0][0], [self.location[0], self.location[1]])
 		self.parent.display.blit(self.contents[1][0], [self.location[0], self.location[1] + 27])
 		self.parent.display.blit(self.contents[2][0], [self.location[0], self.location[1] + 54])
@@ -1023,10 +1026,10 @@ class ActionMenu():
 	def __init__(self, parent):
 		self.parent = parent
 		self.location = (50, 50)
-		self.buttonAttack =		[pygame.image.load('gfx/menuIcons/attack1.png'), 		pygame.image.load('gfx/menuIcons/attack2.png'),		None, 1]
-		self.buttonMove =		[pygame.image.load('gfx/menuIcons/move1.png'), 			pygame.image.load('gfx/menuIcons/move2.png'),		None, 2]
-		self.buttonContain =	[pygame.image.load('gfx/menuIcons/containing1.png'),	pygame.image.load('gfx/menuIcons/containing2.png'),	None, 3]
-		self.buttonExit =		[pygame.image.load('gfx/menuIcons/exit1.png'), 			pygame.image.load('gfx/menuIcons/exit2.png'),		None, 4]
+		self.buttonAttack =     [pygame.image.load('gfx/menuIcons/attack1.png'),        pygame.image.load('gfx/menuIcons/attack2.png'),     None, 1]
+		self.buttonMove =       [pygame.image.load('gfx/menuIcons/move1.png'),          pygame.image.load('gfx/menuIcons/move2.png'),       None, 2]
+		self.buttonContain =    [pygame.image.load('gfx/menuIcons/containing1.png'),    pygame.image.load('gfx/menuIcons/containing2.png'), None, 3]
+		self.buttonExit =       [pygame.image.load('gfx/menuIcons/exit1.png'),          pygame.image.load('gfx/menuIcons/exit2.png'),       None, 4]
 		self.active = False
 
 
@@ -1040,7 +1043,7 @@ class ActionMenu():
 			_butLocation = self.location[0] + 4 + (butNr * 62)
 			self.contents[butNr][2] = pygame.Rect(_butLocation, self.location[1] + 4, 62, 52)
 		self.focusedArray = [0 for x in range(len(self.contents))]
-		self.active = True			# currently only used in content!
+		self.active = True          # currently only used in content!
 
 
 	def create(self):
@@ -1054,7 +1057,7 @@ class ActionMenu():
 		_focusedUnit = self.parent.interface.currentSquare().unit
 		if _focusedUnit.speed:
 			self.contents.append(self.buttonMove)
-		if _focusedUnit.weapons != [None, None, None, None]:		# DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
+		if _focusedUnit.weapons != [None, None, None, None]:        # DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
 			if self.parent.interface.markAttackableSquares(True):
 				self.contents.append(self.buttonAttack)
 		if _focusedUnit.content:
@@ -1079,13 +1082,13 @@ class ActionMenu():
 				if self.contents[butNr][2].collidepoint(mPos):
 					self.focused.count = butNr
 					self.focusedArray[butNr] = 1
-			if not 1 in self.focusedArray:	# reset count, if no button down
+			if not 1 in self.focusedArray:  # reset count, if no button down
 				self.focused.count = 0
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
 			# Keyboard
 			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:	# close menu
+				if event.key == pygame.K_ESCAPE:    # close menu
 					self.parent.holdEscape = True
 					self.parent.mode = "normal"
 					self.focused.count = 0
@@ -1110,21 +1113,21 @@ class ActionMenu():
 		""" execute action selected in the action menu """
 		if 1 in self.focusedArray:
 			_butID = self.contents[result][3]
-			if _butID == 1:									# ATTACK
+			if _butID == 1:                                 # ATTACK
 				self.parent.interface.generateMap("attack")
 				self.parent.mode = "selectAttack"
 				self.parent.interface.fromHex = self.parent.interface.currentSquare()
-			elif _butID == 2:								# MOVE
+			elif _butID == 2:                               # MOVE
 				self.parent.interface.generateMap("move")
 				self.parent.mode = "selectMoveTo"
 				self.parent.interface.fromHex = self.parent.interface.currentSquare()
 				self.active = False
-			elif _butID == 3:								# CONTENT
+			elif _butID == 3:                               # CONTENT
 				_unit = self.parent.interface.currentSquare().unit
 				self.parent.interface.contentMenu.create(_unit)
 				self.parent.mode = "showContent"
-			elif _butID == 4:								# RETURN
-				if self.active:		# hack!
+			elif _butID == 4:                               # RETURN
+				if self.active:     # hack!
 					self.active = False
 				else:
 					self.parent.mode = "normal"
@@ -1132,7 +1135,7 @@ class ActionMenu():
 
 
 	def draw(self):
-		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], self.menuWidth, 60), 4)	# menu border
+		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], self.menuWidth, 60), 4)    # menu border
 		for butNr in range(len(self.contents)):
 			self.parent.display.blit(self.contents[butNr][self.focusedArray[butNr]],  self.contents[butNr][2])
 

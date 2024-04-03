@@ -19,7 +19,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.72.1'		# move units below first screen
+version = '0.73'		# move bugs removed
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -277,23 +277,21 @@ obj =  Main(args)
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# . must not be able to enter opponents content units
 # - Move in turns
 #	. animation of depot/hq taken
 # 	. must win if HQ taken
 # 	- create opponenet AI
+# - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 
-# - move calculation goes to fuckmode in lowest part of screen?
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
-# - units do not move along shortest path
-#	- prefer hexes with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
+# - crash hvis man klikker uden for hexes, mens man vil flytte (paa kantent af de officielle, anerkendte hexes... svaert at forklare, sorry)
 
 
-# --- NOTES --------------------------------------------------------------------------------------
-# - should allow user to see un-owned depots (problem that units cannot be un-owned?)
+# --- NOTES / IDEAS ------------------------------------------------------------------------------
+# - should perhaps allow user to see un-owned depots (problem that units cannot be un-owned?)
 
 
 
