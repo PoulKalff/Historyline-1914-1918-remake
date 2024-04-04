@@ -49,7 +49,7 @@ class GUI():
 		# load map data
 		with open(parent.cmdArgs.mapPath) as json_file:
 			jsonLevelData = json.load(json_file)
-		self.parent.info = Info(jsonLevelData["mapName"], jsonLevelData["mapNo"], jsonLevelData["player"])
+		self.parent.info = Info(jsonLevelData["mapName"], jsonLevelData["mapNo"], jsonLevelData["player"], jsonLevelData["tiles"])
 		self.squareWidth = len(jsonLevelData["tiles"]["line1"])			# 8 for level 1
 		self.squareHeight = len(jsonLevelData["tiles"])					# 47 for level 1
 		self.pixelWidth = self.squareWidth * 142
@@ -59,10 +59,7 @@ class GUI():
 			for nrY, square in enumerate(value):
 				line.append(HexSquare((nrX, nrY), *square))
 			self.mainMap.append(line)
-		self.mapWidth = len(self.mainMap[0])
-		self.mapHeight = len(self.mainMap)
 		self.generateMap()
-
 
 
 
@@ -238,7 +235,7 @@ class GUI():
 		withinRange = [(xFrom, yFrom)]	# coord of self
 		for iteration in range(movingUnit.speed):
 			for coord in set(withinRange):
-				neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+				neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
 				withinRange += neighbors
 		movableSquares = list(set(withinRange))
 		movableSquares.remove(self.movingFrom.position)
@@ -269,12 +266,11 @@ class GUI():
 			if pos in movableSquares:
 				movableSquares.remove(pos)
 		# mark squares not possible to target 
-		for x in range(self.mapHeight):
+		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].fogofwar != 1 and (x,y) not in movableSquares:
 					self.mainMap[x][y].fogofwar = 3
 		# mark inacessible and too far paths
-		print(movableSquares)
 		for square in movableSquares:
 			result = self.findPath((xFrom, yFrom), square)
 			if not result:
@@ -301,7 +297,7 @@ class GUI():
 		rangeMax = max(_allMax)
 		for iteration in range(rangeMax):
 			for coord in set(withinRange):
-				neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+				neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
 				withinRange += neighbors
 		attackableSquares = list(set(withinRange))
 		attackableSquares.remove(attackingFrom.position)
@@ -309,7 +305,7 @@ class GUI():
 			belowMinRange = [(x,y)]
 			for iteration in range(rangeMin - 1):
 				for coord in set(belowMinRange):
-					neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+					neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
 					belowMinRange += neighbors
 			# remove any field below min range
 			for coord in belowMinRange:
@@ -325,7 +321,7 @@ class GUI():
 			return bool(attackableEnemySquares)
 		else:
 			# mark squares possible to attack 
-			for x in range(self.mapHeight):
+			for x in range(self.parent.info.mapHeight):
 				for y in range(len(self.mainMap[x])):
 					if self.mainMap[x][y].fogofwar == 0 and (x,y) not in attackableEnemySquares:
 						self.mainMap[x][y].fogofwar = 3
@@ -336,17 +332,17 @@ class GUI():
 		""" checks each hexSquare on the map and marks it as visible if it can be seen by any friendly unit 
 			must be called each time player moves a piece"""
 		depotSquares = []
-		for x in range(self.mapHeight):
+		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				self.mainMap[x][y].fogofwar = 2 if self.mainMap[x][y].seen else 1
-		for x in range(self.mapHeight):
+		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].unit:
 					if self.mainMap[x][y].unit.faction == self.parent.info.player:			# only mark visible if it is our own unit
 						withinSight = [(x,y)]	# coord of self
 						for iteration in range(self.mainMap[x][y].unit.sight):
 							for coord in set(withinSight):
-								neighbors = adjacentHexes(*coord, self.mapWidth, self.mapHeight)
+								neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
 								withinSight += neighbors
 						for c in set(withinSight):
 							try:
@@ -356,7 +352,7 @@ class GUI():
 								print("Coordinate exceed map size in calculateFOW():", c)
 				if hasattr(self.mainMap[x][y], 'owner') and self.mainMap[x][y].owner == self.parent.info.player:
 					depotSquares.append((x, y))
-					neighbors = adjacentHexes(x, y, self.mapWidth, self.mapHeight)
+					neighbors = adjacentHexes(x, y, self.parent.info.mapWidth, self.parent.info.mapHeight)
 					for n in neighbors:
 						depotSquares.append(n)
 		# mark all squares around depots/HQ as visible
@@ -364,7 +360,7 @@ class GUI():
 			self.mainMap[x][y].fogofwar = 0
 		# --- FOR TEST --- Reveal whole map ------------------------------------------------
 		if self.parent.cmdArgs.reveal:
-			for x in range(self.mapHeight):
+			for x in range(self.parent.info.mapHeight):
 				for y in range(len(self.mainMap[x])):
 					self.mainMap[x][y].fogofwar = 0
 		# --- FOR TEST --- Reveal whole map ------------------------------------------------
@@ -386,8 +382,10 @@ class GUI():
 			pixelCooords = [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9]
 			return pixelCooords
 		else:
-			return self.mainMap[mapCursor[1]][mapCursor[0]]
-
+			try:
+				return self.mainMap[mapCursor[1]][mapCursor[0]]
+			except:				# to avoid extremely rare exception where coord of odd line is +1
+				return False
 
 
 	def draw(self):
@@ -416,11 +414,11 @@ class GUI():
 			self.markMovableSquares()
 		elif action == 'attack':
 			self.markAttackableSquares()
-		width = (self.mapWidth * 142) - 46  # dunno why 46 must be subtracted?
-		height = (self.mapHeight + 1) * 40
+		width = (self.parent.info.mapWidth * 142) - 46  # dunno why 46 must be subtracted?
+		height = (self.parent.info.mapHeight + 1) * 40
 		self.map = pygame.Surface((width, height))
 		self.map.fill(colors.historylineDark)
-		for x in range(self.mapHeight):
+		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				square = self.mainMap[x][y]
 				forskydning = 71 if (x % 2) != 0 else 0
@@ -446,8 +444,8 @@ class GUI():
 					image.blit(text, textRect)
 					self.map.blit(image, [y * 142 + forskydning, x * 40])
 		# generate minimap
-		width = (self.mapWidth * 142) - 46			# dunno why 46 must be subtracted?
-		height = (self.mapHeight + 1) * 40
+		width = (self.parent.info.mapWidth * 142) - 46			# dunno why 46 must be subtracted?
+		height = (self.parent.info.mapHeight + 1) * 40
 		tempMiniMap = self.map.copy()
 		# scale minimap to max height of minimap area (392)
 		scaleFactor = 392 / height
@@ -479,11 +477,11 @@ class GUI():
 		self.parent.display.blit(self.miniMap, [miniMapXCoord, 19])
 		self.rectMini = pygame.draw.rect(self.parent.display, colors.almostBlack, (miniMapXCoord - 4, 15,  w + 8, h + 8), 4)					# minimap border
 		# calculate percentage of area displayed
-		widthPercentageDisplayed = 8 / self.mapWidth
-		heightPercentageDisplayed = 12 / int((self.mapHeight + 1) / 2)
+		widthPercentageDisplayed = 8 / self.parent.info.mapWidth
+		heightPercentageDisplayed = 12 / int((self.parent.info.mapHeight + 1) / 2)
 		# draw a rectangle to show the field of view on the miniMap
-		markerOffsetX = self.mapView[0] / self.mapWidth				# calculate marker offset
-		markerOffsetY = self.mapView[1] / self.mapHeight
+		markerOffsetX = self.mapView[0] / self.parent.info.mapWidth				# calculate marker offset
+		markerOffsetY = self.mapView[1] / self.parent.info.mapHeight
 		pygame.draw.rect(self.parent.display, colors.red, (miniMapXCoord -2 + int(w * markerOffsetX), 17 + int(h * markerOffsetY), int((w + 4) * widthPercentageDisplayed), int((h) * heightPercentageDisplayed)), 2)
 
 
@@ -494,7 +492,7 @@ class GUI():
 		TerrainGUI.blit(self.backgroundTextureTerrain, (4, 4))
 		pygame.draw.rect(TerrainGUI, colors.almostBlack, (0, 0, 662, 118), 4)		# window border
 		square = self.currentSquare()
-		if not square.fogofwar:
+		if square and not square.fogofwar:
 			TerrainGUI.blit(self.movementModifierText, (176, 20))
 			TerrainGUI.blit(self.battleModifierText, (176, 50))
 			TerrainGUI.blit(self.sightModifierText, (176, 80))
@@ -603,7 +601,7 @@ class GUI():
 			newPaths = []
 			for p in reversed(paths):
 				lastField = p[-1]
-				neighbors = adjacentHexes(*lastField, self.mapWidth, self.mapHeight)
+				neighbors = adjacentHexes(*lastField, self.parent.info.mapWidth, self.parent.info.mapHeight)
 				for n in reversed(neighbors):
 					square = self.getSquare(n)
 					if n in visited:				# We don't want paths to visit previously visited fields
@@ -634,7 +632,7 @@ class GUI():
 			newPaths = []
 			for p in reversed(paths):
 				lastField = p[-1]
-				neighbors = adjacentHexes(*lastField, self.mapWidth, self.mapHeight)
+				neighbors = adjacentHexes(*lastField, self.parent.info.mapWidth, self.parent.info.mapHeight)
 				for n in reversed(neighbors):
 					square = self.getSquare(n)
 					if square.unit:

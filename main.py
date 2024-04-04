@@ -127,7 +127,7 @@ class Main():
 		cursorHex = self.interface.currentSquare()
 		if self.mode == "normal":
 			if cursorHex.content != False:	# if square has content ability
-				if cursorHex.owner == self.info.player:
+				if cursorHex.owner != self.info.opponent:
 					self.interface.contentMenu.create(cursorHex)
 					self.mode = "showContent"
 			else:
@@ -253,7 +253,7 @@ class Main():
 parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=120))
 parser.add_argument('levelMap')
 parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
-parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields")
+parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields (for DEV)")
 parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show entire map (for DEV)")
 args = parser.parse_args()
 
@@ -278,20 +278,26 @@ obj =  Main(args)
 
 # --- TODO --------------------------------------------------------------------------------------- 
 # - Move in turns
-#	. animation of depot/hq taken
 # 	. must win if HQ taken
 # 	- create opponenet AI
 # - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
+# - animation of depot/hq taken
 
+# - must colour units in unowned depots
+# - must not be able to move unowned units
+# - must re-colour units in unowned depots on capture
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
-# - crash hvis man klikker uden for hexes, mens man vil flytte (paa kantent af de officielle, anerkendte hexes... svaert at forklare, sorry)
+# - 
 
 
 # --- NOTES / IDEAS ------------------------------------------------------------------------------
-# - should perhaps allow user to see un-owned depots (problem that units cannot be un-owned?)
+# - 
+
+
+
 
 
 

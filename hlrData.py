@@ -594,11 +594,13 @@ class Info():
 						'Central Powers' : 1, 
 						'Entente Cordial' : 2 }
 
-	def __init__(self, _mapName, _mapNo, _player):
+	def __init__(self, _mapName, _mapNo, _player, _tiles):
 		self.player = self.nameDict[_player]
-		self.opponent = 1 if self.player == 2 else 1
+		self.opponent = 1 if self.player == 2 else 2
 		self.mapName = _mapName
 		self.mapNumber = _mapNo
+		self.mapWidth = len(_tiles["line1"])
+		self.mapHeight = len(_tiles)
 
 
 
@@ -648,7 +650,7 @@ class Unit():
 		if key:
 			data = unitsParameters[key]
 			self.name = data['name']
-			self.country = data['country']
+			self.country = data['country'] 
 			self.armour = data['armour']
 			self.speed = data['speed']
 			self.weight = data['weight']
@@ -670,7 +672,21 @@ class Unit():
 			self.picture = data['picture']
 			rawIcon = data['icon']
 			# if central powers, rotate and colourize icon
-			if self.faction == 1:
+			if self.faction == 0:		# unowned
+				arr = pygame.surfarray.pixels3d(rawIcon)
+				for i in range(48):
+					for j in range(48): # loop over the 2d array
+						if numpy.array_equal(arr[i, j], [164, 132, 112]):
+							arr[i, j] = [72, 72, 72]
+						elif numpy.array_equal(arr[i, j], [80, 68, 52]):
+							arr[i, j] = [24, 24, 24]
+						elif numpy.array_equal(arr[i, j], [216, 188, 160]):
+							arr[i, j] = [148, 148, 148]
+						elif numpy.array_equal(arr[i, j], [144, 112,  88]):
+							arr[i, j] = [56, 56, 56]
+						elif numpy.array_equal(arr[i, j], [180, 148, 124]):
+							arr[i, j] = [88, 88, 88]
+			elif self.faction == 1:		# central powers
 				arr = pygame.surfarray.pixels3d(rawIcon)
 				for i in range(48):
 					for j in range(48): # loop over the 2d array
