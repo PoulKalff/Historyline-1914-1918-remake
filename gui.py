@@ -731,6 +731,10 @@ class GUI():
 			# change ownership and flag of Hex
 			toHex.owner = self.parent.info.player
 			toHex.updateDepotColours(toHex.owner)
+
+			print("CONQUERED!")
+
+
 		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room, unit entered
 			toHex.unit.content.addUnit(_unitMoved)
 		else:

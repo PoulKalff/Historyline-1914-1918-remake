@@ -643,6 +643,9 @@ class Weapon():
 			self.picture = data['picture']
 
 
+
+
+
 class Unit():
 	""" Representation of one unit  """
 
@@ -670,47 +673,53 @@ class Unit():
 				else:
 					self.weapons.append(None)
 			self.picture = data['picture']
-			rawIcon = data['icon']
-			# if central powers, rotate and colourize icon
-			if self.faction == 0:		# unowned
-				arr = pygame.surfarray.pixels3d(rawIcon)
-				for i in range(48):
-					for j in range(48): # loop over the 2d array
-						if numpy.array_equal(arr[i, j], [164, 132, 112]):
-							arr[i, j] = [72, 72, 72]
-						elif numpy.array_equal(arr[i, j], [80, 68, 52]):
-							arr[i, j] = [24, 24, 24]
-						elif numpy.array_equal(arr[i, j], [216, 188, 160]):
-							arr[i, j] = [148, 148, 148]
-						elif numpy.array_equal(arr[i, j], [144, 112,  88]):
-							arr[i, j] = [56, 56, 56]
-						elif numpy.array_equal(arr[i, j], [180, 148, 124]):
-							arr[i, j] = [88, 88, 88]
-			elif self.faction == 1:		# central powers
-				arr = pygame.surfarray.pixels3d(rawIcon)
-				for i in range(48):
-					for j in range(48): # loop over the 2d array
-						if numpy.array_equal(arr[i, j], [164, 132, 112]):
-							arr[i, j] = [72, 88, 52]
-						elif numpy.array_equal(arr[i, j], [80, 68, 52]):
-							arr[i, j] = [24, 40, 20]
-						elif numpy.array_equal(arr[i, j], [216, 188, 160]):
-							arr[i, j] = [148, 168, 100]
-						elif numpy.array_equal(arr[i, j], [144, 112,  88]):
-							arr[i, j] = [56, 72, 36]
-						elif numpy.array_equal(arr[i, j], [180, 148, 124]):
-							arr[i, j] = [88, 104, 36]
-			self.contentIcon = rot_center(rawIcon, 180) if self.faction == 'Central Powers' else rawIcon    # preserve small icon to show in content
-			rawIcon = pygame.transform.scale2x(rawIcon)
-			self.allIcons = [   rawIcon,
-								rot_center(rawIcon, 60),
-								rot_center(rawIcon, 120),
-								rot_center(rawIcon, 180),
-								rot_center(rawIcon, 240),
-								rot_center(rawIcon, 300),
-							 ]
-			self.mapIcon = self.allIcons[3] if self.faction == 'Central Powers' else self.allIcons[0]
+			self.rawIcon = data['icon']
+			self.changeColour(self.faction)
+			self.mapIcon = self.allIcons[3] if self.faction == 1 else self.allIcons[0]
 			self.updateWeaponsGfx()
+
+
+	def changeColour(self, owner):
+		self.icon = self.rawIcon.copy()
+		if owner == 0:		# unowned
+			arr = pygame.surfarray.pixels3d(self.icon)
+			for i in range(48):
+				for j in range(48): # loop over the 2d array
+					if numpy.array_equal(arr[i, j], [164, 132, 112]):
+						arr[i, j] = [72, 72, 72]
+					elif numpy.array_equal(arr[i, j], [80, 68, 52]):
+						arr[i, j] = [24, 24, 24]
+					elif numpy.array_equal(arr[i, j], [216, 188, 160]):
+						arr[i, j] = [148, 148, 148]
+					elif numpy.array_equal(arr[i, j], [144, 112,  88]):
+						arr[i, j] = [56, 56, 56]
+					elif numpy.array_equal(arr[i, j], [180, 148, 124]):
+						arr[i, j] = [88, 88, 88]
+		elif owner == 1:		# central powers
+			arr = pygame.surfarray.pixels3d(self.icon)
+			for i in range(48):
+				for j in range(48): # loop over the 2d array
+					if numpy.array_equal(arr[i, j], [164, 132, 112]):
+						arr[i, j] = [72, 88, 52]
+					elif numpy.array_equal(arr[i, j], [80, 68, 52]):
+						arr[i, j] = [24, 40, 20]
+					elif numpy.array_equal(arr[i, j], [216, 188, 160]):
+						arr[i, j] = [148, 168, 100]
+					elif numpy.array_equal(arr[i, j], [144, 112,  88]):
+						arr[i, j] = [56, 72, 36]
+					elif numpy.array_equal(arr[i, j], [180, 148, 124]):
+						arr[i, j] = [88, 104, 36]
+	    # create all other icon variants
+		self.contentIcon = self.icon.copy()
+		self.icon = pygame.transform.scale2x(self.icon)
+		self.allIcons = [   self.icon,
+							rot_center(self.icon, 60),
+							rot_center(self.icon, 120),
+							rot_center(self.icon, 180),
+							rot_center(self.icon, 240),
+							rot_center(self.icon, 300),
+						 ]
+
 
 
 	def updateWeaponsGfx(self):
@@ -764,20 +773,20 @@ class HexSquare():
 			self.name = "Headquarters"
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
 			self.owner = content[0] if content else 0       # 0 for None, 1 for Entente, 2 for CP 
-			self.updateDepotColours(self.owner)
 			self.content = Content(50)
 			if content and len(content) == 2:
 				for unit in content[1]:
 					self.content.addUnit(Unit(unit))
+			self.updateDepotColours(self.owner)
 		elif hexType == 'cmpN':
 			self.name = "Depot"
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
 			self.owner = content[0] if content else 0       # 0 for None, 1 for Entente, 2 for CP 
-			self.updateDepotColours(self.owner)
 			self.content = Content(40)
 			if content and len(content) == 2:
 				for unit in content[1]:
 					self.content.addUnit(Unit(unit))
+			self.updateDepotColours(self.owner)
 		else:
 			self.content = False
 		if infrastructure:
@@ -808,6 +817,12 @@ class HexSquare():
 		_bg = self.background.copy()
 		_bg.blit(cutoutImage, (31, 14))
 		self.background = _bg
+		# colour units in depot if not owned
+		for y in range(9):
+			for x in range(2):
+				if self.content.units[x][y]:
+					self.content.units[x][y].changeColour(_owner)
+					self.content.units[x][y].faction = _owner
 
 
 	def getPixelCooords(self):
@@ -897,7 +912,8 @@ class ContentMenu():
 
 
 	def endMenu(self):
-		if self.content.units[self.focused[1].count][self.focused[0].count]:
+		_unit = self.content.units[self.focused[1].count][self.focused[0].count]
+		if _unit and _unit.faction == self.parent.info.player:
 			self.parent.interface.fromContent = (self.focused[1].count, self.focused[0].count)  # index of unit to move
 			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
 

@@ -280,12 +280,9 @@ obj =  Main(args)
 # - Move in turns
 # 	. must win if HQ taken
 # 	- create opponenet AI
-# - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
+
 # - animation of depot/hq taken
 
-# - must colour units in unowned depots
-# - must not be able to move unowned units
-# - must re-colour units in unowned depots on capture
 
 
 
@@ -294,6 +291,7 @@ obj =  Main(args)
 
 
 # --- NOTES / IDEAS ------------------------------------------------------------------------------
+# - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 # - 
 
 
