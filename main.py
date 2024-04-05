@@ -19,7 +19,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.73'		# move bugs removed
+version = '0.74'		# depot capture message
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -278,16 +278,16 @@ obj =  Main(args)
 
 # --- TODO --------------------------------------------------------------------------------------- 
 # - Move in turns
-# 	. must win if HQ taken
-# 	- create opponenet AI
+# 	- must win if HQ taken
+# - create opponenet AI
+# - complete Level 2 map
 
-# - animation of depot/hq taken
-
+# - must be able to scroll map horizontially
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
-# - 
+# - hexes can come out of sync, horizontally, when cliking on minimap, sor cursor is on half of hex
 
 
 # --- NOTES / IDEAS ------------------------------------------------------------------------------

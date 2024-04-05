@@ -12,6 +12,7 @@ font40 = pygame.font.Font('freesansbold.ttf', 40)
 font50 = pygame.font.Font('freesansbold.ttf', 50)
 font60 = pygame.font.Font('freesansbold.ttf', 60)
 
+flagIndex = {'Germany' : 0, 'France' : 1}
 
 bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cost (0 = not accessible) (0-10),  battle advantage (0-100), sight hindrance (0-10)
 						'grass'         :   [1, 4, 0],
@@ -933,7 +934,7 @@ class ContentMenu():
 			unitGUI = pygame.Surface((662, 438))
 			unitGUI.blit(self.parent.interface.backgroundTextureUnit, (4, 4))
 			unitPanel = self.parent.interface.unitPanel.copy()
-			unitPanel.blit(self.parent.interface.flags, [3, 3], (self.parent.interface.flagIndex[_unit.country] * 88, 0, 88, 88))
+			unitPanel.blit(self.parent.interface.flags, [3, 3], (flagIndex[_unit.country] * 88, 0, 88, 88))
 			unitPanel.blit(_unit.mapIcon, [-1, -1])
 			unitPanel.blit(self.parent.interface.ranksGfx, [4, 103], (_unit.experience * 88, 0, 88, 88))
 			unitPanel.blit(_unit.picture, [380, 3])

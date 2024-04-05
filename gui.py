@@ -16,7 +16,6 @@ class GUI():
 	def __init__(self, parent):
 		self.parent = parent
 		# load constants
-		self.flagIndex = {'Germany' : 0, 'France' : 1}
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.cursorFromGfx = pygame.image.load('gfx/cursor_from.png')
 		self.cursorAttackGfx = pygame.image.load('gfx/cursor_attacking.png')
@@ -523,7 +522,7 @@ class GUI():
 		square = self.currentSquare()
 		if not square.fogofwar and square.unit:
 			unitPanel = self.unitPanel.copy()
-			unitPanel.blit(self.flags, [3, 3], (self.flagIndex[square.unit.country] * 88, 0, 88, 88))
+			unitPanel.blit(self.flags, [3, 3], (flagIndex[square.unit.country] * 88, 0, 88, 88))
 			unitPanel.blit(square.unit.mapIcon, [-1, -1])
 			unitPanel.blit(self.ranksGfx, [4, 103], (square.unit.experience * 88, 0, 88, 88))
 			unitPanel.blit(square.unit.picture, [380, 3])
@@ -657,6 +656,18 @@ class GUI():
 				return False
 
 
+	def showCapture(self, player, hexCaptured):
+		""" show a short text / animation to inform o depot / HQ capture"""
+		_flag = self.flags.subsurface( ((player - 1)  * 88, 0, 88, 88) )
+		_bigFlag = pygame.transform.scale(_flag, (400, 300))
+		_text = font60.render(hexCaptured.name + " captured!", True, colors.black) 	# [movementModifierText, rMovementModifierText]
+		self.parent.display.blit(_bigFlag, [700, 350])
+		self.parent.display.blit(_text, [900 - (_text.get_width() / 2), 470])
+		pygame.display.update()
+		pygame.time.delay(2000)
+
+
+
 	def executeMove(self, movePath):
 		""" Shows the movement of a unit along the path given by the points in the path, then updates map data """
 		self.parent.mode = "normal"
@@ -731,10 +742,7 @@ class GUI():
 			# change ownership and flag of Hex
 			toHex.owner = self.parent.info.player
 			toHex.updateDepotColours(toHex.owner)
-
-			print("CONQUERED!")
-
-
+			self.showCapture(self.parent.info.player, toHex)
 		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room, unit entered
 			toHex.unit.content.addUnit(_unitMoved)
 		else:
