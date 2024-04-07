@@ -19,7 +19,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.74'		# depot capture message
+version = '0.75'		# horizontal scrolling
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -171,10 +171,15 @@ class Main():
 					result =  self.findHex(mX, mY)
 					if result:
 						self.interface.cursorPos = result
-				elif self.interface.rectMini.collidepoint(mX, mY):		# if inside miniMap
+				elif self.interface.rectMini.collidepoint(mX, mY):		# if inside miniMap			sparkmig
 					percentageX = (mX - self.interface.rectMini.x) / self.interface.rectMini.width
 					percentageY = (mY - self.interface.rectMini.y) / self.interface.rectMini.height
-					maxDispY = (self.interface.squareHeight + 1) / 2
+					maxDispX = self.info.mapWidth - 8	# because 8 is the shown screen width
+					dispX = int(percentageX * percentageX * 10)
+					dispX = int(maxDispX) if dispX > maxDispX else dispX
+					dispX = 0 if dispX < 0 else dispX
+					self.interface.mapView[0] = dispX
+					maxDispY = (self.info.mapHeight + 1) / 2
 					dispY = int(percentageY * percentageY * 50)
 					dispY = int(maxDispY) if dispY > maxDispY else dispY
 					dispY = 0 if dispY < 0 else dispY
@@ -202,6 +207,9 @@ class Main():
 			self.interface.cursorMove('Down')
 		elif keysPressed[pygame.K_SPACE]:
 			self.handleSelection()
+		elif keysPressed[pygame.K_e]:
+			if self.cmdArgs.mapedit:
+				self.cmdArgs.editor.showMenu()
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -242,6 +250,8 @@ class Main():
 			pygame.display.update()
 #			print(str(self.mode))
 #			print("External",  self.interface.currentSquare().position  )
+#			print(self.interface.mapView)
+#			print(self.interface.cursorPos, self.interface.mapView)
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
@@ -255,7 +265,12 @@ parser.add_argument('levelMap')
 parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
 parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields (for DEV)")
 parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show entire map (for DEV)")
+parser.add_argument("-m", "--mapedit",		action="store_true",	help="Map editor enabled (for DEV)")
 args = parser.parse_args()
+
+if args.mapedit:
+	print("\n  Map editor enabled!")
+	args.editor = MapEditor()
 
 #check if map exists
 args.mapPath = "levels/" + args.levelMap + ".json"
@@ -280,14 +295,13 @@ obj =  Main(args)
 # - Move in turns
 # 	- must win if HQ taken
 # - create opponenet AI
-# - complete Level 2 map
 
-# - must be able to scroll map horizontially
+# - complete Level 2 map
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
-# - hexes can come out of sync, horizontally, when cliking on minimap, sor cursor is on half of hex
+# - 
 
 
 # --- NOTES / IDEAS ------------------------------------------------------------------------------

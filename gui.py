@@ -49,10 +49,6 @@ class GUI():
 		with open(parent.cmdArgs.mapPath) as json_file:
 			jsonLevelData = json.load(json_file)
 		self.parent.info = Info(jsonLevelData["mapName"], jsonLevelData["mapNo"], jsonLevelData["player"], jsonLevelData["tiles"])
-		self.squareWidth = len(jsonLevelData["tiles"]["line1"])			# 8 for level 1
-		self.squareHeight = len(jsonLevelData["tiles"])					# 47 for level 1
-		self.pixelWidth = self.squareWidth * 142
-		self.pixelHeight = self.squareHeight * 40
 		for nrX, value in enumerate(jsonLevelData['tiles'].values()):
 			line = []
 			for nrY, square in enumerate(value):
@@ -454,8 +450,8 @@ class GUI():
 
 
 	def drawMap(self):
-		self.rectMap = pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)								# map border (main map = 1098 / 968)
-		self.parent.display.blit(self.map, [19, 19], (self.mapView[0], self.mapView[1] * 40, 1098 + self.mapView[0], 960))		# blit visible area of map
+		self.rectMap = pygame.draw.rect(self.parent.display, colors.almostBlack, (15, 15, 1098, 968), 4)							# map border (main map = 1098 / 968)
+		self.parent.display.blit(self.map, [19, 19], (	self.mapView[0] * 142, self.mapView[1] * 40, 1090, 960))							# blit visible area of map
 		forskydning = 71 if (self.cursorPos[1] % 2) != 0 else 0
 		if self.parent.mode == "selectMoveTo":
 			forskydning2 = 71 if (self.fromHex.position[0] % 2) != 0 else 0
@@ -520,7 +516,7 @@ class GUI():
 		unitGUI.blit(self.backgroundTextureUnit, (4, 4))
 		pygame.draw.rect(unitGUI, colors.almostBlack, (0, 0, 662, 438), 4)						# window border
 		square = self.currentSquare()
-		if not square.fogofwar and square.unit:
+		if square and not square.fogofwar and square.unit:
 			unitPanel = self.unitPanel.copy()
 			unitPanel.blit(self.flags, [3, 3], (flagIndex[square.unit.country] * 88, 0, 88, 88))
 			unitPanel.blit(square.unit.mapIcon, [-1, -1])
@@ -554,17 +550,19 @@ class GUI():
 		""" Values are left, right, up, down """
 		verticalOdd = self.cursorPos[1] % 2 == 0
 		if direction == 'Up':
-				if self.cursorPos[1] > 1:
-					self.cursorPos[1] -= 2
-				else:
-					if self.mapView[1] > 1:
-						self.mapView[1] -= 2		# NB : ONLY even numbers, as two lines must be drawn as one!
+			if self.cursorPos[1] > 2:
+				self.cursorPos[1] -= 2
+			elif self.mapView[1] >= 2:
+				self.mapView[1] -= 2		# NB : ONLY even numbers, as two lines must be drawn as one!
+			elif self.cursorPos[1] == 2:
+				self.cursorPos[1] -= 2
 		elif direction == 'Down':
-			if self.cursorPos[1] < 21:
+			if self.cursorPos[1] < 20:
 				self.cursorPos[1] += 2
-			else:
-				if self.mapView[1] + 24 < self.squareHeight:
-					self.mapView[1] += 2		# NB : ONLY even numbers, as two lines must be drawn as one!
+			elif self.mapView[1] + 24 < self.parent.info.mapHeight:
+				self.mapView[1] += 2		# NB : ONLY even numbers, as two lines must be drawn as one!
+			elif self.cursorPos[1] == 20:
+				self.cursorPos[1] += 2
 		elif direction == 'Left':
 			if self.cursorPos[0] > 0:
 				if verticalOdd:
@@ -572,21 +570,32 @@ class GUI():
 					self.cursorPos[0] -= 1
 				else:
 					self.cursorPos[1] -= 1
-			else:
-				if self.cursorPos[1] % 2 != 0:
-					self.cursorPos[1] -= 1
+			elif self.cursorPos[0] == 0:
+				if self.mapView[0] > 0:
+					self.mapView[0] -= 1
+				elif self.mapView[0] == 0:
+					if not verticalOdd:
+						self.cursorPos[1] -= 1
 		elif direction == 'Right':
-			if self.cursorPos[0] < 7:
+			if self.cursorPos[0] < 6:
 				if verticalOdd:
 					self.cursorPos[1] += 1
 				else:
 					self.cursorPos[0] += 1
 					self.cursorPos[1] -= 1
+			elif self.cursorPos[0] == 6:
+				if self.mapView[0] < self.parent.info.mapWidth - 8:	# 8 is screen width
+					self.mapView[0] += 1
+				elif self.mapView[0] == self.parent.info.mapWidth - 8:
+					if verticalOdd:
+						self.cursorPos[1] += 1
+					else:
+						self.cursorPos[0] += 1
+						self.cursorPos[1] -= 1
 		# prevent cursor exiting map
 		if self.cursorPos[0] < 0: self.cursorPos[0] = 0
 		if self.cursorPos[1] < 0: self.cursorPos[1] = 0
 		if self.cursorPos[1] > 22: self.cursorPos[1] = 21
-
 
 
 
@@ -740,9 +749,10 @@ class GUI():
 		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
 			toHex.content.addUnit(_unitMoved)
 			# change ownership and flag of Hex
-			toHex.owner = self.parent.info.player
-			toHex.updateDepotColours(toHex.owner)
-			self.showCapture(self.parent.info.player, toHex)
+			if toHex.owner != self.parent.info.player:
+				toHex.owner = self.parent.info.player
+				toHex.updateDepotColours(toHex.owner)
+				self.showCapture(self.parent.info.player, toHex)
 		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room, unit entered
 			toHex.unit.content.addUnit(_unitMoved)
 		else:

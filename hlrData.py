@@ -15,16 +15,19 @@ font60 = pygame.font.Font('freesansbold.ttf', 60)
 flagIndex = {'Germany' : 0, 'France' : 1}
 
 bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cost (0 = not accessible) (0-10),  battle advantage (0-100), sight hindrance (0-10)
-						'grass'         :   [1, 4, 0],
-						'hills'         :   [2, 52, 8],
+						'forest_w'      :   [3, 43, 8],
+						'grass'         :   [2, 4, 0],
+						'grass_w'       :   [2, 4, 0],
+						'hills'         :   [3, 52, 8],
 						'house'         :   [None, None, 2],
 						'mud'           :   [3, 38, 0],
-						'stone'         :   [2, 27, 0],
+						'stone'         :   [3, 27, 0],
 						'mountain'      :   [5, 63, 10],
+						'mountain_w'    :   [5, 63, 10],
 						'water'         :   [0, 0, 0],
 						'waterStones'   :   [None, None, 0],
 						'trenches'      :   [None, None, 0],    # no map tile yet
-						'barbedWire'    :   [3, 0, 1],          # no map tile yet
+						'barbedWire'    :   [4, 0, 1],          # no map tile yet
 						'hqN'           :   [None, None, 7],
 						'hqS'           :   [None, None, 7],
 						'hqC'           :   [None, None, 7],
@@ -62,13 +65,16 @@ bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cos
 					}
 
 bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.png'),
+				'forest_w'      :   pygame.image.load('gfx/hexTypes/hex_forest_winter.png'),
 				'grass'         :   pygame.image.load('gfx/hexTypes/hex_grass.png'),
+				'grass_w'       :   pygame.image.load('gfx/hexTypes/hex_grass_winter.png'),
 				'hills'         :   pygame.image.load('gfx/hexTypes/hex_hills.png'),
 				'house'         :   pygame.image.load('gfx/hexTypes/hex_house.png'),
 				'mud'           :   pygame.image.load('gfx/hexTypes/hex_mud.png'),
 				'test'          :   pygame.image.load('gfx/hexTypes/hex_test.png'),
 				'stone'         :   pygame.image.load('gfx/hexTypes/hex_stone.png'),
 				'mountain'      :   pygame.image.load('gfx/hexTypes/hex_mountain.png'),
+				'mountain_w'    :   pygame.image.load('gfx/hexTypes/hex_mountain_winter.png'),
 				'water'         :   pygame.image.load('gfx/hexTypes/hex_water.png'),
 				'waterStones'   :   pygame.image.load('gfx/hexTypes/hex_waterStones.png'),
 				'hqN'           :   pygame.image.load('gfx/hexTypes/hex_hqN.png'),
@@ -1171,6 +1177,20 @@ class ActionMenu():
 		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], self.menuWidth, 60), 4)    # menu border
 		for butNr in range(len(self.contents)):
 			self.parent.display.blit(self.contents[butNr][self.focusedArray[butNr]],  self.contents[butNr][2])
+
+
+
+class MapEditor():
+	""" notImplemented yet """
+
+
+	def __init__(self):
+		self.allHexSquares = sorted(bgTiles.keys())
+
+
+	def showMenu(self):
+		for _hex in self.allHexSquares:
+			print(_hex)
 
 
 
