@@ -1,3 +1,5 @@
+import sys
+import time
 import math
 import numpy
 import pygame
@@ -35,6 +37,13 @@ bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cos
 						'hqNW'          :   [None, None, 7],
 						'hqSE'          :   [None, None, 7],
 						'hqSW'          :   [None, None, 7],
+						'hqN_w'         :   [None, None, 7],
+						'hqS_w'         :   [None, None, 7],
+						'hqC_w'         :   [None, None, 7],
+						'hqNE_w'        :   [None, None, 7],
+						'hqNW_w'        :   [None, None, 7],
+						'hqSE_w'        :   [None, None, 7],
+						'hqSW_w'        :   [None, None, 7],
 						'cmpN'          :   [None, None, 7],
 						'cmpS'          :   [None, None, 7],
 						'cmpE'          :   [None, None, 7],
@@ -64,9 +73,10 @@ bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cos
 						'lakeside123'   :   [None, None, 0],
 						'lakeside126'   :   [None, None, 0],
 						'lakeside156'   :   [None, None, 0],
-						'lakeside3456'  :   [None, None, 0]                     
-
+						'lakeside3456'  :   [None, None, 0],                   
+						'unseen'		:   [None, None, 0]
 					}
+
 
 bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.png'),
 				'forest_w'      :   pygame.image.load('gfx/hexTypes/hex_forest_winter.png'),
@@ -75,7 +85,6 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 				'hills'         :   pygame.image.load('gfx/hexTypes/hex_hills.png'),
 				'house'         :   pygame.image.load('gfx/hexTypes/hex_house.png'),
 				'mud'           :   pygame.image.load('gfx/hexTypes/hex_mud.png'),
-				'test'          :   pygame.image.load('gfx/hexTypes/hex_test.png'),
 				'stone'         :   pygame.image.load('gfx/hexTypes/hex_stone.png'),
 				'mountain'      :   pygame.image.load('gfx/hexTypes/hex_mountain.png'),
 				'mountain_w'    :   pygame.image.load('gfx/hexTypes/hex_mountain_winter.png'),
@@ -88,6 +97,13 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 				'hqNW'          :   pygame.image.load('gfx/hexTypes/hex_hqNW.png'),
 				'hqSE'          :   pygame.image.load('gfx/hexTypes/hex_hqSE.png'),
 				'hqSW'          :   pygame.image.load('gfx/hexTypes/hex_hqSW.png'),
+				'hqN_w'         :   pygame.image.load('gfx/hexTypes/hex_hqN_winter.png'),
+				'hqS_w'         :   pygame.image.load('gfx/hexTypes/hex_hqS_winter.png'),
+				'hqC_w'         :   pygame.image.load('gfx/hexTypes/hex_hqC_winter.png'),
+				'hqNE_w'        :   pygame.image.load('gfx/hexTypes/hex_hqNE_winter.png'),
+				'hqNW_w'        :   pygame.image.load('gfx/hexTypes/hex_hqNW_winter.png'),
+				'hqSE_w'        :   pygame.image.load('gfx/hexTypes/hex_hqSE_winter.png'),
+				'hqSW_w'        :   pygame.image.load('gfx/hexTypes/hex_hqSW_winter.png'),
 				'cmpN'          :   pygame.image.load('gfx/hexTypes/hex_campN.png'),
 				'cmpS'          :   pygame.image.load('gfx/hexTypes/hex_campS.png'),
 				'cmpE'          :   pygame.image.load('gfx/hexTypes/hex_campE.png'),
@@ -1192,14 +1208,100 @@ class MapEditor():
 	""" notImplemented yet """
 
 
-	def __init__(self):
-		self.allHexSquares = sorted(bgTiles.keys())
+	def __init__(self, parent):
+		self.parent = parent
+		self.allHexSquares = bgTiles
+		self.displayNames = sorted(bgTiles)
+		self.allData = {}
+		self.selection = ""
+		no = 0
+		for n in self.displayNames:
+			self.allData[n] = [bgTiles[n], HexSquare((0, 0), n, "", ""), font20.render(str(no) + "  " + self.displayNames[no], True, colors.black)]
+			no += 1
 
 
 	def showMenu(self):
-		for _hex in self.allHexSquares:
-			print(_hex)
+		self.menuRunning = True
+		self.menu = pygame.Surface((600, 950))	
+		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
+		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
+		for no in range(45):
+			gfx = self.allData[self.displayNames[no]][2]
+			self.menu.blit(gfx, [50,  10 + 20 * no])
+		for no in range(45, len(self.allData)):
+			gfx = self.allData[self.displayNames[no]][2]
+			self.menu.blit(gfx, [350, 10 + 20 * (no - 45)])
+		self.parent.display.blit(self.menu, (1124, 15))
+		while self.menuRunning:
+			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
+			self.parent.display.blit(selection, [1400, 900])
+			pygame.display.update()
+			self.checkInput()
+		# proccess user selection
+		selectionName = self.displayNames[int(self.selection)]
+		selectionObject = self.allData[selectionName]
+		currentSquare = self.parent.interface.currentSquare()
+		print()
+		print('User chose the tile "' + selectionName + '" to be set at ' + str(currentSquare.position))
+		print()
+		sys.exit()
 
+
+
+
+
+
+
+
+
+	def checkInput(self):
+		""" Checks and responds to input from keyboard and mouse """
+		for event in pygame.event.get():
+			# Quit
+			if event.type == pygame.QUIT:
+				pass
+		# Keyboard
+		keysPressed = pygame.key.get_pressed()
+		if keysPressed[pygame.K_LEFT]:
+			pass
+		elif keysPressed[pygame.K_RIGHT]:
+			pass
+		elif keysPressed[pygame.K_UP]:
+			pass
+		elif keysPressed[pygame.K_DOWN]:
+			pass
+		elif keysPressed[pygame.K_RETURN]:
+			self.menuRunning = False
+		elif keysPressed[pygame.K_0]:
+			self.selection += "0"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_1]:
+			self.selection += "1"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_2]:
+			self.selection += "2"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_3]:
+			self.selection += "3"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_4]:
+			self.selection += "4"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_5]:
+			self.selection += "5"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_6]:
+			self.selection += "6"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_7]:
+			self.selection += "7"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_8]:
+			self.selection += "8"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_9]:
+			self.selection += "9"
+			time.sleep(0.2)
 
 
 

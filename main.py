@@ -31,6 +31,7 @@ class Main():
 		self.width = 1800	# 1110 minimum, as it is smallest map
 		self.height = 1000
 		self.develop = False
+		if args.mapedit: args.editor = MapEditor(self)
 		pygame.init()
 		icon = pygame.image.load('gfx/gameIcon.png')
 		self.devModeFont = pygame.font.Font('freesansbold.ttf', 32)
@@ -267,10 +268,6 @@ parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show number
 parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show entire map (for DEV)")
 parser.add_argument("-m", "--mapedit",		action="store_true",	help="Map editor enabled (for DEV)")
 args = parser.parse_args()
-
-if args.mapedit:
-	print("\n  Map editor enabled!")
-	args.editor = MapEditor()
 
 #check if map exists
 args.mapPath = "levels/" + args.levelMap + ".json"
