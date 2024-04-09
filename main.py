@@ -1,7 +1,8 @@
 #!/usr/bin/python3
-
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+import warnings
+warnings.simplefilter("ignore")
 
 import io
 import os
@@ -19,7 +20,7 @@ from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
-version = '0.75'		# horizontal scrolling
+version = '0.80'		# added map-editor
 
 # --- Classes -------------------------------------------------------------------------------------
 

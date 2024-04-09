@@ -53,6 +53,14 @@ bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cos
 						'cmpS'          :   [None, None, 7],
 						'cmpE'          :   [None, None, 7],
 						'cmpW'          :   [None, None, 7],
+						'cmpN_w'        :   [None, None, 7],
+						'cmpS_w'        :   [None, None, 7],
+						'cmpE_w'        :   [None, None, 7],
+						'cmpW_w'        :   [None, None, 7],
+						'factoryN_w'    :   [None, None, 7],
+						'factoryS_w'    :   [None, None, 7],
+						'factoryE_w'    :   [None, None, 7],
+						'factoryW_w'    :   [None, None, 7],
 						'mountN'        :   [None, None, 10],
 						'mountS'        :   [None, None, 10],
 						'mountE'        :   [None, None, 10],
@@ -70,6 +78,12 @@ bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cos
 						'stream25'      :   [None, None, 0],
 						'stream26'      :   [None, None, 0],
 						'stream36'      :   [None, None, 0],
+						'stream13_w'    :   [None, None, 0],
+						'stream14_w'    :   [None, None, 0],
+						'stream25_w'    :   [None, None, 0],
+						'stream26_w'    :   [None, None, 0],
+						'stream35_w'    :   [None, None, 0],
+						'stream46_w'    :   [None, None, 0],
 						'lakeside12'    :   [None, None, 0],
 						'lakeside16'    :   [None, None, 0],
 						'lakeside23'    :   [None, None, 0],
@@ -117,6 +131,14 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 				'cmpS'          :   pygame.image.load('gfx/hexTypes/hex_campS.png'),
 				'cmpE'          :   pygame.image.load('gfx/hexTypes/hex_campE.png'),
 				'cmpW'          :   pygame.image.load('gfx/hexTypes/hex_campW.png'),
+				'factoryN_w'    :   pygame.image.load('gfx/hexTypes/hex_factoryN_winter.png'),
+				'factoryS_w'    :   pygame.image.load('gfx/hexTypes/hex_factoryS_winter.png'),
+				'factoryE_w'    :   pygame.image.load('gfx/hexTypes/hex_factoryE_winter.png'),
+				'factoryW_w'    :   pygame.image.load('gfx/hexTypes/hex_factoryW_winter.png'),
+				'cmpN_w'        :   pygame.image.load('gfx/hexTypes/hex_campN_winter.png'),
+				'cmpS_w'        :   pygame.image.load('gfx/hexTypes/hex_campS_winter.png'),
+				'cmpE_w'        :   pygame.image.load('gfx/hexTypes/hex_campE_winter.png'),
+				'cmpW_w'        :   pygame.image.load('gfx/hexTypes/hex_campW_winter.png'),
 				'mountN'        :   pygame.image.load('gfx/hexTypes/hex_mountainN.png'),
 				'mountS'        :   pygame.image.load('gfx/hexTypes/hex_mountainS.png'),
 				'mountE'        :   pygame.image.load('gfx/hexTypes/hex_mountainE.png'),
@@ -134,6 +156,12 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 				'stream25'      :   pygame.image.load('gfx/hexTypes/hex_stream25.png'),
 				'stream26'      :   pygame.image.load('gfx/hexTypes/hex_stream26.png'),
 				'stream36'      :   pygame.image.load('gfx/hexTypes/hex_stream36.png'),
+				'stream13_w'    :   pygame.image.load('gfx/hexTypes/hex_stream13_winter.png'),
+				'stream14_w'    :   pygame.image.load('gfx/hexTypes/hex_stream14_winter.png'),
+				'stream25_w'    :   pygame.image.load('gfx/hexTypes/hex_stream25_winter.png'),
+				'stream26_w'    :   pygame.image.load('gfx/hexTypes/hex_stream26_winter.png'),
+				'stream35_w'    :   pygame.image.load('gfx/hexTypes/hex_stream35_winter.png'),
+				'stream46_w'    :   pygame.image.load('gfx/hexTypes/hex_stream46_winter.png'),
 				'lakeside12'    :   pygame.image.load('gfx/hexTypes/hex_lakeside12.png'),
 				'lakeside16'    :   pygame.image.load('gfx/hexTypes/hex_lakeside16.png'),
 				'lakeside23'    :   pygame.image.load('gfx/hexTypes/hex_lakeside23.png'),
@@ -1220,14 +1248,26 @@ class MapEditor():
 
 	def __init__(self, parent):
 		self.parent = parent
-		self.allHexSquares = bgTiles
-		self.displayNames = sorted(bgTiles)
+		summer = []
+		winter = []
+		for n in bgTiles.keys():
+			if n.endswith("_w"):
+				winter.append(n)
+			else:
+				summer.append(n)
+		self.summerTiles = sorted(summer)
+		self.winterTiles = sorted(winter)
 		self.allData = {}
 		self.selection = ""
 		no = 0
-		for n in self.displayNames:
-			self.allData[n] = [bgTiles[n], HexSquare((0, 0), n, "", ""), font20.render(str(no) + "  " + self.displayNames[no], True, colors.black)]
+		for n in self.summerTiles:
+			self.allData[n] = [bgTiles[n], HexSquare((0, 0), n, "", ""), font20.render(str(no) + "  " + self.summerTiles[no], True, colors.black)]
 			no += 1
+		for n in self.winterTiles:
+			self.allData[n] = [bgTiles[n], HexSquare((0, 0), n, "", ""), font20.render(str(no) + "  " + self.winterTiles[no - len(self.summerTiles)], True, colors.black)]
+			no += 1
+		self.displayNames = self.summerTiles + self.winterTiles
+
 
 
 	def showMenu(self):
@@ -1235,12 +1275,12 @@ class MapEditor():
 		self.menu = pygame.Surface((600, 950))	
 		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
 		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
-		for no in range(45):
-			gfx = self.allData[self.displayNames[no]][2]
+		for no in range(len(self.summerTiles)):
+			gfx = self.allData[self.summerTiles[no]][2]
 			self.menu.blit(gfx, [50,  10 + 20 * no])
-		for no in range(45, len(self.allData)):
-			gfx = self.allData[self.displayNames[no]][2]
-			self.menu.blit(gfx, [350, 10 + 20 * (no - 45)])
+		for no in range(len(self.winterTiles)):
+			gfx = self.allData[self.winterTiles[no]][2]
+			self.menu.blit(gfx, [350, 10 + 20 * (no)])
 		self.parent.display.blit(self.menu, (1124, 15))
 		while self.menuRunning:
 			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
@@ -1249,7 +1289,7 @@ class MapEditor():
 			pygame.display.update()
 			self.checkInput()
 		# proccess user selection
-		if self.selection and int(self.selection) <= len(self.allData):
+		if self.selection and int(self.selection) <= len(self.allData) - 1:
 			selectionName = self.displayNames[int(self.selection)]
 #			self.selection = ""			# selection could be reset or not....
 			selectedHexObject = self.allData[selectionName][1]
