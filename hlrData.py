@@ -1,4 +1,5 @@
 import sys
+import json
 import time
 import math
 import numpy
@@ -797,6 +798,7 @@ class HexSquare():
 		self.unit = Unit(unit) if unit else None                        # any unit occupying the square, e.g. Infantry
 		self.fogofwar = None                                    # one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
 		self.position = pos
+		self.type = hexType
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
@@ -1234,23 +1236,41 @@ class MapEditor():
 		self.parent.display.blit(self.menu, (1124, 15))
 		while self.menuRunning:
 			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
+			pygame.draw.rect(self.parent.display, colors.red, (1400, 900, 300, 50))
 			self.parent.display.blit(selection, [1400, 900])
 			pygame.display.update()
 			self.checkInput()
 		# proccess user selection
-		selectionName = self.displayNames[int(self.selection)]
-		selectionObject = self.allData[selectionName]
-		currentSquare = self.parent.interface.currentSquare()
-		print()
-		print('User chose the tile "' + selectionName + '" to be set at ' + str(currentSquare.position))
-		print()
-		sys.exit()
-
-
-
-
-
-
+		if self.selection and int(self.selection) <= len(self.allData):
+			selectionName = self.displayNames[int(self.selection)]
+#			self.selection = ""			# selection could be reset or not....
+			selectedHexObject = self.allData[selectionName][1]
+			currentSquare = self.parent.interface.currentSquare()
+			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
+			# assign new hex object and generate map
+			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]] = selectedHexObject
+			self.parent.interface.generateMap()
+			# assign the name of the tile to the .json-file, to preserve the change
+			with open(self.parent.cmdArgs.mapPath) as json_file:
+				jsonLevelData = json.load(json_file)
+				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][0] = selectedHexObject.type
+			with open(self.parent.cmdArgs.mapPath, "w") as json_file:
+#				json.dump(jsonLevelData, json_file, indent=4)		# simpler, safer, but not formatted
+				json_file.write("{\n")
+				json_file.write('\t"mapName" :\t"%s",\n' % (jsonLevelData["mapName"]))
+				json_file.write('\t"mapNo" :\t%s,\n' % (str(jsonLevelData["mapNo"])))
+				json_file.write('\t"player" :\t"%s",\n' % (jsonLevelData["player"]))
+				json_file.write('\t"tiles" :\t{\n')
+				no = 0
+				for line in jsonLevelData["tiles"]:
+					_line = str(jsonLevelData["tiles"]["line%s" % str(no + 1)])
+					convLine = _line.replace("'", '"')
+					if no + 1 != len(jsonLevelData["tiles"]):
+						convLine += ","
+					json_file.write('\t\t\t\t"line%s" :\t%s\n' % (str(no + 1), convLine))
+					no += 1
+				json_file.write("\t\t\t\t}\n")
+				json_file.write("}\n\n\n\n\n\n\n")
 
 
 
@@ -1301,6 +1321,9 @@ class MapEditor():
 			time.sleep(0.2)
 		elif keysPressed[pygame.K_9]:
 			self.selection += "9"
+			time.sleep(0.2)
+		elif keysPressed[pygame.K_BACKSPACE]:
+			self.selection = self.selection[:-1]
 			time.sleep(0.2)
 
 

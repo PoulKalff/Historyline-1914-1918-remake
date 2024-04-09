@@ -253,6 +253,9 @@ class Main():
 #			print("External",  self.interface.currentSquare().position  )
 #			print(self.interface.mapView)
 #			print(self.interface.cursorPos, self.interface.mapView)
+#			print(self.interface.mainMap[0][0])
+
+
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
