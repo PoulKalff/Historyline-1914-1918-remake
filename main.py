@@ -211,7 +211,19 @@ class Main():
 			self.handleSelection()
 		elif keysPressed[pygame.K_e]:
 			if self.cmdArgs.mapedit:
-				self.cmdArgs.editor.showMenu()
+				self.cmdArgs.editor.showTileMenu()
+		elif keysPressed[pygame.K_r]:
+			if self.cmdArgs.mapedit:
+				self.cmdArgs.editor.showInfrastructureMenu()
+		elif keysPressed[pygame.K_t]:
+			if self.cmdArgs.mapedit:
+				self.cmdArgs.editor.showUnitMenu()
+
+
+
+
+
+
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1

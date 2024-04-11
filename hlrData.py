@@ -1268,6 +1268,7 @@ class MapEditor():
 		self.summerTiles = sorted(summer)
 		self.winterTiles = sorted(winter)
 		self.allData = {}
+		self.allInfraData = {}
 		self.selection = ""
 		no = 0
 		for n in self.summerTiles:
@@ -1277,10 +1278,44 @@ class MapEditor():
 			self.allData[n] = [bgTiles[n], HexSquare((0, 0), n, "", ""), font20.render(str(no) + "  " + self.winterTiles[no - len(self.summerTiles)], True, colors.black)]
 			no += 1
 		self.displayNames = self.summerTiles + self.winterTiles
+		# add infrastructure
+		infra = []
+		for n in infraIcons.keys():
+			infra.append(n)
+		self.infraNames = sorted(infra)
+		no = 0
+		for n in self.infraNames:
+			self.allInfraData[n] = [infraIcons[n], font20.render(str(no) + "  " + self.infraNames[no], True, colors.black), n]
+			no += 1
 
 
 
-	def showMenu(self):
+	def saveData(self, data):
+		""" saves data in json in a more readable formatting """
+		with open(self.parent.cmdArgs.mapPath, "w") as json_file:
+#			json.dump(data, json_file, indent=4)		# simpler, safer, but not formatted
+			json_file.write("{\n")
+			json_file.write('\t"mapName" :\t"%s",\n' % (data["mapName"]))
+			json_file.write('\t"mapNo" :\t%s,\n' % (str(data["mapNo"])))
+			json_file.write('\t"player" :\t"%s",\n' % (data["player"]))
+			json_file.write('\t"tiles" :\t{\n')
+			no = 0
+			for line in data["tiles"]:
+				_line = str(data["tiles"]["line%s" % str(no + 1)])
+				convLine = _line.replace("'", '"')
+				if no + 1 != len(data["tiles"]):
+					convLine += ","
+				json_file.write('\t\t\t\t"line%s" :\t%s\n' % (str(no + 1), convLine))
+				no += 1
+			json_file.write("\t\t\t\t}\n")
+			json_file.write("}\n\n\n\n\n\n\n")
+			return 1
+
+
+
+	def showTileMenu(self):
+		""" display the menu of hex tiles  """
+		no = 0
 		self.menuRunning = True
 		self.menu = pygame.Surface((600, 950))	
 		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
@@ -1312,23 +1347,65 @@ class MapEditor():
 			with open(self.parent.cmdArgs.mapPath) as json_file:
 				jsonLevelData = json.load(json_file)
 				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][0] = selectedHexObject.type
-			with open(self.parent.cmdArgs.mapPath, "w") as json_file:
-#				json.dump(jsonLevelData, json_file, indent=4)		# simpler, safer, but not formatted
-				json_file.write("{\n")
-				json_file.write('\t"mapName" :\t"%s",\n' % (jsonLevelData["mapName"]))
-				json_file.write('\t"mapNo" :\t%s,\n' % (str(jsonLevelData["mapNo"])))
-				json_file.write('\t"player" :\t"%s",\n' % (jsonLevelData["player"]))
-				json_file.write('\t"tiles" :\t{\n')
-				no = 0
-				for line in jsonLevelData["tiles"]:
-					_line = str(jsonLevelData["tiles"]["line%s" % str(no + 1)])
-					convLine = _line.replace("'", '"')
-					if no + 1 != len(jsonLevelData["tiles"]):
-						convLine += ","
-					json_file.write('\t\t\t\t"line%s" :\t%s\n' % (str(no + 1), convLine))
-					no += 1
-				json_file.write("\t\t\t\t}\n")
-				json_file.write("}\n\n\n\n\n\n\n")
+			self.saveData(jsonLevelData)
+
+
+
+	def showInfrastructureMenu(self):
+		""" display the menu of hex tiles  """
+		self.menuRunning = True
+		self.menu = pygame.Surface((600, 950))	
+		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
+		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
+		no = 0
+		for no in range(len(self.infraNames)):
+			gfx = self.allInfraData[self.infraNames[no]][1]
+			self.menu.blit(gfx, [50,  10 + 20 * no])
+		self.parent.display.blit(self.menu, (1124, 15))
+		while self.menuRunning:
+			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
+			pygame.draw.rect(self.parent.display, colors.red, (1400, 900, 300, 50))
+			self.parent.display.blit(selection, [1400, 900])
+			pygame.display.update()
+			self.checkInput()
+		# proccess user selection
+		if self.selection and int(self.selection) <= len(self.allInfraData) - 1:
+			selectionName = self.infraNames[int(self.selection)]
+			selectedInfraObject = self.allInfraData[selectionName][0]
+			selectedInfraName = self.allInfraData[selectionName][2]
+			currentSquare = self.parent.interface.currentSquare()
+			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
+			# assign new hex object and generate map
+			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = selectedInfraObject
+			self.parent.interface.generateMap()
+			# assign the name of the tile to the .json-file, to preserve the change
+			with open(self.parent.cmdArgs.mapPath) as json_file:
+				jsonLevelData = json.load(json_file)
+				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][1] = selectedInfraName
+			self.saveData(jsonLevelData)
+
+
+
+	def showUnitMenu(self):
+		""" display the menu of hex tiles  """
+		self.menuRunning = True
+		self.menu = pygame.Surface((600, 950))	
+		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
+		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
+
+		sys.exit("showUnitMenu")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
