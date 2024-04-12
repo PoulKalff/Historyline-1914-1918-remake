@@ -186,6 +186,24 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 
 
 infraIcons =    {   ''          :   None,
+
+					'cross1'	:   pygame.image.load('gfx/infrastructure/crossRail36Path14.png'),
+					'cross2'	:   pygame.image.load('gfx/infrastructure/crossRail36Road14.png'),
+					'cross3'	:   pygame.image.load('gfx/infrastructure/crossRail36Road25.png'),
+					'cross4'	:   pygame.image.load('gfx/infrastructure/crossRail14Path36.png'),
+					'rail26'    :   pygame.image.load('gfx/infrastructure/rail26.png'),
+					'rail13'    :   pygame.image.load('gfx/infrastructure/rail13.png'),
+					'rail35'    :   pygame.image.load('gfx/infrastructure/rail35.png'),
+
+					'rail46'    :   pygame.image.load('gfx/infrastructure/rail46.png'),
+					'rail15'    :   pygame.image.load('gfx/infrastructure/rail15.png'),
+					'rail24'    :   pygame.image.load('gfx/infrastructure/rail24.png'),
+
+
+					'rail36'    :   pygame.image.load('gfx/infrastructure/rail36.png'),
+					'rail14'    :   pygame.image.load('gfx/infrastructure/rail14.png'),
+					'rail25'    :   pygame.image.load('gfx/infrastructure/rail25.png'),
+					'rail346'   :   pygame.image.load('gfx/infrastructure/rail346.png'),
 					'road13'    :   pygame.image.load('gfx/infrastructure/road13.png'),
 					'road14'    :   pygame.image.load('gfx/infrastructure/road14.png'),
 					'road15'    :   pygame.image.load('gfx/infrastructure/road15.png'),
@@ -197,6 +215,7 @@ infraIcons =    {   ''          :   None,
 					'road125'   :   pygame.image.load('gfx/infrastructure/road125.png'),
 					'path125'   :   pygame.image.load('gfx/infrastructure/path125.png'),
 					'road124'   :   pygame.image.load('gfx/infrastructure/road124.png'),
+					'road145'   :   pygame.image.load('gfx/infrastructure/road145.png'),
 					'road236'   :   pygame.image.load('gfx/infrastructure/road236.png'),
 					'road346'   :   pygame.image.load('gfx/infrastructure/road346.png'),
 					'road356'   :   pygame.image.load('gfx/infrastructure/road356.png'),
@@ -613,13 +632,41 @@ weaponsParameters =     {   'bayonet'   :       {   'name'      : 'Bayonet',
 
 
 def rot_center(image, angle):
-	"""rotate an image while keeping its center and size"""
+	""" rotate an image while keeping its center and size """
 	orig_rect = image.get_rect()
 	rot_image = pygame.transform.rotate(image, angle)
 	rot_rect = orig_rect.copy()
 	rot_rect.center = rot_image.get_rect().center
 	rot_image = rot_image.subsurface(rot_rect).copy()
 	return rot_image
+
+
+def createPathInfraIcons(allIcons):
+	""" iterates through infrastructure icons and creates a path-icon equivalent from each road icon """
+	pathIcons = []
+	for icon in allIcons:
+		if icon[0].startswith('road'):
+			pathIcons.append(icon)
+	# process each icon, put back in list
+
+# RAW LINES FROM DIFFERENT FUCNTION!
+
+	self.icon = self.rawIcon.copy()
+	if owner == 0:		# unowned
+		arr = pygame.surfarray.pixels3d(self.icon)
+		for i in range(48):
+			for j in range(48): # loop over the 2d array
+				if numpy.array_equal(arr[i, j], [164, 132, 112]):
+					arr[i, j] = [72, 72, 72]
+				elif numpy.array_equal(arr[i, j], [80, 68, 52]):
+					arr[i, j] = [24, 24, 24]
+				elif numpy.array_equal(arr[i, j], [216, 188, 160]):
+					arr[i, j] = [148, 148, 148]
+				elif numpy.array_equal(arr[i, j], [144, 112,  88]):
+					arr[i, j] = [56, 56, 56]
+				elif numpy.array_equal(arr[i, j], [180, 148, 124]):
+					arr[i, j] = [88, 88, 88]
+
 
 
 
