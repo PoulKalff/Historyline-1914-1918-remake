@@ -186,7 +186,6 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 
 
 infraIcons =    {   ''          :   None,
-
 					'cross1'	:   pygame.image.load('gfx/infrastructure/crossRail36Path14.png'),
 					'cross2'	:   pygame.image.load('gfx/infrastructure/crossRail36Road14.png'),
 					'cross3'	:   pygame.image.load('gfx/infrastructure/crossRail36Road25.png'),
@@ -194,16 +193,14 @@ infraIcons =    {   ''          :   None,
 					'rail26'    :   pygame.image.load('gfx/infrastructure/rail26.png'),
 					'rail13'    :   pygame.image.load('gfx/infrastructure/rail13.png'),
 					'rail35'    :   pygame.image.load('gfx/infrastructure/rail35.png'),
-
 					'rail46'    :   pygame.image.load('gfx/infrastructure/rail46.png'),
 					'rail15'    :   pygame.image.load('gfx/infrastructure/rail15.png'),
 					'rail24'    :   pygame.image.load('gfx/infrastructure/rail24.png'),
-
-
 					'rail36'    :   pygame.image.load('gfx/infrastructure/rail36.png'),
 					'rail14'    :   pygame.image.load('gfx/infrastructure/rail14.png'),
 					'rail25'    :   pygame.image.load('gfx/infrastructure/rail25.png'),
 					'rail346'   :   pygame.image.load('gfx/infrastructure/rail346.png'),
+					'rail356'   :   pygame.image.load('gfx/infrastructure/rail356.png'),
 					'road13'    :   pygame.image.load('gfx/infrastructure/road13.png'),
 					'road14'    :   pygame.image.load('gfx/infrastructure/road14.png'),
 					'road15'    :   pygame.image.load('gfx/infrastructure/road15.png'),
