@@ -309,7 +309,8 @@ obj =  Main(args)
 # 	- must win if HQ taken
 # - create opponenet AI
 
-# - complete Level 2 map
+
+
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
@@ -318,7 +319,7 @@ obj =  Main(args)
 
 # --- NOTES / IDEAS ------------------------------------------------------------------------------
 # - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-# - create streams as infrastructure
+# - convert streams to infrastructure
 
 
 

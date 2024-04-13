@@ -474,6 +474,76 @@ unitsParameters =   {   ''              :   None,
 												'weapons'       : ['m1902', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/bunker.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/bunker.png')
+											},
+						'EC_charron' :		{   'name'          : 'Charron',
+												'country'       : 'France',
+												'armour'        : 25,
+												'speed'         : 5,
+												'weight'        : 2,
+												'storageMax'    : 0,
+												'sight'         : 7,
+												'fuel'          : 50,
+												'exp'           : 0,
+												'skills'        : [],
+												'weapons'       : ['wickers', None, None, None],
+												'icon'          : pygame.image.load('gfx/units/icons/charron.png'),
+												'picture'       : pygame.image.load('gfx/units/pictures/charron.png')
+											},
+						'CP_armCar' :	{   	'name'          : 'Armored Car',
+												'country'       : 'Germany',
+												'armour'        : 25,
+												'speed'         : 5,
+												'weight'        : 2,
+												'storageMax'    : 0,
+												'sight'         : 7,
+												'fuel'          : 50,
+												'exp'           : 0,
+												'skills'        : [],
+												'weapons'       : ['maxim', None, None, None],
+												'icon'          : pygame.image.load('gfx/units/icons/armoredCar.png'),
+												'picture'       : pygame.image.load('gfx/units/pictures/armoredCar.png')
+											},
+						'EC_patrolBoat' :	{   'name'          : 'Speedboat',
+												'country'       : 'France',
+												'armour'        : 15,
+												'speed'         : 8,
+												'weight'        : 2,
+												'storageMax'    : 0,
+												'sight'         : 7,
+												'fuel'          : 50,
+												'exp'           : 0,
+												'skills'        : [],
+												'weapons'       : ['wickers', None, None, None],
+												'icon'          : pygame.image.load('gfx/units/icons/patrolBoat.png'),
+												'picture'       : pygame.image.load('gfx/units/pictures/patrolBoat.png')
+											},
+						'EC_armTrain' :		{   'name'          : 'Armored Train',
+												'country'       : 'France',
+												'armour'        : 75,
+												'speed'         : 7,
+												'weight'        : 7,
+												'storageMax'    : 2,
+												'sight'         : 3,
+												'fuel'          : 50,
+												'exp'           : 0,
+												'skills'        : [],
+												'weapons'       : ['m1902', None, None, None],
+												'icon'          : pygame.image.load('gfx/units/icons/armoredTrain.png'),
+												'picture'       : pygame.image.load('gfx/units/pictures/armoredTrain.png')
+											},
+						'CP_armTrain' :		{   'name'          : 'Armored Train',
+												'country'       : 'Germany',
+												'armour'        : 75,
+												'speed'         : 7,
+												'weight'        : 7,
+												'storageMax'    : 2,
+												'sight'         : 3,
+												'fuel'          : 50,
+												'exp'           : 0,
+												'skills'        : [],
+												'weapons'       : ['lefh', None, None, None],
+												'icon'          : pygame.image.load('gfx/units/icons/armoredTrain.png'),
+												'picture'       : pygame.image.load('gfx/units/pictures/armoredTrain.png')
 											}
 					}
 
@@ -1360,14 +1430,24 @@ class MapEditor():
 			self.allInfraData[n] = [infraIcons[n], font20.render(str(no) + "  " + self.infraNames[no], True, colors.black), n]
 			no += 1
 		# add units
-		units = []
+		ecUnits = []
+		cpUnits = []
+		winter = []
 		for n in unitsParameters.keys():
-			units.append(n)
-		self.unitNames = sorted(units)
+			if n.startswith("CP_"):
+				cpUnits.append(n)
+			else:
+				ecUnits.append(n)
+		self.ecUnitNames = sorted(ecUnits)
+		self.cpUnitNames = sorted(cpUnits)
 		no = 0
-		for n in self.unitNames:
-			self.allUnitData[n] = [unitsParameters[n], font20.render(str(no) + "  " + self.unitNames[no], True, colors.black), n]
+		for n in self.ecUnitNames:
+			self.allUnitData[n] = [unitsParameters[n], font20.render(str(no) + "  " + self.ecUnitNames[no], True, colors.black), n]
 			no += 1
+		for n in self.cpUnitNames:
+			self.allUnitData[n] = [unitsParameters[n], font20.render(str(no) + "  " + self.cpUnitNames[no - len(self.ecUnitNames)], True, colors.black), n]
+			no += 1
+		self.unitNames = self.ecUnitNames + self.cpUnitNames
 
 
 
@@ -1396,7 +1476,6 @@ class MapEditor():
 
 	def showTileMenu(self):
 		""" display the menu of hex tiles  """
-		no = 0
 		if self.lastMenu != 1:
 			self.selection = ""
 		self.lastMenu = 1
@@ -1442,7 +1521,6 @@ class MapEditor():
 		self.menu = pygame.Surface((600, 950))	
 		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
 		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
-		no = 0
 		for no in range(45):
 			gfx = self.allInfraData[self.infraNames[no]][1]
 			self.menu.blit(gfx, [50,  10 + 20 * no])
@@ -1483,13 +1561,12 @@ class MapEditor():
 		self.menu = pygame.Surface((600, 950))	
 		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
 		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
-		no = 0
-		for no in range(len(self.unitNames)):
-			gfx = self.allUnitData[self.unitNames[no]][1]
+		for no in range(len(self.ecUnitNames)):
+			gfx = self.allUnitData[self.ecUnitNames[no]][1]
 			self.menu.blit(gfx, [50,  10 + 20 * no])
-#		for no in range(45, len(self.infraNames)):
-#			gfx = self.allInfraData[self.infraNames[no]][1]
-#			self.menu.blit(gfx, [350, 10 + 20 * (no - 45)])
+		for no in range(len(self.cpUnitNames)):
+			gfx = self.allUnitData[self.cpUnitNames[no]][1]
+			self.menu.blit(gfx, [350, 10 + 20 * no])
 		self.parent.display.blit(self.menu, (1124, 15))
 		while self.menuRunning:
 			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
@@ -1501,9 +1578,12 @@ class MapEditor():
 		if self.selection and int(self.selection) <= len(self.allUnitData) - 1:
 			selectionName = self.unitNames[int(self.selection)]
 			selectedUnitName = self.allUnitData[selectionName][2]
-			selectedUnitObject = Unit(selectedUnitName)
 			currentSquare = self.parent.interface.currentSquare()
 			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
+			if selectedUnitName:
+				selectedUnitObject = Unit(selectedUnitName)
+			else:
+				selectedUnitObject = None
 			# assign and generate map
 			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].unit = selectedUnitObject
 			self.parent.interface.generateMap()
