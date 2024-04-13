@@ -190,6 +190,21 @@ infraIcons =    {   ''          :   None,
 					'cross2'	:   pygame.image.load('gfx/infrastructure/crossRail36Road14.png'),
 					'cross3'	:   pygame.image.load('gfx/infrastructure/crossRail36Road25.png'),
 					'cross4'	:   pygame.image.load('gfx/infrastructure/crossRail14Path36.png'),
+
+
+					'trench1'   :   pygame.image.load('gfx/infrastructure/trench1.png'),
+					'trench4'   :   pygame.image.load('gfx/infrastructure/trench4.png'),
+					'trench5'   :   pygame.image.load('gfx/infrastructure/trench5.png'),
+					'trench5a'  :   pygame.image.load('gfx/infrastructure/trench5a.png'),
+					'trench12'  :   pygame.image.load('gfx/infrastructure/trench12.png'),
+					'trench14'  :   pygame.image.load('gfx/infrastructure/trench14.png'),
+					'trench24'  :   pygame.image.load('gfx/infrastructure/trench24.png'),
+					'trench25'  :   pygame.image.load('gfx/infrastructure/trench25.png'),
+					'trench124' :   pygame.image.load('gfx/infrastructure/trench124.png'),
+					'trench125' :   pygame.image.load('gfx/infrastructure/trench125.png'),
+					'trench15'  :   pygame.image.load('gfx/infrastructure/trench15.png'),
+
+
 					'rail26'    :   pygame.image.load('gfx/infrastructure/rail26.png'),
 					'rail13'    :   pygame.image.load('gfx/infrastructure/rail13.png'),
 					'rail35'    :   pygame.image.load('gfx/infrastructure/rail35.png'),
@@ -1416,9 +1431,14 @@ class MapEditor():
 		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
 		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
 		no = 0
-		for no in range(len(self.infraNames)):
+		for no in range(45):
 			gfx = self.allInfraData[self.infraNames[no]][1]
 			self.menu.blit(gfx, [50,  10 + 20 * no])
+		for no in range(45, len(self.infraNames)):
+			gfx = self.allInfraData[self.infraNames[no]][1]
+			self.menu.blit(gfx, [350, 10 + 20 * (no - 45)])
+
+
 		self.parent.display.blit(self.menu, (1124, 15))
 		while self.menuRunning:
 			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
