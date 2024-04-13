@@ -312,14 +312,13 @@ obj =  Main(args)
 # - complete Level 2 map
 
 
-
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - 
 
 
 # --- NOTES / IDEAS ------------------------------------------------------------------------------
 # - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-# - 
+# - create streams as infrastructure
 
 
 
