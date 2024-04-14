@@ -988,7 +988,7 @@ class HexSquare():
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
-		if hexType == 'hqN':
+		if hexType == 'hqN' or hexType == 'hqN_w':
 			self.name = "Headquarters"
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
 			self.owner = content[0] if content else 0       # 0 for None, 1 for Entente, 2 for CP 
@@ -997,9 +997,18 @@ class HexSquare():
 				for unit in content[1]:
 					self.content.addUnit(Unit(unit))
 			self.updateDepotColours(self.owner)
-		elif hexType == 'cmpN':
+		elif hexType == 'cmpN' or hexType == 'cmpN_w':
 			self.name = "Depot"
 			self.picture = pygame.image.load('gfx/units/pictures/storage.png')
+			self.owner = content[0] if content else 0       # 0 for None, 1 for Entente, 2 for CP 
+			self.content = Content(40)
+			if content and len(content) == 2:
+				for unit in content[1]:
+					self.content.addUnit(Unit(unit))
+			self.updateDepotColours(self.owner)
+		elif hexType == 'factoryE' or hexType == 'factoryE_w':
+			self.name = "Factory"
+			self.picture = pygame.image.load('gfx/units/pictures/factory.png')
 			self.owner = content[0] if content else 0       # 0 for None, 1 for Entente, 2 for CP 
 			self.content = Content(40)
 			if content and len(content) == 2:
@@ -1029,12 +1038,16 @@ class HexSquare():
 				self.battleModifier = 10
 
 
-	def updateDepotColours(self, _owner):     # 0: None, 1: CentralPowers, 2: Allies
+	def updateDepotColours(self, _owner, factory = False):     # 0: None, 1: CentralPowers, 2: Allies
 		""" overwrites the colours on the depot/HQ hex """
 		colImage = pygame.image.load('gfx/hexTypes/depotOwnership.png')
 		cutoutImage = colImage.subsurface((0, _owner * 6, 35, 6))
 		_bg = self.background.copy()
-		_bg.blit(cutoutImage, (31, 14))
+		if self.name == "Factory":
+			rotImage = pygame.transform.rotate(cutoutImage, -60)
+			_bg.blit(rotImage, (61, 9))
+		else:
+			_bg.blit(cutoutImage, (31, 14))
 		self.background = _bg
 		# colour units in depot if not owned
 		for y in range(9):

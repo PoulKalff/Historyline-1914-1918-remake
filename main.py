@@ -308,8 +308,9 @@ obj =  Main(args)
 # - Move in turns
 # 	- must win if HQ taken
 # - create opponenet AI
+# - adjust unit horizontal movement (map displacemnt not adjusted)
 
-
+# - units should not have a nationality in type, at least not all
 
 
 
