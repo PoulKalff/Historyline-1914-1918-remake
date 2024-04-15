@@ -519,7 +519,7 @@ class GUI():
 		if square and not square.fogofwar and square.unit:
 			unitPanel = self.unitPanel.copy()
 			unitPanel.blit(self.flags, [3, 3], (flagIndex[square.unit.country] * 88, 0, 88, 88))
-			unitPanel.blit(square.unit.mapIcon, [-1, -1])
+			unitPanel.blit(square.unit.allIcons[0], [-1, -1])
 			unitPanel.blit(self.ranksGfx, [4, 103], (square.unit.experience * 88, 0, 88, 88))
 			unitPanel.blit(square.unit.picture, [380, 3])
 			gfx = font20.render(square.unit.name, True, (208, 185, 140)); 				unitPanel.blit(gfx, [236 - (gfx.get_width() / 2), 9])
@@ -721,8 +721,8 @@ class GUI():
 				frameCoord = [pixelCoordYfrom, pixelCoordXfrom]
 				for x in range(8):
 					# show frame
-					self.drawMap()														# Below is compensation for map scrolled down! Horizontal is not tested!
-					self.parent.display.blit(_unitMoved.allIcons[rotation], [frameCoord[0]  - ( 48 * self.mapView[0] ), frameCoord[1] - ( 40 * self.mapView[1] )])		# must blit unit.allIcons[0-5]
+					self.drawMap()														# Below is compensation for map scrolled down / right
+					self.parent.display.blit(_unitMoved.allIcons[rotation], [frameCoord[0] - ( 142 * self.mapView[0] ), frameCoord[1] - ( 40 * self.mapView[1] )])		# must blit unit.allIcons[0-5]
 					pygame.display.update()
 					pygame.time.wait(20)
 					# use rotation to calculatenext frame
