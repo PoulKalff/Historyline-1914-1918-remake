@@ -186,6 +186,17 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 
 
 infraIcons =    {   ''          :   None,
+					'stream13'   :   pygame.image.load('gfx/infrastructure/stream13.png'),
+					'stream135'  :   pygame.image.load('gfx/infrastructure/stream135.png'),
+					'stream14'   :   pygame.image.load('gfx/infrastructure/stream14.png'),
+					'stream15'   :   pygame.image.load('gfx/infrastructure/stream15.png'),
+					'stream24'   :   pygame.image.load('gfx/infrastructure/stream24.png'),
+					'stream246'  :   pygame.image.load('gfx/infrastructure/stream246.png'),
+					'stream25'   :   pygame.image.load('gfx/infrastructure/stream25.png'),
+					'stream26'   :   pygame.image.load('gfx/infrastructure/stream26.png'),
+					'stream35'   :   pygame.image.load('gfx/infrastructure/stream35.png'),
+					'stream36'   :   pygame.image.load('gfx/infrastructure/stream36.png'),
+					'stream46'   :   pygame.image.load('gfx/infrastructure/stream46.png'),
 					'cross1'	:   pygame.image.load('gfx/infrastructure/crossRail36Path14.png'),
 					'cross2'	:   pygame.image.load('gfx/infrastructure/crossRail36Road14.png'),
 					'cross3'	:   pygame.image.load('gfx/infrastructure/crossRail36Road25.png'),
@@ -1072,6 +1083,12 @@ class HexSquare():
 			self.content = False
 		if infrastructure:
 			self.infra = infraIcons[infrastructure]
+
+
+
+
+
+
 			self.bgGrey.blit(greyscale(self.infra), (0,0))  # grayscale and blit any infrastructure on the hidden filed gfx
 			if infrastructure.startswith("road"):
 				self.movementModifier = 0
@@ -1094,9 +1111,9 @@ class HexSquare():
 				self.movementModifier = None
 				self.movementAllowed.append(2)
 				self.movementAllowed.remove(0)
-		if hexType.startswith('stream') or hexType.startswith('lake'):		# when converted to infrastructure, remove this
-			self.movementAllowed.append(2)
-			self.movementAllowed.remove(0)
+	#	if hexType.startswith('stream') or hexType.startswith('lake'):		# when converted to infrastructure, remove this
+	#		self.movementAllowed.append(2)
+	#		self.movementAllowed.remove(0)
 
 
 
