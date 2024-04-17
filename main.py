@@ -309,8 +309,7 @@ obj =  Main(args)
 # 	- must win if HQ taken
 # - create opponenet AI
 
-# - Trains must only move on tracks
-# - Boats must only move on water
+# - convert streams to infrastructure, adjust boats movements
 
 
 
@@ -325,7 +324,7 @@ obj =  Main(args)
 
 # --- NOTES / IDEAS ------------------------------------------------------------------------------
 # - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-# - convert streams to infrastructure
+#	- units must block adjacent hexes, ie. higher movement costs
 # - artillery should be able to destroy infrastructure
 # - create units to supply ammo
 # - create units to supply fuel

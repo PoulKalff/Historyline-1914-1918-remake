@@ -235,10 +235,17 @@ class GUI():
 		movableSquares = list(set(withinRange))
 		movableSquares.remove(self.movingFrom.position)
 		obstructed = []
+		# movableSquares now holds all squares within range
 		for x, y in movableSquares:
-			if self.mainMap[x][y].fogofwar != 0 and self.mainMap[x][y].fogofwar != 2:
+			if movingUnit.movementType:
+				if movingUnit.movementType not in self.mainMap[x][y].movementAllowed:
+					obstructed.append((x,y))
+			elif self.mainMap[x][y].fogofwar != 0 and self.mainMap[x][y].fogofwar != 2:
 				obstructed.append((x,y))
-			elif self.mainMap[x][y].unit:
+			elif self.mainMap[x][y].movementModifier == None:
+				obstructed.append((x,y))
+			# if unit on hex
+			if self.mainMap[x][y].unit:
 				if movingUnit.faction != self.parent.info.player:
 					obstructed.append((x,y))		# remove if opposing units
 				else:
@@ -249,13 +256,14 @@ class GUI():
 							obstructed.append((x,y))
 					else:
 						obstructed.append((x,y))
-			# handle depot access
-			if self.mainMap[x][y].movementModifier == None:
-				if self.mainMap[x][y].content == False:			# if hex does not have a storage
-					obstructed.append((x,y))
-				elif self.mainMap[x][y].owner != 0 and self.mainMap[x][y].owner != self.parent.info.player:		# if hex does have a storage, is it the enemys
-					if not 1 in movingUnit.skills:	# mark hex only if moving unit can capture
-						obstructed.append((x,y))
+			# handle depot access, regardless of previous loop; hex will be have been filtered out here, if qualified, we will pop it from obstructed
+			if self.mainMap[x][y].content != False:			# if hex has a storage
+				if self.mainMap[x][y].owner == self.parent.info.player:		# if it is ours
+					print("Caught one at", x, y)
+					if (x,y) in obstructed: obstructed.remove((x,y))
+				elif 1 in movingUnit.skills:								# if it is not ours, but we can talke it
+					print("Caught at", x, y)
+					if (x,y) in obstructed: obstructed.remove((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
 			if pos in movableSquares:

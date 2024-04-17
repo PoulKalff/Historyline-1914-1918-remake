@@ -260,6 +260,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 30,
 												'exp'           : 0,
 												'skills'        : [1],
+												'movementType'  : 0,		# 0 : normal, 1 : only move on tracks, 2: only move on water
 												'weapons'       : ['bayonet', 'lugerp08', 'gewehr98', None],
 												'icon'          : pygame.image.load('gfx/units/icons/infantry.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/infantry.png')
@@ -274,6 +275,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 30,
 												'exp'           : 0,
 												'skills'        : [1],
+												'movementType'  : 0,
 												'weapons'       : ['bayonet', 'revolveur', 'leeEnfield', None],
 												'icon'          : pygame.image.load('gfx/units/icons/infantry.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/infantry.png')
@@ -288,6 +290,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 30,
 												'exp'           : 0,
 												'skills'        : [1],
+												'movementType'  : 0,
 												'weapons'       : ['trenchKnife', 'maxim', None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/eliteInfantry.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/eliteInfantry.png')
@@ -302,6 +305,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 30,
 												'exp'           : 0,
 												'skills'        : [1],
+												'movementType'  : 0,
 												'weapons'       : ['trenchKnife', 'wickers', None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/eliteInfantry.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/eliteInfantry.png')
@@ -317,6 +321,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [1],
+												'movementType'  : 0,
 												'weapons'       : ['sabre', 'gewehr98', None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/cavalry.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/cavalry.png')
@@ -331,6 +336,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [1],
+												'movementType'  : 0,
 												'weapons'       : [ 'sabre', 'leeEnfield', None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/cavalry.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/cavalry.png')
@@ -345,6 +351,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 25,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 0,
 												'weapons'       : ['feldkanone16', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/lightArtillery.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/lightArtillery.png')
@@ -359,6 +366,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 20,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 0,
 												'weapons'       : ['m1902', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/lightArtillery.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/lightArtillery.png')
@@ -373,6 +381,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 20,
 												'exp'           : 0,
 												'skills'        : [5],
+												'movementType'  : 0,
 												'weapons'       : ['lefh', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/mediumArtillery.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/mediumArtillery.png')
@@ -387,6 +396,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 20,
 												'exp'           : 0,
 												'skills'        : [5],
+												'movementType'  : 0,
 												'weapons'       : ['canon75', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/mediumArtillery.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/mediumArtillery.png')
@@ -401,6 +411,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 20,
 												'exp'           : 0,
 												'skills'        : [5],
+												'movementType'  : 0,
 												'weapons'       : ['morser', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/heavyArtillery.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/heavyArtillery.png')
@@ -415,6 +426,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 20,
 												'exp'           : 0,
 												'skills'        : [5],
+												'movementType'  : 0,
 												'weapons'       : ['canon155', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/heavyArtillery.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/heavyArtillery.png')
@@ -429,6 +441,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 0,
 												'weapons'       : [None, None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/supplyCar.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/supplyCar.png')
@@ -443,6 +456,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 0,
 												'weapons'       : [None, None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/supplyCar.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/supplyCar.png')
@@ -457,6 +471,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [7],
+												'movementType'  : 0,
 												'weapons'       : ['feldkanone16', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/bunker.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/bunker.png')
@@ -471,6 +486,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [7],
+												'movementType'  : 0,
 												'weapons'       : ['m1902', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/bunker.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/bunker.png')
@@ -485,6 +501,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 0,
 												'weapons'       : ['wickers', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/charron.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/charron.png')
@@ -499,6 +516,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 0,
 												'weapons'       : ['maxim', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/armoredCar.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/armoredCar.png')
@@ -513,6 +531,22 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 2,	# Only move on water
+												'weapons'       : ['wickers', None, None, None],
+												'icon'          : pygame.image.load('gfx/units/icons/patrolBoat.png'),
+												'picture'       : pygame.image.load('gfx/units/pictures/patrolBoat.png')
+											},
+						'CP_patrolBoat' :	{   'name'          : 'Speedboat',
+												'country'       : 'Germany',
+												'armour'        : 15,
+												'speed'         : 8,
+												'weight'        : 2,
+												'storageMax'    : 0,
+												'sight'         : 7,
+												'fuel'          : 50,
+												'exp'           : 0,
+												'skills'        : [],
+												'movementType'  : 2,	# Only move on water
 												'weapons'       : ['wickers', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/patrolBoat.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/patrolBoat.png')
@@ -527,6 +561,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 1,	# Only move on tracks
 												'weapons'       : [None, None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/transportTrain.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/transportTrain.png')
@@ -541,6 +576,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 1,	# Only move on tracks
 												'weapons'       : ['m1902', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/armoredTrain.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/armoredTrain.png')
@@ -555,6 +591,7 @@ unitsParameters =   {   ''              :   None,
 												'fuel'          : 50,
 												'exp'           : 0,
 												'skills'        : [],
+												'movementType'  : 1,	# Only move on tracks
 												'weapons'       : ['lefh', None, None, None],
 												'icon'          : pygame.image.load('gfx/units/icons/armoredTrain.png'),
 												'picture'       : pygame.image.load('gfx/units/pictures/armoredTrain.png')
@@ -893,6 +930,7 @@ class Unit():
 			self.fuel = data['fuel']
 			self.experience = 0
 			self.skills = data['skills']
+			self.movementType = data['movementType']
 			self.weapons = []
 			self.weaponsGfx = []
 			self.maxSize = 10       # all units size 10?
@@ -1002,6 +1040,7 @@ class HexSquare():
 		self.movementModifier = bgTilesModifiers[hexType][0]
 		self.battleModifier = bgTilesModifiers[hexType][1]
 		self.sightModifier = bgTilesModifiers[hexType][2]
+		self.movementAllowed = [0]
 		if hexType == 'hqN' or hexType == 'hqN_w':
 			self.name = "Headquarters"
 			self.picture = pygame.image.load('gfx/units/pictures/hq.png')
@@ -1037,19 +1076,28 @@ class HexSquare():
 			if infrastructure.startswith("road"):
 				self.movementModifier = 0
 				self.battleModifier = 0
-			elif infrastructure.startswith("path"):
+			if infrastructure.startswith("path"):
 				self.movementModifier = 1
 				self.battleModifier = 0
-			elif infrastructure.startswith("bridge"):
+			if infrastructure.startswith("bridge"):
 				self.movementModifier = 1
 				self.battleModifier = 0
-			elif infrastructure.startswith("rail"):
+			if infrastructure.startswith("rail") or infrastructure.startswith("cross"):
 				self.movementModifier = 0
-			elif infrastructure.startswith("barbed"):
+				self.movementAllowed.append(1)
+			if infrastructure.startswith("barbed"):
 				self.movementModifier = 10
-			elif infrastructure.startswith("trench"):
+			if infrastructure.startswith("trench"):
 				self.movementModifier = 10
 				self.battleModifier = 10
+			if infrastructure.startswith('stream') or infrastructure.startswith('lake'):	
+				self.movementModifier = None
+				self.movementAllowed.append(2)
+				self.movementAllowed.remove(0)
+		if hexType.startswith('stream') or hexType.startswith('lake'):		# when converted to infrastructure, remove this
+			self.movementAllowed.append(2)
+			self.movementAllowed.remove(0)
+
 
 
 	def updateDepotColours(self, _owner, factory = False):     # 0: None, 1: CentralPowers, 2: Allies
