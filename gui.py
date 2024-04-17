@@ -259,10 +259,8 @@ class GUI():
 			# handle depot access, regardless of previous loop; hex will be have been filtered out here, if qualified, we will pop it from obstructed
 			if self.mainMap[x][y].content != False:			# if hex has a storage
 				if self.mainMap[x][y].owner == self.parent.info.player:		# if it is ours
-					print("Caught one at", x, y)
 					if (x,y) in obstructed: obstructed.remove((x,y))
 				elif 1 in movingUnit.skills:								# if it is not ours, but we can talke it
-					print("Caught at", x, y)
 					if (x,y) in obstructed: obstructed.remove((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
@@ -428,7 +426,9 @@ class GUI():
 		 		# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
 				if square.fogofwar == 0:	# fully visible
 					self.map.blit(square.background, [y * 142 + forskydning, x * 40])
-					if square.infra:	self.map.blit(square.infra, [y * 142 + forskydning, x * 40])
+					if square.infra:
+						for i in square.infra:
+							self.map.blit(i, [y * 142 + forskydning, x * 40])
 					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
 				elif square.fogofwar == 1:	# fully hidden, black
 					self.map.blit(square.bgHidden, [y * 142 + forskydning, x * 40])
@@ -436,7 +436,9 @@ class GUI():
 					self.map.blit(square.bgGrey, [y * 142 + forskydning, x * 40])
 				elif square.fogofwar == 3:	# unreachable to move to, normal but overlayed
 					self.map.blit(square.background, [y * 142 + forskydning, x * 40])
-					if square.infra:	self.map.blit(square.infra, [y * 142 + forskydning, x * 40])
+					if square.infra:
+						for i in square.infra:
+							self.map.blit(i, [y * 142 + forskydning, x * 40])
 					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
 					self.map.blit(self.semiTransparent, [y * 142 + forskydning, x * 40])
 				if self.parent.cmdArgs.hexnumbers:	# put as number on square
@@ -500,7 +502,9 @@ class GUI():
 			TerrainGUI.blit(self.battleModifierText, (176, 50))
 			TerrainGUI.blit(self.sightModifierText, (176, 80))
 			TerrainGUI.blit(square.background, [49, 19])
-			if square.infra:	TerrainGUI.blit(square.infra, [49, 19])
+			if square.infra:
+				for i in square.infra:
+					TerrainGUI.blit(i, [49, 19])
 			TerrainGUI.blit(self.hexBorder, [47, 17])
 			if square.movementModifier != None:
 				for x in range(square.movementModifier):

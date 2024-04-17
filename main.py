@@ -309,7 +309,6 @@ obj =  Main(args)
 # 	- must win if HQ taken
 # - create opponenet AI
 
-# - more than one infrastructure on each hex
 # - colour the stream infrastructure correctly
 
 

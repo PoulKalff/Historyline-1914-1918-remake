@@ -69,26 +69,26 @@ bgTilesModifiers =  {   'forest'        :   [3, 43, 8],           # movement cos
 						'mountS_w'      :   [None, None, 10],
 						'mountE_w'      :   [None, None, 10],
 						'mountW_w'      :   [None, None, 10],
-						'stream35'      :   [None, None, 0],
-						'stream46'      :   [None, None, 0],
-						'stream14'      :   [None, None, 0],
-						'stream13'      :   [None, None, 0],
-						'stream15'      :   [None, None, 0],
-						'stream24'      :   [None, None, 0],
-						'stream25'      :   [None, None, 0],
-						'stream26'      :   [None, None, 0],
-						'stream36'      :   [None, None, 0],
-						'stream13_w'    :   [None, None, 0],
-						'stream14_w'    :   [None, None, 0],
-						'stream25_w'    :   [None, None, 0],
-						'stream26_w'    :   [None, None, 0],
-						'stream35_w'    :   [None, None, 0],
-						'stream36_w'    :   [None, None, 0],
-						'stream46_w'    :   [None, None, 0],
-						'stream135_w'   :   [None, None, 0],
-						'stream15_w'    :   [None, None, 0],
-						'stream246_w'   :   [None, None, 0],
-						'stream24_w'    :   [None, None, 0],
+						# 'stream35'      :   [None, None, 0],
+						# 'stream46'      :   [None, None, 0],
+						# 'stream14'      :   [None, None, 0],
+						# 'stream13'      :   [None, None, 0],
+						# 'stream15'      :   [None, None, 0],
+						# 'stream24'      :   [None, None, 0],
+						# 'stream25'      :   [None, None, 0],
+						# 'stream26'      :   [None, None, 0],
+						# 'stream36'      :   [None, None, 0],
+						# 'stream13_w'    :   [None, None, 0],
+						# 'stream14_w'    :   [None, None, 0],
+						# 'stream25_w'    :   [None, None, 0],
+						# 'stream26_w'    :   [None, None, 0],
+						# 'stream35_w'    :   [None, None, 0],
+						# 'stream36_w'    :   [None, None, 0],
+						# 'stream46_w'    :   [None, None, 0],
+						# 'stream135_w'   :   [None, None, 0],
+						# 'stream15_w'    :   [None, None, 0],
+						# 'stream246_w'   :   [None, None, 0],
+						# 'stream24_w'    :   [None, None, 0],
 						'lakeside12'    :   [None, None, 0],
 						'lakeside16'    :   [None, None, 0],
 						'lakeside23'    :   [None, None, 0],
@@ -152,26 +152,26 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 				'mountS_w'      :   pygame.image.load('gfx/hexTypes/hex_mountainS_winter.png'),
 				'mountE_w'      :   pygame.image.load('gfx/hexTypes/hex_mountainE_winter.png'),
 				'mountW_w'      :   pygame.image.load('gfx/hexTypes/hex_mountainW_winter.png'),
-				'stream35'      :   pygame.image.load('gfx/hexTypes/hex_stream35.png'),
-				'stream46'      :   pygame.image.load('gfx/hexTypes/hex_stream46.png'),
-				'stream14'      :   pygame.image.load('gfx/hexTypes/hex_stream14.png'),
-				'stream13'      :   pygame.image.load('gfx/hexTypes/hex_stream13.png'),
-				'stream15'      :   pygame.image.load('gfx/hexTypes/hex_stream15.png'),
-				'stream24'      :   pygame.image.load('gfx/hexTypes/hex_stream24.png'),
-				'stream25'      :   pygame.image.load('gfx/hexTypes/hex_stream25.png'),
-				'stream26'      :   pygame.image.load('gfx/hexTypes/hex_stream26.png'),
-				'stream36'      :   pygame.image.load('gfx/hexTypes/hex_stream36.png'),
-				'stream13_w'    :   pygame.image.load('gfx/hexTypes/hex_stream13_winter.png'),
-				'stream14_w'    :   pygame.image.load('gfx/hexTypes/hex_stream14_winter.png'),
-				'stream25_w'    :   pygame.image.load('gfx/hexTypes/hex_stream25_winter.png'),
-				'stream26_w'    :   pygame.image.load('gfx/hexTypes/hex_stream26_winter.png'),
-				'stream35_w'    :   pygame.image.load('gfx/hexTypes/hex_stream35_winter.png'),
-				'stream36_w'    :   pygame.image.load('gfx/hexTypes/hex_stream36_winter.png'),
-				'stream46_w'    :   pygame.image.load('gfx/hexTypes/hex_stream46_winter.png'),
-				'stream135_w'   :   pygame.image.load('gfx/hexTypes/hex_stream135_winter.png'),
-				'stream15_w'    :   pygame.image.load('gfx/hexTypes/hex_stream15_winter.png'),
-				'stream246_w'   :   pygame.image.load('gfx/hexTypes/hex_stream246_winter.png'),
-				'stream24_w'    :   pygame.image.load('gfx/hexTypes/hex_stream24_winter.png'),
+				# 'stream35'      :   pygame.image.load('gfx/hexTypes/hex_stream35.png'),
+				# 'stream46'      :   pygame.image.load('gfx/hexTypes/hex_stream46.png'),
+				# 'stream14'      :   pygame.image.load('gfx/hexTypes/hex_stream14.png'),
+				# 'stream13'      :   pygame.image.load('gfx/hexTypes/hex_stream13.png'),
+				# 'stream15'      :   pygame.image.load('gfx/hexTypes/hex_stream15.png'),
+				# 'stream24'      :   pygame.image.load('gfx/hexTypes/hex_stream24.png'),
+				# 'stream25'      :   pygame.image.load('gfx/hexTypes/hex_stream25.png'),
+				# 'stream26'      :   pygame.image.load('gfx/hexTypes/hex_stream26.png'),
+				# 'stream36'      :   pygame.image.load('gfx/hexTypes/hex_stream36.png'),
+				# 'stream13_w'    :   pygame.image.load('gfx/hexTypes/hex_stream13_winter.png'),
+				# 'stream14_w'    :   pygame.image.load('gfx/hexTypes/hex_stream14_winter.png'),
+				# 'stream25_w'    :   pygame.image.load('gfx/hexTypes/hex_stream25_winter.png'),
+				# 'stream26_w'    :   pygame.image.load('gfx/hexTypes/hex_stream26_winter.png'),
+				# 'stream35_w'    :   pygame.image.load('gfx/hexTypes/hex_stream35_winter.png'),
+				# 'stream36_w'    :   pygame.image.load('gfx/hexTypes/hex_stream36_winter.png'),
+				# 'stream46_w'    :   pygame.image.load('gfx/hexTypes/hex_stream46_winter.png'),
+				# 'stream135_w'   :   pygame.image.load('gfx/hexTypes/hex_stream135_winter.png'),
+				# 'stream15_w'    :   pygame.image.load('gfx/hexTypes/hex_stream15_winter.png'),
+				# 'stream246_w'   :   pygame.image.load('gfx/hexTypes/hex_stream246_winter.png'),
+				# 'stream24_w'    :   pygame.image.load('gfx/hexTypes/hex_stream24_winter.png'),
 				'lakeside12'    :   pygame.image.load('gfx/hexTypes/hex_lakeside12.png'),
 				'lakeside16'    :   pygame.image.load('gfx/hexTypes/hex_lakeside16.png'),
 				'lakeside23'    :   pygame.image.load('gfx/hexTypes/hex_lakeside23.png'),
@@ -1081,39 +1081,38 @@ class HexSquare():
 			self.updateDepotColours(self.owner)
 		else:
 			self.content = False
-		if infrastructure:
-			self.infra = infraIcons[infrastructure]
-
-
-
-
-
-
-			self.bgGrey.blit(greyscale(self.infra), (0,0))  # grayscale and blit any infrastructure on the hidden filed gfx
-			if infrastructure.startswith("road"):
+		_infrastructure = []
+		if infrastructure:							# create list of one or more infrastructure
+			self.infra = []
+			if type(infrastructure) == list:
+				for i in infrastructure:
+					_infrastructure.append(i)
+			else:
+				_infrastructure = [infrastructure]
+		for i in _infrastructure:
+			self.infra.append(infraIcons[i])
+			self.bgGrey.blit(greyscale(infraIcons[i]), (0,0))  # grayscale and blit any infrastructure on the hidden filed gfx
+			if i.startswith("road"):
 				self.movementModifier = 0
 				self.battleModifier = 0
-			if infrastructure.startswith("path"):
+			if i.startswith("path"):
 				self.movementModifier = 1
 				self.battleModifier = 0
-			if infrastructure.startswith("bridge"):
+			if i.startswith("bridge"):
 				self.movementModifier = 1
 				self.battleModifier = 0
-			if infrastructure.startswith("rail") or infrastructure.startswith("cross"):
+			if i.startswith("rail") or i.startswith("cross"):
 				self.movementModifier = 0
 				self.movementAllowed.append(1)
-			if infrastructure.startswith("barbed"):
+			if i.startswith("barbed"):
 				self.movementModifier = 10
-			if infrastructure.startswith("trench"):
+			if i.startswith("trench"):
 				self.movementModifier = 10
 				self.battleModifier = 10
-			if infrastructure.startswith('stream') or infrastructure.startswith('lake'):	
+			if i.startswith('stream') or i.startswith('lake'):	
 				self.movementModifier = None
 				self.movementAllowed.append(2)
 				self.movementAllowed.remove(0)
-	#	if hexType.startswith('stream') or hexType.startswith('lake'):		# when converted to infrastructure, remove this
-	#		self.movementAllowed.append(2)
-	#		self.movementAllowed.remove(0)
 
 
 
@@ -1634,7 +1633,10 @@ class MapEditor():
 			currentSquare = self.parent.interface.currentSquare()
 			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
 			# assign and generate map
-			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = selectedInfraObject
+			if selectedInfraObject:
+				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = [selectedInfraObject]
+			else:
+				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = None
 			self.parent.interface.generateMap()
 			# assign the name of the tile to the .json-file, to preserve the change
 			with open(self.parent.cmdArgs.mapPath) as json_file:
