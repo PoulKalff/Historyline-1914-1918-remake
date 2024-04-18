@@ -285,7 +285,9 @@ parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show en
 parser.add_argument("-m", "--mapedit",		action="store_true",	help="Map editor enabled (for DEV)")
 args = parser.parse_args()
 
-#check if map exists
+# handle commandline arguments
+if args.version:
+	sys.exit("\n  " + str(version) + "\n")
 args.mapPath = "levels/" + args.levelMap + ".json"
 if not os.path.exists(args.mapPath):
 	print("\n  The level '" + str(args.levelMap) + "' does not exist.")
@@ -307,9 +309,8 @@ obj =  Main(args)
 # --- TODO --------------------------------------------------------------------------------------- 
 # - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 #	- units must block adjacent hexes, ie. higher movement costs
-# - Move in turns
+# - Move in turns / create opponenet AI
 # 	- must win if HQ taken
-# - create opponenet AI
 
 
 
