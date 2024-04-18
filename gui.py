@@ -52,6 +52,7 @@ class GUI():
 		for nrX, value in enumerate(jsonLevelData['tiles'].values()):
 			line = []
 			for nrY, square in enumerate(value):
+#				print(nrX, nrY)
 				line.append(HexSquare((nrX, nrY), *square))
 			self.mainMap.append(line)
 		self.generateMap()

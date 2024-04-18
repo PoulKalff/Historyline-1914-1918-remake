@@ -305,11 +305,13 @@ obj =  Main(args)
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
+# - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
+#	- units must block adjacent hexes, ie. higher movement costs
 # - Move in turns
 # 	- must win if HQ taken
 # - create opponenet AI
 
-# - colour the stream infrastructure correctly
+
 
 
 
@@ -320,10 +322,7 @@ obj =  Main(args)
 
 
 
-
-# --- NOTES / IDEAS ------------------------------------------------------------------------------
-# - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
-#	- units must block adjacent hexes, ie. higher movement costs
+# --- BEYOND ORIGINAL ----------------------------------------------------------------------------
 # - artillery should be able to destroy infrastructure
 # - create units to supply ammo
 # - create units to supply fuel
