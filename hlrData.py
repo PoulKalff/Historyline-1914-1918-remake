@@ -9,6 +9,7 @@ import pygame
 
 pygame.init()
 
+font15 = pygame.font.Font('freesansbold.ttf', 15)
 font20 = pygame.font.Font('freesansbold.ttf', 20)
 font30 = pygame.font.Font('freesansbold.ttf', 30)
 font40 = pygame.font.Font('freesansbold.ttf', 40)
@@ -145,7 +146,7 @@ bgTiles =   {   'forest'        :   pygame.image.load('gfx/hexTypes/hex_forest.p
 			}
 
 
-infraIcons =    {   ''          :   None,
+infraIcons =    {   '<none>'	:	None,
 					'stream13'  :   pygame.image.load('gfx/infrastructure/stream13.png'),
 					'stream135' :   pygame.image.load('gfx/infrastructure/stream135.png'),
 					'stream14'  :   pygame.image.load('gfx/infrastructure/stream14.png'),
@@ -220,7 +221,7 @@ infraIcons =    {   ''          :   None,
 				}
 
 
-unitsParameters =   {   ''              :   None,
+unitsParameters =   {   '<none>'		:		 None,
 						'CP_infantry'   :   {   'name'          : 'Infantry',
 												'country'       : 'Germany',
 												'armour'        : 20,
@@ -1435,271 +1436,12 @@ class ActionMenu():
 					self.parent.mode = "normal"
 
 
-
 	def draw(self):
 		self.menuBorder = pygame.draw.rect(self.parent.display, colors.almostBlack, (self.location[0], self.location[1], self.menuWidth, 60), 4)    # menu border
 		for butNr in range(len(self.contents)):
 			self.parent.display.blit(self.contents[butNr][self.focusedArray[butNr]],  self.contents[butNr][2])
 
 
-
-class MapEditor():
-	""" Allows editing of Hex, Infrastructur and Units """
-
-
-	def __init__(self, parent):
-		self.parent = parent
-		summer = []
-		winter = []
-		for n in bgTiles.keys():
-			if n.endswith("_w"):
-				winter.append(n)
-			else:
-				summer.append(n)
-		self.summerTiles = sorted(summer)
-		self.winterTiles = sorted(winter)
-		self.allHexData = {}
-		self.allInfraData = {}
-		self.allUnitData = {}
-		self.selection = ""
-		self.lastMenu = 0
-		no = 0
-		for n in self.summerTiles:
-			self.allHexData[n] = [bgTiles[n], HexSquare((0, 0), n, "", ""), font20.render(str(no) + "  " + self.summerTiles[no], True, colors.black)]
-			no += 1
-		for n in self.winterTiles:
-			self.allHexData[n] = [bgTiles[n], HexSquare((0, 0), n, "", ""), font20.render(str(no) + "  " + self.winterTiles[no - len(self.summerTiles)], True, colors.black)]
-			no += 1
-		self.displayNames = self.summerTiles + self.winterTiles
-		# add infrastructure
-		infra = []
-		for n in infraIcons.keys():
-			infra.append(n)
-		self.infraNames = sorted(infra)
-		no = 0
-		for n in self.infraNames:
-			self.allInfraData[n] = [infraIcons[n], font20.render(str(no) + "  " + self.infraNames[no], True, colors.black), n]
-			no += 1
-		# add units
-		ecUnits = []
-		cpUnits = []
-		winter = []
-		for n in unitsParameters.keys():
-			if n.startswith("CP_"):
-				cpUnits.append(n)
-			else:
-				ecUnits.append(n)
-		self.ecUnitNames = sorted(ecUnits)
-		self.cpUnitNames = sorted(cpUnits)
-		no = 0
-		for n in self.ecUnitNames:
-			self.allUnitData[n] = [unitsParameters[n], font20.render(str(no) + "  " + self.ecUnitNames[no], True, colors.black), n]
-			no += 1
-		for n in self.cpUnitNames:
-			self.allUnitData[n] = [unitsParameters[n], font20.render(str(no) + "  " + self.cpUnitNames[no - len(self.ecUnitNames)], True, colors.black), n]
-			no += 1
-		self.unitNames = self.ecUnitNames + self.cpUnitNames
-
-
-
-	def saveData(self, data):
-		""" saves data in json in a more readable formatting """
-		with open(self.parent.cmdArgs.mapPath, "w") as json_file:
-#			json.dump(data, json_file, indent=4)		# simpler, safer, but not formatted
-			json_file.write("{\n")
-			json_file.write('\t"mapName" :\t"%s",\n' % (data["mapName"]))
-			json_file.write('\t"mapNo" :\t%s,\n' % (str(data["mapNo"])))
-			json_file.write('\t"player" :\t"%s",\n' % (data["player"]))
-			json_file.write('\t"tiles" :\t{\n')
-			no = 0
-			for line in data["tiles"]:
-				_line = str(data["tiles"]["line%s" % str(no + 1)])
-				convLine = _line.replace("'", '"')
-				if no + 1 != len(data["tiles"]):
-					convLine += ","
-				json_file.write('\t\t\t\t"line%s" :\t%s\n' % (str(no + 1), convLine))
-				no += 1
-			json_file.write("\t\t\t\t}\n")
-			json_file.write("}\n\n\n\n\n\n\n")
-			return 1
-
-
-
-	def showTileMenu(self):
-		""" display the menu of hex tiles  """
-		if self.lastMenu != 1:
-			self.selection = ""
-		self.lastMenu = 1
-		self.menuRunning = True
-		self.menu = pygame.Surface((600, 950))	
-		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
-		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
-		for no in range(len(self.summerTiles)):
-			gfx = self.allHexData[self.summerTiles[no]][2]
-			self.menu.blit(gfx, [50,  10 + 20 * no])
-		for no in range(len(self.winterTiles)):
-			gfx = self.allHexData[self.winterTiles[no]][2]
-			self.menu.blit(gfx, [350, 10 + 20 * (no)])
-		self.parent.display.blit(self.menu, (1124, 15))
-		while self.menuRunning:
-			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
-			pygame.draw.rect(self.parent.display, colors.red, (1400, 900, 300, 50))
-			self.parent.display.blit(selection, [1400, 900])
-			pygame.display.update()
-			self.checkInput()
-		# proccess user selection
-		if self.selection and int(self.selection) <= len(self.allHexData) - 1:
-			selectionName = self.displayNames[int(self.selection)]
-			currentSquare = self.parent.interface.currentSquare()
-			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
-			# assign new hex object and generate map
-			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].background = bgTiles[selectionName]
-			self.parent.interface.generateMap()
-			# assign the name of the tile to the .json-file, to preserve the change
-			with open(self.parent.cmdArgs.mapPath) as json_file:
-				jsonLevelData = json.load(json_file)
-				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][0] = selectionName
-			self.saveData(jsonLevelData)
-
-
-
-	def showInfrastructureMenu(self):
-		""" display the menu of hex tiles  """
-		if self.lastMenu != 2:
-			self.selection = ""
-		self.lastMenu = 2
-		self.menuRunning = True
-		self.menu = pygame.Surface((600, 950))	
-		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
-		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
-		for no in range(45):
-			gfx = self.allInfraData[self.infraNames[no]][1]
-			self.menu.blit(gfx, [50,  10 + 20 * no])
-		for no in range(45, len(self.infraNames)):
-			gfx = self.allInfraData[self.infraNames[no]][1]
-			self.menu.blit(gfx, [350, 10 + 20 * (no - 45)])
-		self.parent.display.blit(self.menu, (1124, 15))
-		while self.menuRunning:
-			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
-			pygame.draw.rect(self.parent.display, colors.red, (1400, 900, 300, 50))
-			self.parent.display.blit(selection, [1400, 900])
-			pygame.display.update()
-			self.checkInput()
-		# proccess user selection
-		if self.selection and int(self.selection) <= len(self.allInfraData) - 1:
-			selectionName = self.infraNames[int(self.selection)]
-			selectedInfraObject = self.allInfraData[selectionName][0]
-			selectedInfraName = self.allInfraData[selectionName][2]
-			currentSquare = self.parent.interface.currentSquare()
-			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
-			# assign and generate map
-			if selectedInfraObject:
-				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = [selectedInfraObject]
-			else:
-				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = None
-			self.parent.interface.generateMap()
-			# assign the name of the tile to the .json-file, to preserve the change
-			with open(self.parent.cmdArgs.mapPath) as json_file:
-				jsonLevelData = json.load(json_file)
-				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][1] = selectedInfraName
-			self.saveData(jsonLevelData)
-
-
-
-	def showUnitMenu(self):
-		""" display the menu of hex tiles  """
-		if self.lastMenu != 3:
-			self.selection = ""
-		self.lastMenu = 3
-		self.menuRunning = True
-		self.menu = pygame.Surface((600, 950))	
-		pygame.draw.rect(self.menu, colors.red, (0, 0, 600, 950))						# window background
-		pygame.draw.rect(self.menu, colors.black, (0, 0, 600, 950), 4)						# window border
-		for no in range(len(self.ecUnitNames)):
-			gfx = self.allUnitData[self.ecUnitNames[no]][1]
-			self.menu.blit(gfx, [50,  10 + 20 * no])
-		for no in range(len(self.cpUnitNames)):
-			gfx = self.allUnitData[self.cpUnitNames[no]][1]
-			self.menu.blit(gfx, [350, 10 + 20 * no])
-		self.parent.display.blit(self.menu, (1124, 15))
-		while self.menuRunning:
-			selection = font30.render("Selection: " + str(self.selection), True, colors.black)
-			pygame.draw.rect(self.parent.display, colors.red, (1400, 900, 300, 50))
-			self.parent.display.blit(selection, [1400, 900])
-			pygame.display.update()
-			self.checkInput()
-		# proccess user selection
-		if self.selection and int(self.selection) <= len(self.allUnitData) - 1:
-			selectionName = self.unitNames[int(self.selection)]
-			selectedUnitName = self.allUnitData[selectionName][2]
-			currentSquare = self.parent.interface.currentSquare()
-			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
-			if selectedUnitName:
-				selectedUnitObject = Unit(selectedUnitName)
-			else:
-				selectedUnitObject = None
-			# assign and generate map
-			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].unit = selectedUnitObject
-			self.parent.interface.generateMap()
-			# assign the name of the tile to the .json-file, to preserve the change
-			with open(self.parent.cmdArgs.mapPath) as json_file:
-				jsonLevelData = json.load(json_file)
-				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][2] = selectedUnitName
-			self.saveData(jsonLevelData)
-
-
-
-	def checkInput(self):
-		""" Checks and responds to input from keyboard and mouse """
-		for event in pygame.event.get():
-			# Quit
-			if event.type == pygame.QUIT:
-				pass
-		# Keyboard
-		keysPressed = pygame.key.get_pressed()
-		if keysPressed[pygame.K_LEFT]:
-			pass
-		elif keysPressed[pygame.K_RIGHT]:
-			pass
-		elif keysPressed[pygame.K_UP]:
-			pass
-		elif keysPressed[pygame.K_DOWN]:
-			pass
-		elif keysPressed[pygame.K_RETURN]:
-			self.menuRunning = False
-		elif keysPressed[pygame.K_0]:
-			self.selection += "0"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_1]:
-			self.selection += "1"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_2]:
-			self.selection += "2"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_3]:
-			self.selection += "3"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_4]:
-			self.selection += "4"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_5]:
-			self.selection += "5"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_6]:
-			self.selection += "6"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_7]:
-			self.selection += "7"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_8]:
-			self.selection += "8"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_9]:
-			self.selection += "9"
-			time.sleep(0.2)
-		elif keysPressed[pygame.K_BACKSPACE]:
-			self.selection = self.selection[:-1]
-			time.sleep(0.2)
 
 
 

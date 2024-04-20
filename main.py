@@ -16,6 +16,7 @@ import argparse
 import pygame.locals
 from io import BytesIO
 from gui import GUI
+from mapEditor import MapEditor
 from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
@@ -211,19 +212,7 @@ class Main():
 			self.handleSelection()
 		elif keysPressed[pygame.K_e]:
 			if self.cmdArgs.mapedit:
-				self.cmdArgs.editor.showTileMenu()
-		elif keysPressed[pygame.K_r]:
-			if self.cmdArgs.mapedit:
-				self.cmdArgs.editor.showInfrastructureMenu()
-		elif keysPressed[pygame.K_t]:
-			if self.cmdArgs.mapedit:
-				self.cmdArgs.editor.showUnitMenu()
-
-
-
-
-
-
+				self.cmdArgs.editor.showMenus()
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -312,12 +301,13 @@ obj =  Main(args)
 # - Move in turns / create opponenet AI
 # 	- must win if HQ taken
 
-
+# - show chosen hex in editor
+# - add map generator to mapeditor class, create cmd switch
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
-# - 
+# - unreachable depots can be chosen by train
 
 
 
