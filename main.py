@@ -301,15 +301,14 @@ obj =  Main(args)
 # - Move in turns / create opponenet AI
 # 	- must win if HQ taken
 
-# - show chosen hex in editor
 # - add map generator to mapeditor class, create cmd switch
+# - use mouse on map editor
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - unreachable depots can be chosen by train
-
-
+# - mapEditor menus can hit "IndexError: list index out of range", dunno why...esp in last (Units)
 
 
 

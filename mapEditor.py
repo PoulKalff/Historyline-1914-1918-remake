@@ -112,47 +112,64 @@ class MapEditor():
 	def showMenus(self):
 		""" displays the three editor menus """
 		self.menuRunning = True
+		self.noChange = False
+		currentSquare = self.parent.interface.currentSquare()
 		while self.menuRunning:
 			self.parent.display.blit(self.menus[self.activeMenu.get()], (1124, 15))
 			# cusor
+			_selection = [self.activeMenu.get(), self.cursorPos[0].get(), self.cursorPos[1].get()]
+			_selName = self.menuContent[_selection[0]][_selection[1]][_selection[2]]
 			pygame.draw.rect(self.parent.display, colors.green, (	1128 + self.cursorPos[0].get() * 197, 
 																	59 + self.cursorPos[1].get() * 20, 
 																	198,
 																	20), 3)
+			# display selection
+			if _selection[0] == 0:
+				self.parent.display.blit(bgTiles[_selName], [1150, 850])
+			else:
+				self.parent.display.blit(currentSquare.background, [1150, 850])
+			if _selection[0] == 1:
+				if _selName != "<none>":
+					self.parent.display.blit(infraIcons[_selName], [1150, 850])
+			elif _selection[0] == 2:
+				if _selName != "<none>":
+					unitDisplay = Unit(_selName)
+					self.parent.display.blit(unitDisplay.allIcons[0], [1150, 842])
 			pygame.display.update()
 			self.checkInput()
 		# process selection
-		_selection = [self.activeMenu.get(), self.cursorPos[0].get(), self.cursorPos[1].get()]
-		_selName = self.menuContent[_selection[0]][_selection[1]][_selection[2]]
-		currentSquare = self.parent.interface.currentSquare()
-		mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
-		# assign new hex object and generate map
-		if _selection[0] == 0:
-			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].background = bgTiles[_selName]
-			_fileWriteData = _selName
-		elif _selection[0] == 1:
-			if  _selName == "<none>":
-				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = None
-				_fileWriteData = ""
-			else:
-				if self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra == None:
-					self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = [infraIcons[_selName]]
-					_fileWriteData = [_selName]
+		if not self.noChange:
+#			_selection = [self.activeMenu.get(), self.cursorPos[0].get(), self.cursorPos[1].get()]
+#			_selName = self.menuContent[_selection[0]][_selection[1]][_selection[2]]
+			currentSquare = self.parent.interface.currentSquare()
+			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
+			# assign new hex object and generate map
+			if _selection[0] == 0:
+				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].background = bgTiles[_selName]
+				_fileWriteData = _selName
+			elif _selection[0] == 1:
+				if  _selName == "<none>":
+					self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = None
+					_fileWriteData = ""
 				else:
-					self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra.append(infraIcons[_selName])
-					with open(self.parent.cmdArgs.mapPath) as json_file:
-						jsonLevelData = json.load(json_file)
-						_fileWriteData = jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]]
-					_fileWriteData.append(_selName)
-		elif _selection[0] == 2:
-			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].unit = Unit(_selName) if _selName != "<none>" else None
-			_fileWriteData = _selName if _selName != "<none>" else ""
-		self.parent.interface.generateMap()
-		# assign the name of the tile to the .json-file, to preserve the change
-		with open(self.parent.cmdArgs.mapPath) as json_file:
-			jsonLevelData = json.load(json_file)
-			jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]] = _fileWriteData
-		self.saveData(jsonLevelData)
+					if self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra == None:
+						self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = [infraIcons[_selName]]
+						_fileWriteData = [_selName]
+					else:
+						self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra.append(infraIcons[_selName])
+						with open(self.parent.cmdArgs.mapPath) as json_file:
+							jsonLevelData = json.load(json_file)
+							_fileWriteData = jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]]
+						_fileWriteData.append(_selName)
+			elif _selection[0] == 2:
+				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].unit = Unit(_selName) if _selName != "<none>" else None
+				_fileWriteData = _selName if _selName != "<none>" else ""
+			self.parent.interface.generateMap()
+			# assign the name of the tile to the .json-file, to preserve the change
+			with open(self.parent.cmdArgs.mapPath) as json_file:
+				jsonLevelData = json.load(json_file)
+				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]] = _fileWriteData
+			self.saveData(jsonLevelData)
 
 
 
@@ -184,7 +201,6 @@ class MapEditor():
 	def checkInput(self):
 		""" Checks and responds to input from keyboard and mouse """
 		for event in pygame.event.get():
-			# Quit
 			if event.type == pygame.QUIT:
 				pass
 		# Keyboard
@@ -216,10 +232,9 @@ class MapEditor():
 			pygame.time.delay(150)
 		elif keysPressed[pygame.K_RETURN]:
 			self.menuRunning = False
-
-
-
-
+		elif keysPressed[pygame.K_q]:
+			self.noChange = True
+			self.menuRunning = False
 
 
 
