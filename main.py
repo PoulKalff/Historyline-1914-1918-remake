@@ -16,7 +16,7 @@ import argparse
 import pygame.locals
 from io import BytesIO
 from gui import GUI
-from mapEditor import MapEditor
+from mapEditor import *
 from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
@@ -212,6 +212,7 @@ class Main():
 			self.handleSelection()
 		elif keysPressed[pygame.K_e]:
 			if self.cmdArgs.mapedit:
+				pygame.time.delay(150)
 				self.cmdArgs.editor.showMenus()
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
@@ -251,13 +252,6 @@ class Main():
 				self.checkInput()
 			self.interface.draw()
 			pygame.display.update()
-#			print(str(self.mode))
-#			print("External",  self.interface.currentSquare().position  )
-#			print(self.interface.mapView)
-#			print(self.interface.cursorPos, self.interface.mapView)
-#			print(self.interface.mainMap[0][0])
-
-
 		pygame.quit()
 		print('\n  Game terminated gracefully\n')
 
@@ -270,6 +264,7 @@ parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpForma
 parser.add_argument('levelMap')
 parser.add_argument("-v", "--version",		action="store_true",	help="Print version and exit")
 parser.add_argument("-n", "--hexnumbers",	action="store_true",	help="Show numbers on hex fields (for DEV)")
+parser.add_argument("-g", "--generate",		action="store_true",	help="Generates and saves a new map file")
 parser.add_argument("-r", "--reveal",		action="store_true",	help="Always show entire map (for DEV)")
 parser.add_argument("-m", "--mapedit",		action="store_true",	help="Map editor enabled (for DEV)")
 args = parser.parse_args()
@@ -277,6 +272,9 @@ args = parser.parse_args()
 # handle commandline arguments
 if args.version:
 	sys.exit("\n  " + str(version) + "\n")
+if args.generate:
+	filename = generateMap()
+	sys.exit('\n  Generated new map was saved as "' + filename + '"\n')
 args.mapPath = "levels/" + args.levelMap + ".json"
 if not os.path.exists(args.mapPath):
 	print("\n  The level '" + str(args.levelMap) + "' does not exist.")
@@ -300,9 +298,6 @@ obj =  Main(args)
 #	- units must block adjacent hexes, ie. higher movement costs
 # - Move in turns / create opponenet AI
 # 	- must win if HQ taken
-
-# - add map generator to mapeditor class, create cmd switch
-# - use mouse on map editor
 
 
 

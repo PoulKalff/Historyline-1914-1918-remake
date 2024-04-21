@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import time
@@ -18,36 +19,49 @@ menuTitles = 	[
 # --- Functions -----------------------------------------------------------------------------------
 
 
-def generateMap(self):
+def generateMap():
 	""" generate a new map with placeholder data, and save to file """
-
-	sys.exit(" def generateMaps(self): ")
-
-	height = 47
-	width = 12
-	name = 'test'
-	no = 0
-	player = 'test'
-	print('{')
-	print('\t"mapName" :\t"' + name + '",')
-	print('\t"mapNo" :\t' + str(no) + ',')
-	print('\t"player" :\t"' + player + '",')
-
-	print('\t"tiles"\t:{')
+	name = 		input("Name of the Map : ").capitalize()
+	height = 	int(input("Height of the Map : "))
+	width = 	int(input("Widthh of the Map : "))
+	no = 		input("Number of the Map : ")
+	_player = 	input("Map player (EC/CP) : ")
+	_type =		input("Summer or Winter (s/w) : ")
+	filename =	"level" + str(no) + "_" + _player.lower() + ".json"
+	expPath =	os.path.join("levels", filename)
+	if _player.upper() == "EC":
+		player = "Entente Cordial"
+	elif _player.upper() == "CP":
+		player = "Central Powers"
+	else:
+		sys.exit("Error... please select EC or CP")
+	if _type.lower() == "w":
+		tile = "grass_w"
+	else: 
+		tile = "grass"
+	tiles = {}
+	hexEntry = [tile, "",""]
+	jsonData = {
+					"mapName" :	None,
+					"mapNo" :	None,
+					"player" :	None,
+					"tiles" :	{}
+				}
+	# assemble data
+	jsonData["mapName"] = name
+	jsonData["mapNo"] = no
+	jsonData["player"] = player
 	for x in range(height):
-		print('\t\t\t\t"line' + str(x + 1) + '":\t[', end="")
+		key  = "line" + str(x + 1)
+		value = []
 		_width = width if x % 2 == 0 else width - 1 
 		for y in range(_width):
-			print('["i","",""]', end="")
-			if y < _width - 1:
-				print(', ', end="")
-		print("]", end="")
-		if x < height - 1:
-			print(',')
-		else:
-			print()
-	print('\t\t}')
-	print('}')
+			value.append(hexEntry)
+		tiles[key] = value
+	jsonData["tiles"] = tiles
+	with open(expPath, "w") as json_file:
+		json.dump(jsonData, json_file, indent=4)
+	return filename
 
 
 # --- Classes -------------------------------------------------------------------------------------
@@ -112,7 +126,6 @@ class MapEditor():
 	def showMenus(self):
 		""" displays the three editor menus """
 		self.menuRunning = True
-		self.noChange = False
 		currentSquare = self.parent.interface.currentSquare()
 		while self.menuRunning:
 			self.parent.display.blit(self.menus[self.activeMenu.get()], (1124, 15))
@@ -137,39 +150,45 @@ class MapEditor():
 					self.parent.display.blit(unitDisplay.allIcons[0], [1150, 842])
 			pygame.display.update()
 			self.checkInput()
-		# process selection
-		if not self.noChange:
-#			_selection = [self.activeMenu.get(), self.cursorPos[0].get(), self.cursorPos[1].get()]
-#			_selName = self.menuContent[_selection[0]][_selection[1]][_selection[2]]
-			currentSquare = self.parent.interface.currentSquare()
-			mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
-			# assign new hex object and generate map
-			if _selection[0] == 0:
-				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].background = bgTiles[_selName]
-				_fileWriteData = _selName
-			elif _selection[0] == 1:
-				if  _selName == "<none>":
-					self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = None
-					_fileWriteData = ""
+
+
+
+	def executeChange(self):
+		""" execute selection and update map """
+		_selection = [self.activeMenu.get(), self.cursorPos[0].get(), self.cursorPos[1].get()]
+		_selName = self.menuContent[_selection[0]][_selection[1]][_selection[2]]
+		currentSquare = self.parent.interface.currentSquare()
+		mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
+		# assign new hex object and generate map
+		if _selection[0] == 0:
+			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].background = bgTiles[_selName]
+			_fileWriteData = _selName
+		elif _selection[0] == 1:
+			if  _selName == "<none>":
+				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = None
+				_fileWriteData = ""
+			else:
+				if self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra == None:
+					self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = [infraIcons[_selName]]
+					_fileWriteData = [_selName]
 				else:
-					if self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra == None:
-						self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = [infraIcons[_selName]]
-						_fileWriteData = [_selName]
-					else:
-						self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra.append(infraIcons[_selName])
-						with open(self.parent.cmdArgs.mapPath) as json_file:
-							jsonLevelData = json.load(json_file)
-							_fileWriteData = jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]]
-						_fileWriteData.append(_selName)
-			elif _selection[0] == 2:
-				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].unit = Unit(_selName) if _selName != "<none>" else None
-				_fileWriteData = _selName if _selName != "<none>" else ""
-			self.parent.interface.generateMap()
-			# assign the name of the tile to the .json-file, to preserve the change
-			with open(self.parent.cmdArgs.mapPath) as json_file:
-				jsonLevelData = json.load(json_file)
-				jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]] = _fileWriteData
-			self.saveData(jsonLevelData)
+					self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra.append(infraIcons[_selName])
+					with open(self.parent.cmdArgs.mapPath) as json_file:
+						jsonLevelData = json.load(json_file)
+						_fileWriteData = jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]]
+					_fileWriteData.append(_selName)
+		elif _selection[0] == 2:
+			self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].unit = Unit(_selName) if _selName != "<none>" else None
+			_fileWriteData = _selName if _selName != "<none>" else ""
+		# assign the name of the tile to the .json-file, to preserve the change
+		with open(self.parent.cmdArgs.mapPath) as json_file:
+			jsonLevelData = json.load(json_file)
+			jsonLevelData["tiles"]["line" + str(mapCursor[1] + 1)][mapCursor[0]][_selection[0]] = _fileWriteData
+		self.saveData(jsonLevelData)
+		# redraw all to show change
+		self.parent.interface.generateMap()
+		self.parent.interface.draw()
+		pygame.display.update()
 
 
 
@@ -203,6 +222,35 @@ class MapEditor():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pass
+			# Mouse
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				mX, mY = pygame.mouse.get_pos()
+				if self.parent.mouseClick.tick() < 500:						# if doubleclick detected
+					self.executeChange()
+				elif self.parent.interface.rectMap.collidepoint(mX, mY):		# if inside map
+					result =  self.parent.findHex(mX, mY)
+					if result:
+						self.parent.interface.cursorPos = result
+						self.parent.interface.draw()
+						pygame.display.update()
+				elif 1128 < mX < 1728 and 59 < mY < 969:			# inside menu area
+					menuX = mX - 1128
+					menuY = mY - 59
+					cellX = math.floor(menuX / 200)
+					cellY = math.floor(menuY / 20)
+					menu = self.menuContent[self.activeMenu.get()]
+					# check if valid column
+					if cellX > len(menu) - 1:
+						pass		# invalid column, ignore
+					else:
+						# check if valid row
+						if cellY > len(menu[cellX]) - 1:
+							pass		# invalid row, ignore
+						else:
+							self.cursorPos[1].count = cellY
+							self.cursorPos[0].count = cellX
+				else:
+					pass	# outside Menu area
 		# Keyboard
 		keysPressed = pygame.key.get_pressed()
 		if keysPressed[pygame.K_LEFT]:
@@ -231,11 +279,15 @@ class MapEditor():
 			self.cursorPos[1].count = 0
 			pygame.time.delay(150)
 		elif keysPressed[pygame.K_RETURN]:
+			self.executeChange()
+			pygame.time.delay(150)
+		elif keysPressed[pygame.K_e]:
 			self.menuRunning = False
+			pygame.time.delay(150)
 		elif keysPressed[pygame.K_q]:
-			self.noChange = True
 			self.menuRunning = False
-
+			pygame.time.delay(150)
+ 
 
 
 
