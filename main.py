@@ -302,9 +302,7 @@ obj =  Main(args)
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
-# - unreachable depots can be chosen by train
-# - mapEditor menus can hit "IndexError: list index out of range", dunno why...esp in last (Units)
-
+# - 
 
 
 # --- BEYOND ORIGINAL ----------------------------------------------------------------------------

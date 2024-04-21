@@ -222,6 +222,7 @@ class GUI():
 	def markMovableSquares(self):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
 			Must be called each time player selects move """
+		depotsInRange = []
 		if self.fromContent:
 			movingUnit = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]]
 		else:
@@ -260,9 +261,9 @@ class GUI():
 			# handle depot access, regardless of previous loop; hex will be have been filtered out here, if qualified, we will pop it from obstructed
 			if self.mainMap[x][y].content != False:			# if hex has a storage
 				if self.mainMap[x][y].owner == self.parent.info.player:		# if it is ours
-					if (x,y) in obstructed: obstructed.remove((x,y))
+					depotsInRange.append((x,y))
 				elif 1 in movingUnit.skills:								# if it is not ours, but we can talke it
-					if (x,y) in obstructed: obstructed.remove((x,y))
+					depotsInRange.append((x,y))
 		# remove obstacaled squares
 		for pos in obstructed:
 			if pos in movableSquares:
@@ -279,7 +280,12 @@ class GUI():
 				self.mainMap[square[0]][square[1]].fogofwar = 3
 			elif len(result) - 1 > movingUnit.speed :
 				self.mainMap[square[0]][square[1]].fogofwar = 3
-
+		# add depots if at least one square is a neighbor
+		for coord in depotsInRange:
+			neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
+			for n in neighbors:
+				if n in movableSquares:
+					self.mainMap[coord[0]][coord[1]].fogofwar = 0
 
 
 	def markAttackableSquares(self, check = False):
