@@ -16,6 +16,7 @@ import argparse
 import pygame.locals
 from io import BytesIO
 from gui import GUI
+from ArtificialIntelligence import AI
 from mapEditor import *
 from hlrData import *
 
@@ -32,7 +33,7 @@ class Main():
 		self.cmdArgs = args
 		self.width = 1800	# 1110 minimum, as it is smallest map
 		self.height = 1000
-		self.develop = False
+		self.playerTurn = 1 	# 1 (human) or 0 (computer). Human player always begins
 		if args.mapedit: args.editor = MapEditor(self)
 		pygame.init()
 		icon = pygame.image.load('gfx/gameIcon.png')
@@ -50,6 +51,7 @@ class Main():
 	def initGame(self):
 		self.running = True
 		self.interface = GUI(self)
+		self.computerPlayer = AI(self)
 		self.test = [0, 0]
 
 
@@ -242,14 +244,17 @@ class Main():
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
-			if self.mode == "actionMenu":
-				self.interface.actionMenu.checkInput()
-			elif self.mode == "weaponMenu":
-				self.interface.weaponMenu.checkInput()
-			elif self.mode == "showContent":
-				self.interface.contentMenu.checkInput()
+			if self.playerTurn:
+				if self.mode == "actionMenu":
+					self.interface.actionMenu.checkInput()
+				elif self.mode == "weaponMenu":
+					self.interface.weaponMenu.checkInput()
+				elif self.mode == "showContent":
+					self.interface.contentMenu.checkInput()
+				else:
+					self.checkInput()
 			else:
-				self.checkInput()
+				pass	# The AI controls its pieces, by iterating its pieces, then set self.playerTurn = 1
 			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()
@@ -298,11 +303,14 @@ obj =  Main(args)
 #	- units must block adjacent hexes, ie. higher movement costs
 # - Move in turns / create opponenet AI
 # 	- must win if HQ taken
+# 	- create a button to end the turn
+# - Right clik to show a menu (options, end turn)
 
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - 
+
 
 
 # --- BEYOND ORIGINAL ----------------------------------------------------------------------------
