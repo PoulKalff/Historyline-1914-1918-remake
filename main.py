@@ -299,18 +299,17 @@ obj =  Main(args)
 
 
 # --- TODO --------------------------------------------------------------------------------------- 
-# - calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
+# - Calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 #	- units must block adjacent hexes, ie. higher movement costs
 # - Move in turns / create opponenet AI
 # 	- must win if HQ taken
 # 	- create a button to end the turn
 # - Right clik to show a menu (options, end turn)
 
-
+# - bridge gfx to put under road over stream
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - 
-
 
 
 # --- BEYOND ORIGINAL ----------------------------------------------------------------------------

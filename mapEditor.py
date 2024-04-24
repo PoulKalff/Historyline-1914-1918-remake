@@ -23,7 +23,9 @@ def generateMap():
 	""" generate a new map with placeholder data, and save to file """
 	name = 		input("Name of the Map : ").capitalize()
 	height = 	int(input("Height of the Map : "))
-	width = 	int(input("Widthh of the Map : "))
+	if height % 2 == 0:
+		sys.exit("Error... map height must be an odd number")
+	width = 	int(input("Width of the Map : "))
 	no = 		input("Number of the Map : ")
 	_player = 	input("Map player (EC/CP) : ")
 	_type =		input("Summer or Winter (s/w) : ")
