@@ -55,6 +55,12 @@ class Main():
 		self.test = [0, 0]
 
 
+	def gameOver(self):
+		activePlayer = "Human Player" if self.playerTurn else "Computer Player"
+		sys.exit("Game over, winner is " + str(activePlayer))
+
+
+
 	def findHex(self, _mX, _mY):
 		""" Determine which Hex the mouse is in """
 		_mX -= 21
@@ -216,6 +222,20 @@ class Main():
 			if self.cmdArgs.mapedit:
 				pygame.time.delay(150)
 				self.cmdArgs.editor.showMenus()
+		elif keysPressed[pygame.K_F1]:
+			self.display.blit(self.interface.modeChange, [403, 500])
+			pygame.display.update()
+			_changeMode = True
+			while _changeMode:
+				for event in pygame.event.get():
+					# Keyboard
+					keysPressed = pygame.key.get_pressed()
+					if keysPressed[pygame.K_q]:
+						_changeMode = False
+						pygame.time.delay(150)
+					elif keysPressed[pygame.K_F1]:
+						_changeMode = False
+						self.playerTurn = 0
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -240,7 +260,6 @@ class Main():
 
 
 
-
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
@@ -254,7 +273,7 @@ class Main():
 				else:
 					self.checkInput()
 			else:
-				pass	# The AI controls its pieces, by iterating its pieces, then set self.playerTurn = 1
+				self.computerPlayer.moveAllUnits()
 			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()
@@ -301,12 +320,10 @@ obj =  Main(args)
 # --- TODO --------------------------------------------------------------------------------------- 
 # - Calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 #	- units must block adjacent hexes, ie. higher movement costs
-# - Move in turns / create opponenet AI
-# 	- must win if HQ taken
-# 	- create a button to end the turn
-# - Right clik to show a menu (options, end turn)
+# - Create opponenet AI
 
-# - bridge gfx to put under road over stream
+# - must win if HQ taken ()
+
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - 

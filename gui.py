@@ -16,6 +16,7 @@ class GUI():
 	def __init__(self, parent):
 		self.parent = parent
 		# load constants
+		self.modeChange = pygame.image.load('gfx/modeChange.png')
 		self.cursorGfx = pygame.image.load('gfx/cursor.png')
 		self.cursorFromGfx = pygame.image.load('gfx/cursor_from.png')
 		self.cursorAttackGfx = pygame.image.load('gfx/cursor_attacking.png')
@@ -693,6 +694,7 @@ class GUI():
 		self.parent.display.blit(_text, [900 - (_text.get_width() / 2), 470])
 		pygame.display.update()
 		pygame.time.delay(2000)
+		self.parent.gameOver()
 
 
 

@@ -37,7 +37,7 @@ class AI():
 
 	def moveUnit(self, unitToMove):
 		""" calculate best movement for the given unit and move it """
-		print('Now calculating movement for "' + unit.name + '"...')
+		print('Now calculating movement for "' + unitToMove.name + '"...')
 		# - call adajcent hexes to get all possible moves
 		# - use some other function to calculate best possible move
 		# - show the move? (perhaps user should choose wheter to show or not (like BI3))
