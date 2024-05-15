@@ -26,7 +26,7 @@ class AI():
 
 
 	def moveAllUnits(self):
-		""" iterate through the units, moving each one """
+		""" iterate through the units, moving each one. Called from main each round """
 		for unit in self.units:
 			self.moveUnit(unit)
 		# some message to tell player that the sides have changed...?
