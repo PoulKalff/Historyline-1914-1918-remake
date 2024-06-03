@@ -17,7 +17,7 @@ int TPWM_Unpack()
 
 
     while (outofs < TPWM.unpacked_size)
-    {      
+    {
         packbyte = TPWM.packed_data[inofs];
         inofs++;
 
@@ -103,7 +103,7 @@ for b in rawData[13:13 + 27]:
 # open file
 # pf = fopen(partlib_filename, "rb");
 
-# (Unpack_file(pf) 
+# (Unpack_file(pf)
 
 
 
