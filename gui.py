@@ -60,6 +60,17 @@ class GUI():
 
 
 
+	def resetUnits(self):
+		""" Resets all map icons to faction colourand moved state. Must be called at the beginning of each round"""
+		for unit in self.parent.ownUnits:
+			unit.mapIcon = unit.allIcons[unit.currentRotation]
+			unit.moved = False
+		self.generateMap()
+		self.drawMap()
+		pygame.display.update()
+
+
+
 	def handleBattle(self, attackFromSquare, attackToSquare, weapon):
 		""" Handles and shows the battle between to units """
 		# retrieve all data for calculation
@@ -220,15 +231,14 @@ class GUI():
 
 
 
-	def markMovableSquares(self):
-		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
-			Must be called each time player selects move """
+	def getMovableSquares(self, unitPos):
+		""" calculates a list of all hex squares that a unit on unitPos can move to """
 		depotsInRange = []
 		if self.fromContent:
 			movingUnit = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]]
 		else:
-			movingUnit = self.currentSquare().unit
-		self.movingFrom = self.currentSquare()
+			movingUnit = unitPos.unit
+		self.movingFrom = unitPos
 		xFrom, yFrom = self.movingFrom.position
 		withinRange = [(xFrom, yFrom)]	# coord of self
 		for iteration in range(movingUnit.speed):
@@ -263,13 +273,29 @@ class GUI():
 			if self.mainMap[x][y].content != False:			# if hex has a storage
 				if self.mainMap[x][y].owner == self.parent.info.player:		# if it is ours
 					depotsInRange.append((x,y))
-				elif 1 in movingUnit.skills:								# if it is not ours, but we can talke it
+				elif 1 in movingUnit.skills:								# if it is not ours, but we can capture it
 					depotsInRange.append((x,y))
+		# add depots if at least one square is a neighbor
+		for coord in depotsInRange:
+			neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
+			for n in neighbors:
+				if n in movableSquares:
+					movableSquares.append(coord)
 		# remove obstacaled squares
 		for pos in obstructed:
 			if pos in movableSquares:
 				movableSquares.remove(pos)
-		# mark squares not possible to target 
+		return movableSquares
+
+
+
+	def markMovableSquares(self):
+		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
+			Must be called each time player selects move """
+		movableSquares = self.getMovableSquares(self.currentSquare())
+		xFrom, yFrom = self.currentSquare().position
+		movingUnit = self.currentSquare().unit
+		# mark squares not possible to move to 
 		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				if self.mainMap[x][y].fogofwar != 1 and (x,y) not in movableSquares:
@@ -281,12 +307,7 @@ class GUI():
 				self.mainMap[square[0]][square[1]].fogofwar = 3
 			elif len(result) - 1 > movingUnit.speed :
 				self.mainMap[square[0]][square[1]].fogofwar = 3
-		# add depots if at least one square is a neighbor
-		for coord in depotsInRange:
-			neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
-			for n in neighbors:
-				if n in movableSquares:
-					self.mainMap[coord[0]][coord[1]].fogofwar = 0
+
 
 
 	def markAttackableSquares(self, check = False):
@@ -447,7 +468,8 @@ class GUI():
 					if square.infra:
 						for i in square.infra:
 							self.map.blit(i, [y * 142 + forskydning, x * 40])
-					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
+					if square.unit:
+						self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
 					self.map.blit(self.semiTransparent, [y * 142 + forskydning, x * 40])
 				if self.parent.cmdArgs.hexnumbers:	# put as number on square
 					text = self.parent.devModeFont.render(str(x) + '/' + str(y), True, (255,0,0))
@@ -689,12 +711,13 @@ class GUI():
 		""" show a short text / animation to inform o depot / HQ capture"""
 		_flag = self.flags.subsurface( ((player - 1)  * 88, 0, 88, 88) )
 		_bigFlag = pygame.transform.scale(_flag, (400, 300))
-		_text = font60.render(hexCaptured.name + " captured!", True, colors.black) 	# [movementModifierText, rMovementModifierText]
+		_text = font40.render(hexCaptured.name + " captured!", True, colors.black) 	# [movementModifierText, rMovementModifierText]
 		self.parent.display.blit(_bigFlag, [700, 350])
 		self.parent.display.blit(_text, [900 - (_text.get_width() / 2), 470])
 		pygame.display.update()
 		pygame.time.delay(2000)
-		self.parent.gameOver()
+		if hexCaptured.name == "Headquarters":
+			self.parent.gameOver()
 
 
 
@@ -763,6 +786,7 @@ class GUI():
 					elif rotation == 5:			# right up
 						frameCoord[0] = int(frameCoord[0] + 8.875)
 						frameCoord[1] -= 5
+				_unitMoved.currentRotation = rotation
 			pixelCoordXfrom = pixelCoordXto
 			pixelCoordYfrom = pixelCoordYto
 		# check if target has content
@@ -778,6 +802,8 @@ class GUI():
 			toHex.unit.content.addUnit(_unitMoved)
 		else:
 			toHex.unit = _unitMoved
+		# change status and colour to show that unit has moved
+		_unitMoved.markAsMoved()
 		# generate and display new map with unit
 		self.generateMap()
 		self.drawMap()

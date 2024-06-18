@@ -4,6 +4,7 @@ import numpy
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
+showCalculations = True
 
 # --- Functions -----------------------------------------------------------------------------------
 
@@ -17,28 +18,33 @@ class AI():
 
 	def __init__(self, parent):
 		self.parent = parent
-		self.units = []
-		# find each of the players units... how?
-		for _line in parent.interface.mainMap:
-			for _hex in _line:
-				if _hex.unit and _hex.unit.faction == self.parent.info.opponent:
-					self.units.append(_hex.unit)
+
 
 
 	def moveAllUnits(self):
 		""" iterate through the units, moving each one. Called from main each round """
-		for unit in self.units:
+		if showCalculations:
+			print("\nCalculating computer player movements:")
+			print("----------------------------------------------")
+		for unit in self.parent.getAllUnits(0):
 			self.moveUnit(unit)
 		# some message to tell player that the sides have changed...?
-		print("Your turn again, human player. Good luck!")
+		if showCalculations:
+			print("----------------------------------------------")
 		self.parent.playerTurn = 1
 
 
 
 	def moveUnit(self, unitToMove):
 		""" calculate best movement for the given unit and move it """
-		print('Now calculating movement for "' + unitToMove.name + '"...')
-		# - call adajcent hexes to get all possible moves
+		if showCalculations:
+			print('   Now calculating movement for "' + unitToMove.name + '"...' + str(unitToMove.position))
+		# call adajcent hexes to get all possible moves
+		allPossibleMoves = self.parent.interface.getMovableSquares(self.parent.interface.getSquare(unitToMove.position))
+		print("      Moves available:", len(allPossibleMoves))
+
+
+
 		# - use some other function to calculate best possible move
 		# - show the move? (perhaps user should choose wheter to show or not (like BI3))
 

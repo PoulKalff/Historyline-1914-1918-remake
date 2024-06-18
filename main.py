@@ -52,6 +52,7 @@ class Main():
 		self.running = True
 		self.interface = GUI(self)
 		self.computerPlayer = AI(self)
+		self.ownUnits = self.getAllUnits()
 		self.test = [0, 0]
 
 
@@ -167,6 +168,19 @@ class Main():
 
 
 
+	def getAllUnits(self, ownUnits = True):
+		""" Returns a list of all units of the side given, and updates their position on the map"""
+		_units = []
+		side = self.info.player if ownUnits else self.info.opponent
+		for _line in self.interface.mainMap:
+			for _hex in _line:
+				if _hex.unit and _hex.unit.faction == side:
+					_hex.unit.position = _hex.position
+					_units.append(_hex.unit)
+		return _units
+
+
+
 	def checkInput(self):
 		""" Checks and responds to input from keyboard and mouse """
 		for event in pygame.event.get():
@@ -246,11 +260,23 @@ class Main():
 		elif keysPressed[pygame.K_KP2]:
 			self.test[1] += 1
 		elif keysPressed[pygame.K_d]:
+	#		test = self.getAllUnits(0)
+	#		for t in test:
+	#			print(t.name, t.moved)
+
+			cursorHex = self.interface.currentSquare()
+#			print(cursorHex.unit)
+#			print(cursorHex.unit.faction == self.info.player)
+#			print(cursorHex.unit.moved)
+
+			print(cursorHex.unit.name, cursorHex.unit.moved)
+
+
 #			print(self.interface.mainMap[5][0].name, self.interface.mainMap[5][0].owner)
 #			print(self.interface.mainMap[18][5].name, self.interface.mainMap[18][5].owner)
 #			obj = self.interface.mainMap[45][6]
-			print(obj.position)
-			print(  self.interface.currentSquare().position  )
+#			print(obj.position)
+#			print(  self.interface.currentSquare().position  )
 			sys.exit()
 		# ------------------------------------- test end ---------------------------------------
 		elif keysPressed[pygame.K_PAGEUP]:
@@ -274,6 +300,7 @@ class Main():
 					self.checkInput()
 			else:
 				self.computerPlayer.moveAllUnits()
+				self.interface.resetUnits()
 			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()
@@ -320,13 +347,13 @@ obj =  Main(args)
 # --- TODO --------------------------------------------------------------------------------------- 
 # - Calculate hex movement with lower move cost (ie. roads) :	Collect all possible paths within range, calculate collect movepoints for all squares in each path!
 #	- units must block adjacent hexes, ie. higher movement costs
-# - Create opponenet AI
+# - Develop opponenet AI
 
-# - must win if HQ taken ()
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 
 # - 
+
 
 
 # --- BEYOND ORIGINAL ----------------------------------------------------------------------------

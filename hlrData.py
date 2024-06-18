@@ -951,8 +951,6 @@ class Weapon():
 
 
 
-
-
 class Unit():
 	""" Representation of one unit  """
 
@@ -973,7 +971,10 @@ class Unit():
 			self.weaponsGfx = []
 			self.maxSize = 10       # all units size 10?
 			self.currentSize = 10
+			self.position = None
+			self.moved = False
 			self.faction = 1 if self.country in ['Germany', 'Austria', 'Bulgaria', 'Ottoman'] else 2
+			self.currentRotation = 3 if self.faction == 1 else 0
 			self.content = Content(data['storageMax']) if data['storageMax'] > 0 else False
 			for w in data['weapons']:
 				if w:
@@ -987,9 +988,23 @@ class Unit():
 			self.updateWeaponsGfx()
 
 
-	def changeColour(self, owner):
+
+	def markAsMoved(self):
+		""" colours the current icon gray to show that it has moved. """
+		tempIcon = self.mapIcon.copy()
+		arr = pygame.surfarray.pixels3d(tempIcon)
+		for i in range(96):
+			for j in range(96): # loop over the 2d array
+				arr[i, j][1] = arr[i, j][0]
+				arr[i, j][2] = arr[i, j][0]
+		self.mapIcon = tempIcon.copy()
+		self.moved = True
+
+
+
+	def changeColour(self, color):
 		self.icon = self.rawIcon.copy()
-		if owner == 0:		# unowned
+		if color == 0:		# unowned / moved
 			arr = pygame.surfarray.pixels3d(self.icon)
 			for i in range(48):
 				for j in range(48): # loop over the 2d array
@@ -1003,7 +1018,7 @@ class Unit():
 						arr[i, j] = [56, 56, 56]
 					elif numpy.array_equal(arr[i, j], [180, 148, 124]):
 						arr[i, j] = [88, 88, 88]
-		elif owner == 1:		# central powers
+		elif color == 1:		# central powers
 			arr = pygame.surfarray.pixels3d(self.icon)
 			for i in range(48):
 				for j in range(48): # loop over the 2d array
@@ -1424,7 +1439,7 @@ class ActionMenu():
 		self.location[1] = 0 if self.location[1] < 0 else self.location[1]
 		self.contents = []
 		_focusedUnit = self.parent.interface.currentSquare().unit
-		if _focusedUnit.speed:
+		if _focusedUnit.speed and not _focusedUnit.moved:
 			self.contents.append(self.buttonMove)
 		if _focusedUnit.weapons != [None, None, None, None]:        # DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
 			if self.parent.interface.markAttackableSquares(True):
