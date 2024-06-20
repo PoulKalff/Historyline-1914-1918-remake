@@ -289,12 +289,13 @@ class GUI():
 
 
 
-	def markMovableSquares(self):
+	def markMovableSquares(self, _square = None):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
 			Must be called each time player selects move """
-		movableSquares = self.getMovableSquares(self.currentSquare())
-		xFrom, yFrom = self.currentSquare().position
-		movingUnit = self.currentSquare().unit
+		curSquare = _square if _square else self.currentSquare()
+		movableSquares = self.getMovableSquares(curSquare)
+		xFrom, yFrom = curSquare.position
+		movingUnit = curSquare.unit
 		# mark squares not possible to move to 
 		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
@@ -307,6 +308,7 @@ class GUI():
 				self.mainMap[square[0]][square[1]].fogofwar = 3
 			elif len(result) - 1 > movingUnit.speed :
 				self.mainMap[square[0]][square[1]].fogofwar = 3
+		return movableSquares
 
 
 
@@ -486,6 +488,26 @@ class GUI():
 		scaleFactor = 392 / height
 		self.miniMap = pygame.transform.scale(tempMiniMap, (width * scaleFactor, height * scaleFactor))
 #		pygame.image.save(self.map, 'generatedMap.png')
+
+
+
+	def markFields(self, hexSquares):
+		""" for DEV only. Marks a list of fields with overlay, redraws map and halts"""
+		for x in range(self.parent.info.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				square = self.mainMap[x][y]
+				forskydning = 71 if (x % 2) != 0 else 0
+				# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
+				if (x, y) in hexSquares:
+					self.parent.display.blit(self.semiTransparent, [(y - self.mapView[0]) * 142 + forskydning + 19, (x - self.mapView[1]) * 40 + 19])
+		pygame.display.update()
+		# halt until user input
+		proceed = False
+		print("Press mouse button to proceed")
+		while not proceed:
+			for event in pygame.event.get():
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					proceed = True
 
 
 

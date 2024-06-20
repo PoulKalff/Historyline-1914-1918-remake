@@ -2,6 +2,9 @@ import sys
 import math
 import numpy
 
+import pygame
+
+
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 showCalculations = True
@@ -39,10 +42,26 @@ class AI():
 		""" calculate best movement for the given unit and move it """
 		if showCalculations:
 			print('   Now calculating movement for "' + unitToMove.name + '"...' + str(unitToMove.position))
-		# call adajcent hexes to get all possible moves
-		allPossibleMoves = self.parent.interface.getMovableSquares(self.parent.interface.getSquare(unitToMove.position))
+		# get all possible moves
+		x, y = unitToMove.position
+		square = self.parent.interface.mainMap[x][y]
+		allPossibleMoves = self.parent.interface.markMovableSquares(square)
 		print("      Moves available:", len(allPossibleMoves))
+		for move in allPossibleMoves:
+			print(move)
 
+
+				# Noget skal resettes her? Hvorfor bliver den ved med at regne ud fra det oprindelige felt, og derfeter taget færrer og færrer?
+
+
+
+		self.parent.interface.markFields(allPossibleMoves)
+
+
+
+
+
+#		sys.exit("Killed for DEV in ArtificialIntelligenve.py")
 
 
 		# - use some other function to calculate best possible move
