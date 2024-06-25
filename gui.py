@@ -322,15 +322,17 @@ class GUI():
 
 
 
-	def markAttackableSquares(self, check = False):
+	def markAttackableSquares(self, _square = None):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot attack.
 			Must be called each time player selects attack
 			If check is True, returns True or False, indicating whether any units are in range """
-		attackingFrom = self.currentSquare()
-		x, y = attackingFrom.position
+		attackingFrom = _square if _square else self.currentSquare()
+		x, y = _square.position
 		withinRange = [(x,y)]	# coord of self
 		_allMin = []
 		_allMax = []
+		if attackingFrom.unit.weapons == [None, None, None, None]:			# if no weapon available
+			return []
 		for c in attackingFrom.unit.weapons:
 			if c:
 				_allMin.append(c.rangeMin)
@@ -357,16 +359,14 @@ class GUI():
 		for x, y in attackableSquares:
 			if self.mainMap[x][y].fogofwar == 0:
 				if self.mainMap[x][y].unit:
-					if self.mainMap[x][y].unit.faction != self.parent.info.player:
+					if self.mainMap[x][y].unit.faction != self.parent.playerTurn:
 						attackableEnemySquares.append((x,y))
-		if check:
-			return bool(attackableEnemySquares)
-		else:
-			# mark squares possible to attack 
-			for x in range(self.parent.info.mapHeight):
-				for y in range(len(self.mainMap[x])):
-					if self.mainMap[x][y].fogofwar == 0 and (x,y) not in attackableEnemySquares:
-						self.mainMap[x][y].fogofwar = 3
+		# mark squares possible to attack 
+		for x in range(self.parent.info.mapHeight):
+			for y in range(len(self.mainMap[x])):
+				if self.mainMap[x][y].fogofwar == 0 and (x,y) not in attackableEnemySquares:
+					self.mainMap[x][y].fogofwar = 3
+		return attackableEnemySquares
 
 
 

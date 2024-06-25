@@ -33,7 +33,7 @@ class Main():
 		self.cmdArgs = args
 		self.width = 1800	# 1110 minimum, as it is smallest map
 		self.height = 1000
-		self.playerTurn = 1 	# 1 (human) or 0 (computer). Human player always begins
+		self.playerTurn = 1 	# 1 (human) or 2 (computer). Human player always begins
 		if args.mapedit: args.editor = MapEditor(self)
 		pygame.init()
 		icon = pygame.image.load('gfx/gameIcon.png')
@@ -57,7 +57,7 @@ class Main():
 
 
 	def gameOver(self):
-		activePlayer = "Human Player" if self.playerTurn else "Computer Player"
+		activePlayer = "Human Player" if self.playerTurn == 1 else "Computer Player"
 		sys.exit("Game over, winner is " + str(activePlayer))
 
 
@@ -249,7 +249,7 @@ class Main():
 						pygame.time.delay(150)
 					elif keysPressed[pygame.K_F1]:
 						_changeMode = False
-						self.playerTurn = 0
+						self.playerTurn = 2
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -289,7 +289,7 @@ class Main():
 	def loop(self):
 		""" Ensure that view runs until terminated by user """
 		while self.running:
-			if self.playerTurn:
+			if self.playerTurn == 1:
 				if self.mode == "actionMenu":
 					self.interface.actionMenu.checkInput()
 				elif self.mode == "weaponMenu":
@@ -301,7 +301,6 @@ class Main():
 			else:
 				self.computerPlayer.moveAllUnits()
 				self.interface.resetUnits()
-				self.interface.resetSquares()
 			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()
