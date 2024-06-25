@@ -61,13 +61,23 @@ class GUI():
 
 
 	def resetUnits(self):
-		""" Resets all map icons to faction colourand moved state. Must be called at the beginning of each round"""
+		""" Resets all map icons to faction colour and moved state. Must be called at the beginning of each round"""
 		for unit in self.parent.ownUnits:
 			unit.mapIcon = unit.allIcons[unit.currentRotation]
 			unit.moved = False
 		self.generateMap()
 		self.drawMap()
 		pygame.display.update()
+
+
+
+	def resetSquares(self):
+		""" Resets all map hexes to clear. Must be called at the beginning of each round"""
+		for sLine in self.mainMap:
+			for square in sLine:
+				square.fogofwar = 0
+#				square.
+#		sys.exit()
 
 
 
@@ -231,14 +241,14 @@ class GUI():
 
 
 
-	def getMovableSquares(self, unitPos):
-		""" calculates a list of all hex squares that a unit on unitPos can move to """
+	def getMovableSquares(self, hexSquare):
+		""" calculates a list of all hex squares that a unit on hexSquare can move to """
 		depotsInRange = []
-		if self.fromContent:
+		if self.fromContent:	# flag set or unset
 			movingUnit = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]]
 		else:
-			movingUnit = unitPos.unit
-		self.movingFrom = unitPos
+			movingUnit = hexSquare.unit
+		self.movingFrom = hexSquare
 		xFrom, yFrom = self.movingFrom.position
 		withinRange = [(xFrom, yFrom)]	# coord of self
 		for iteration in range(movingUnit.speed):
@@ -285,7 +295,7 @@ class GUI():
 		for pos in obstructed:
 			if pos in movableSquares:
 				movableSquares.remove(pos)
-		return movableSquares
+		return set(movableSquares)
 
 
 
@@ -390,12 +400,12 @@ class GUI():
 		# mark all squares around depots/HQ as visible
 		for x, y in depotSquares:
 			self.mainMap[x][y].fogofwar = 0
-		# --- FOR TEST --- Reveal whole map ------------------------------------------------
+		# --- FOR DEV --- Reveal whole map ------------------------------------------------
 		if self.parent.cmdArgs.reveal:
 			for x in range(self.parent.info.mapHeight):
 				for y in range(len(self.mainMap[x])):
 					self.mainMap[x][y].fogofwar = 0
-		# --- FOR TEST --- Reveal whole map ------------------------------------------------
+		# --- FOR DEV --- Reveal whole map ------------------------------------------------
 
 
 
@@ -493,6 +503,7 @@ class GUI():
 
 	def markFields(self, hexSquares):
 		""" for DEV only. Marks a list of fields with overlay, redraws map and halts"""
+		self.drawMap()
 		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
 				square = self.mainMap[x][y]

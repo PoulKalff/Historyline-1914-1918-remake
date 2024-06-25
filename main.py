@@ -301,6 +301,7 @@ class Main():
 			else:
 				self.computerPlayer.moveAllUnits()
 				self.interface.resetUnits()
+				self.interface.resetSquares()
 			self.interface.draw()
 			pygame.display.update()
 		pygame.quit()

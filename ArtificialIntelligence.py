@@ -31,6 +31,7 @@ class AI():
 			print("----------------------------------------------")
 		for unit in self.parent.getAllUnits(0):
 			self.moveUnit(unit)
+			self.parent.interface.resetSquares()
 		# some message to tell player that the sides have changed...?
 		if showCalculations:
 			print("----------------------------------------------")
@@ -47,21 +48,23 @@ class AI():
 		square = self.parent.interface.mainMap[x][y]
 		allPossibleMoves = self.parent.interface.markMovableSquares(square)
 		print("      Moves available:", len(allPossibleMoves))
+
+
+		# load a set of rules from JSON or whatever? Use these to calculate. But How? Which format?
+
+
+
+		print("      Move chosen:", "and WHY?")
+
+
+
+		# --- for DEV ----------------------------------------------------
 		for move in allPossibleMoves:
 			print(move)
-
-
-				# Noget skal resettes her? Hvorfor bliver den ved med at regne ud fra det oprindelige felt, og derfeter taget færrer og færrer?
-
-
-
 		self.parent.interface.markFields(allPossibleMoves)
+		# --- for DEV ----------------------------------------------------
 
 
-
-
-
-#		sys.exit("Killed for DEV in ArtificialIntelligenve.py")
 
 
 		# - use some other function to calculate best possible move
