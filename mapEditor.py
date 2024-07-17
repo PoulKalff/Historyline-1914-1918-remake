@@ -1,9 +1,7 @@
 import os
 import sys
 import json
-import time
 import math
-import numpy
 import pygame
 from hlrData import *
 
@@ -159,7 +157,7 @@ class MapEditor():
 		""" execute selection and update map """
 		_selection = [self.activeMenu.get(), self.cursorPos[0].get(), self.cursorPos[1].get()]
 		_selName = self.menuContent[_selection[0]][_selection[1]][_selection[2]]
-		currentSquare = self.parent.interface.currentSquare()
+# unused?		currentSquare = self.parent.interface.currentSquare()
 		mapCursor = [self.parent.interface.cursorPos[0] + self.parent.interface.mapView[0], self.parent.interface.cursorPos[1]  + self.parent.interface.mapView[1]]
 		# assign new hex object and generate map
 		if _selection[0] == 0:
@@ -170,7 +168,7 @@ class MapEditor():
 				self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = None
 				_fileWriteData = ""
 			else:
-				if self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra == None:
+				if self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra is None:
 					self.parent.interface.mainMap[mapCursor[1]][mapCursor[0]].infra = [infraIcons[_selName]]
 					_fileWriteData = [_selName]
 				else:
@@ -289,7 +287,7 @@ class MapEditor():
 		elif keysPressed[pygame.K_q]:
 			self.menuRunning = False
 			pygame.time.delay(150)
- 
+
 
 
 

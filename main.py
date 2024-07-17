@@ -1,28 +1,21 @@
 #!/usr/bin/python3
-from os import environ
-environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import warnings
-warnings.simplefilter("ignore")
-
-import io
 import os
 import sys
-import math
-import time
-import json
 import pygame
-import requests
 import argparse
 import pygame.locals
-from io import BytesIO
+from os import environ
 from gui import GUI
 from ArtificialIntelligence import AI
-from mapEditor import *
+from mapEditor import generateMap, MapEditor
 from hlrData import *
 
 # --- Variables / Ressources ----------------------------------------------------------------------
 
 version = '0.80'		# added map-editor
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+warnings.simplefilter("ignore")
 
 # --- Classes -------------------------------------------------------------------------------------
 
@@ -34,7 +27,8 @@ class Main():
 		self.width = 1800	# 1110 minimum, as it is smallest map
 		self.height = 1000
 		self.playerTurn = 1 	# 1 (human) or 2 (computer). Human player always begins
-		if args.mapedit: args.editor = MapEditor(self)
+		if args.mapedit:
+			args.editor = MapEditor(self)
 		pygame.init()
 		icon = pygame.image.load('gfx/gameIcon.png')
 		self.devModeFont = pygame.font.Font('freesansbold.ttf', 32)
@@ -138,7 +132,7 @@ class Main():
 		""" Handles user selection by SPACE or MOUSE """
 		cursorHex = self.interface.currentSquare()
 		if self.mode == "normal":
-			if cursorHex.content != False:	# if square has content ability
+			if cursorHex.content:	# if square has content ability
 				if cursorHex.owner != self.info.opponent:
 					self.interface.contentMenu.create(cursorHex)
 					self.mode = "showContent"
@@ -217,7 +211,7 @@ class Main():
 		if keysPressed[pygame.K_q]:
 			self.running = False
 		elif keysPressed[pygame.K_ESCAPE]:
-			if self.holdEscape == True:
+			if self.holdEscape:
 				self.holdEscape = False
 				pygame.time.delay(500)
 			else:
@@ -331,8 +325,8 @@ if not os.path.exists(args.mapPath):
 	print("\n  The level '" + str(args.levelMap) + "' does not exist.")
 	print("    These are the level files:")
 	levelFiles = os.listdir("levels")
-	for l in levelFiles:
-		print("      ", l)
+	for level in levelFiles:
+		print("      ", level)
 	print()
 	sys.exit()
 

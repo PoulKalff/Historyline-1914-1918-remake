@@ -1,6 +1,3 @@
-import sys
-import json
-import time
 import math
 import numpy
 import pygame
@@ -205,10 +202,7 @@ infraIcons =    {   '<none>'	:	None,
 					'path135'   :   pygame.image.load('gfx/infrastructure/path135.png'),
 					'path136'   :   pygame.image.load('gfx/infrastructure/path136.png'),
 					'road135'   :   pygame.image.load('gfx/infrastructure/road135.png'),
-					'road14'    :   pygame.image.load('gfx/infrastructure/road14.png'),
-					'road15'    :   pygame.image.load('gfx/infrastructure/road15.png'),
 					'road24'    :   pygame.image.load('gfx/infrastructure/road24.png'),
-					'road35'    :   pygame.image.load('gfx/infrastructure/road35.png'),
 					'path15'    :   pygame.image.load('gfx/infrastructure/path15.png'),
 					'path24'    :   pygame.image.load('gfx/infrastructure/path24.png'),
 					'path26'    :   pygame.image.load('gfx/infrastructure/path26.png'),
@@ -1126,7 +1120,7 @@ class HexSquare():
 		_infrastructure = []
 		if infrastructure:							# create list of one or more infrastructure
 			self.infra = []
-			if type(infrastructure) == list:
+			if isinstance(infrastructure, list):
 				for i in infrastructure:
 					_infrastructure.append(i)
 			else:
@@ -1342,7 +1336,7 @@ class WeaponMenu():
 			self.contents.append([pygame.transform.scale(w, (332, 25) ) if w else None, None])
 		self.noOfWeapons = 0
 		for w in self.attackingSquare.unit.weapons:
-			if w != None:
+			if w is not None:
 				self.noOfWeapons += 1
 		self.focused = RangeIterator(self.noOfWeapons)
 		# calculate rect for each weapon
@@ -1466,7 +1460,7 @@ class ActionMenu():
 				if self.contents[butNr][2].collidepoint(mPos):
 					self.focused.count = butNr
 					self.focusedArray[butNr] = 1
-			if not 1 in self.focusedArray:  # reset count, if no button down
+			if 1 not in self.focusedArray:  # reset count, if no button down
 				self.focused.count = 0
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				self.endMenu(self.focused.get())
@@ -1533,7 +1527,7 @@ class FlipSwitch():
 		self._value = bool(Ind)
 
 	def flip(self):
-		if self._value == True:
+		if self._value:
 			self._value = False
 		else:
 			self._value = True

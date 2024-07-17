@@ -1,11 +1,8 @@
-import sys
 import json
 import time
 import copy
-import math
 import pygame
 import random
-import pygame.surfarray as surfarray
 from hlrData import *
 
 # --- Classes -------------------------------------------------------------------------------------
@@ -145,8 +142,8 @@ class GUI():
 		# print("   Random:       ", eRndModified)
 		# print("   Kills:        ", eFinal)
 		# show battle : make calculations needed inside loop		
-		fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140));
-		toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140));
+		fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140))
+		toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140))
 		subFromWeapon = weapon.picture.subsurface((42, 0, 248, 49))
 		subToWeapon = enemyWeapon.picture.subsurface((42, 0, 248, 49)) if enemyWeapon else pygame.Surface((290, 49), pygame.SRCALPHA, 32)
 		fromWeapon = pygame.transform.scale(subFromWeapon, (146, 30))
@@ -177,8 +174,8 @@ class GUI():
 					if attackToSquare.unit.experience < 10:
 						attackToSquare.unit.experience += 1
 					_deaths[1] = True	
-				fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140));
-				toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140));
+				fromSize = font40.render(str(attackFromSquare.unit.currentSize), True, (208, 185, 140))
+				toSize = font40.render(str(attackToSquare.unit.currentSize), True, (208, 185, 140))
 			else:
 				barFrame = 100
 			battleMenu = self.battleMenu.copy()
@@ -265,7 +262,7 @@ class GUI():
 					obstructed.append((x,y))
 			elif self.mainMap[x][y].fogofwar != 0 and self.mainMap[x][y].fogofwar != 2:
 				obstructed.append((x,y))
-			elif self.mainMap[x][y].movementModifier == None:
+			elif self.mainMap[x][y].movementModifier is None:
 				obstructed.append((x,y))
 			# if unit on hex
 			if self.mainMap[x][y].unit:
@@ -280,7 +277,7 @@ class GUI():
 					else:
 						obstructed.append((x,y))
 			# handle depot access, regardless of previous loop; hex will be have been filtered out here, if qualified, we will pop it from obstructed
-			if self.mainMap[x][y].content != False:			# if hex has a storage
+			if self.mainMap[x][y].content:			# if hex has a storage
 				if self.mainMap[x][y].owner == self.parent.info.player:		# if it is ours
 					depotsInRange.append((x,y))
 				elif 1 in movingUnit.skills:								# if it is not ours, but we can capture it
@@ -387,11 +384,11 @@ class GUI():
 								neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
 								withinSight += neighbors
 						for c in set(withinSight):
-							try:
-								self.mainMap[c[0]][c[1]].fogofwar = 0
-								self.mainMap[c[0]][c[1]].seen = True
-							except:
-								print("Coordinate exceed map size in calculateFOW():", c)
+#							try:
+							self.mainMap[c[0]][c[1]].fogofwar = 0
+							self.mainMap[c[0]][c[1]].seen = True
+#							except:
+#								print("Coordinate exceed map size in calculateFOW():", c)
 				if hasattr(self.mainMap[x][y], 'owner') and self.mainMap[x][y].owner == self.parent.info.player:
 					depotSquares.append((x, y))
 					neighbors = adjacentHexes(x, y, self.parent.info.mapWidth, self.parent.info.mapHeight)
@@ -424,10 +421,10 @@ class GUI():
 			pixelCooords = [self.cursorPos[0] * 142 + forskydning + 7, self.cursorPos[1] * 40 + 9]
 			return pixelCooords
 		else:
-			try:
-				return self.mainMap[mapCursor[1]][mapCursor[0]]
-			except:				# to avoid extremely rare exception where coord of odd line is +1
-				return False
+#			try:
+			return self.mainMap[mapCursor[1]][mapCursor[0]]
+#			except:				# to avoid extremely rare exception where coord of odd line is +1
+#				return False
 
 
 	def draw(self):
@@ -470,7 +467,8 @@ class GUI():
 					if square.infra:
 						for i in square.infra:
 							self.map.blit(i, [y * 142 + forskydning, x * 40])
-					if square.unit:		self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
+					if square.unit:
+						self.map.blit(square.unit.mapIcon, [y * 142 + forskydning, x * 40 - 9])
 				elif square.fogofwar == 1:	# fully hidden, black
 					self.map.blit(square.bgHidden, [y * 142 + forskydning, x * 40])
 				elif square.fogofwar == 2:	# hidden, but seen before, grey
@@ -506,7 +504,6 @@ class GUI():
 		self.drawMap()
 		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
-				square = self.mainMap[x][y]
 				forskydning = 71 if (x % 2) != 0 else 0
 				# one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
 				if (x, y) in hexSquares:
@@ -569,12 +566,12 @@ class GUI():
 				for i in square.infra:
 					TerrainGUI.blit(i, [49, 19])
 			TerrainGUI.blit(self.hexBorder, [47, 17])
-			if square.movementModifier != None:
+			if square.movementModifier is not None:
 				for x in range(square.movementModifier):
 					TerrainGUI.blit(self.progressSquare, (392 + (x * 20), 18))
 			else:
 				TerrainGUI.blit(self.iProgressBar, [392, 18])
-			if square.battleModifier != None:
+			if square.battleModifier is not None:
 				for x in range(int(square.battleModifier / 10)):
 					TerrainGUI.blit(self.progressSquare, (392 + (x * 20), 48))
 			else:
@@ -668,9 +665,12 @@ class GUI():
 						self.cursorPos[0] += 1
 						self.cursorPos[1] -= 1
 		# prevent cursor exiting map
-		if self.cursorPos[0] < 0: self.cursorPos[0] = 0
-		if self.cursorPos[1] < 0: self.cursorPos[1] = 0
-		if self.cursorPos[1] > 22: self.cursorPos[1] = 21
+		if self.cursorPos[0] < 0:
+			self.cursorPos[0] = 0
+		if self.cursorPos[1] < 0:
+			self.cursorPos[1] = 0
+		if self.cursorPos[1] > 22:
+			self.cursorPos[1] = 21
 
 
 
@@ -686,7 +686,6 @@ class GUI():
 				lastField = p[-1]
 				neighbors = adjacentHexes(*lastField, self.parent.info.mapWidth, self.parent.info.mapHeight)
 				for n in reversed(neighbors):
-					square = self.getSquare(n)
 					if n in visited:				# We don't want paths to visit previously visited fields
 						neighbors.remove(n)
 				for n in neighbors:
@@ -820,8 +819,6 @@ class GUI():
 						frameCoord[0] = int(frameCoord[0] + 8.875)
 						frameCoord[1] -= 5
 				_unitMoved.currentRotation = rotation
-			pixelCoordXfrom = pixelCoordXto
-			pixelCoordYfrom = pixelCoordYto
 		# check if target has content
 		_delivered = False
 		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
