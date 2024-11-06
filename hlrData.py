@@ -1436,7 +1436,7 @@ class ActionMenu():
 		if _focusedUnit.speed and not _focusedUnit.moved:
 			self.contents.append(self.buttonMove)
 		if _focusedUnit.weapons != [None, None, None, None]:        # DEV: should also check if any ammo in each. Eclude weapons without ammo from list here
-			if self.parent.interface.markAttackableSquares(True):
+			if self.parent.interface.markAttackableSquares():
 				self.contents.append(self.buttonAttack)
 		if _focusedUnit.content:
 			self.contents.append(self.buttonContain)

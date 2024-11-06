@@ -322,9 +322,9 @@ class GUI():
 	def markAttackableSquares(self, _square = None):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot attack.
 			Must be called each time player selects attack
-			If check is True, returns True or False, indicating whether any units are in range """
+			If check is True, returns True or False, indicating whether any units are in range """  			#  <----- no?? Not done yet? 
 		attackingFrom = _square if _square else self.currentSquare()
-		x, y = _square.position
+		x, y = attackingFrom.position
 		withinRange = [(x,y)]	# coord of self
 		_allMin = []
 		_allMax = []
@@ -776,7 +776,7 @@ class GUI():
 			pixelCoordXto = x * 40 + 10
 			pixelCoordYto = y * 142 + forskydning + 19
 			if coord != _fromCoord:
-#				print("Moving pixel coordinates: (%s, %s) ---> (%s, %s)" % (pixelCoordXfrom, pixelCoordYfrom, pixelCoordXto, pixelCoordYto))
+	#			print("Moving pixel coordinates: (%s, %s) ---> (%s, %s)" % (pixelCoordXfrom, pixelCoordYfrom, pixelCoordXto, pixelCoordYto))
 				# calculate rotation
 				if pixelCoordYfrom > pixelCoordYto:
 					if pixelCoordXfrom < pixelCoordXto:
@@ -818,7 +818,8 @@ class GUI():
 					elif rotation == 5:			# right up
 						frameCoord[0] = int(frameCoord[0] + 8.875)
 						frameCoord[1] -= 5
-				_unitMoved.currentRotation = rotation
+			pixelCoordXfrom = pixelCoordXto
+			pixelCoordYfrom = pixelCoordYto
 		# check if target has content
 		_delivered = False
 		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
@@ -839,5 +840,4 @@ class GUI():
 		self.drawMap()
 		pygame.display.update()
 		return 1
-
 
