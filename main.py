@@ -343,6 +343,9 @@ obj =  Main(args)
 #	- units must block adjacent hexes, ie. higher movement costs
 # - Develop opponenet AI
 
+# - Do not reset unit rotation on new round
+# - Set unit moved to depot as MOVED
+# - Announce that we are in a new round (what does original game do?)
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 

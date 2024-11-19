@@ -1,3 +1,4 @@
+import sys
 import json
 import time
 import copy
@@ -38,7 +39,6 @@ class GUI():
 		self.cursorPos = [0,0]									# x,y index of cursor position on SCREEN, not on map!
 		self.mapView = [0, 0]										# the starting coordinates of the map
 		self.mainMap = []
-		self.fromContent = False 	# flag, shows moveUnit to not move the unit of current hex
 		# gfxTexts
 		self.movementModifierText = font20.render('Movement Penalty', True, colors.black) 	# [movementModifierText, rMovementModifierText]
 		self.battleModifierText = font20.render('Battle Advantage', True, colors.black)		#[battleModifierText, rBattleModifierText]
@@ -241,10 +241,7 @@ class GUI():
 	def getMovableSquares(self, hexSquare):
 		""" calculates a list of all hex squares that a unit on hexSquare can move to """
 		depotsInRange = []
-		if self.fromContent:	# flag set or unset
-			movingUnit = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]]
-		else:
-			movingUnit = hexSquare.unit
+		movingUnit = hexSquare.unit
 		self.movingFrom = hexSquare
 		xFrom, yFrom = self.movingFrom.position
 		withinRange = [(xFrom, yFrom)]	# coord of self
@@ -740,7 +737,7 @@ class GUI():
 
 
 	def showCapture(self, player, hexCaptured):
-		""" show a short text / animation to inform o depot / HQ capture"""
+		""" show a short text / animation to inform of depot / HQ capture"""
 		_flag = self.flags.subsurface( ((player - 1)  * 88, 0, 88, 88) )
 		_bigFlag = pygame.transform.scale(_flag, (400, 300))
 		_text = font40.render(hexCaptured.name + " captured!", True, colors.black) 	# [movementModifierText, rMovementModifierText]
@@ -755,20 +752,25 @@ class GUI():
 
 	def executeMove(self, movePath):
 		""" Shows the movement of a unit along the path given by the points in the path, then updates map data """
-		self.parent.mode = "normal"
 		xFrom, yFrom = movePath[0]
 		_fromCoord = movePath[0]
 		xTo, yTo = movePath[-1]
 		fromHex = self.mainMap[xFrom][yFrom]
 		toHex = self.mainMap[xTo][yTo]
 		# remove unit from matrix and save it, display map without unit
-		if self.fromContent:
-			_unitMoved = self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]]
-			self.parent.interface.contentMenu.content.units[self.fromContent[0]][self.fromContent[1]] = False
-			self.fromContent = False
-		else:
-			_unitMoved = fromHex.unit
-			fromHex.unit = None
+		_unitMoved = fromHex.unit
+		fromHex.unit = None
+		# also remove unit from depot, if hex is depot
+		if fromHex.content:
+			if _unitMoved in fromHex.content.units[0]:
+				_index = fromHex.content.units[0].index(_unitMoved)
+				fromHex.content.units[0][_index] = False
+				print("Found in list 0!!!!!", fromHex.content.units)
+			elif _unitMoved in fromHex.content.units[1]:
+				_index = fromHex.content.units[1].index(_unitMoved)
+				fromHex.content.units[1][_index] = False
+				print("Found in list 1!!!!!", fromHex.content.units)
+		self.parent.mode = "normal"
 		self.generateMap()
 		for coord in movePath:
 			x, y = coord
@@ -820,6 +822,14 @@ class GUI():
 						frameCoord[1] -= 5
 			pixelCoordXfrom = pixelCoordXto
 			pixelCoordYfrom = pixelCoordYto
+		# change status and colour to show that unit has moved
+		_unitMoved.markAsMoved()
+
+
+
+
+
+		
 		# check if target has content
 		_delivered = False
 		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
@@ -833,8 +843,6 @@ class GUI():
 			toHex.unit.content.addUnit(_unitMoved)
 		else:
 			toHex.unit = _unitMoved
-		# change status and colour to show that unit has moved
-		_unitMoved.markAsMoved()
 		# generate and display new map with unit
 		self.generateMap()
 		self.drawMap()

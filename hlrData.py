@@ -1260,8 +1260,9 @@ class ContentMenu():
 	def endMenu(self):
 		_unit = self.content.units[self.focused[1].count][self.focused[0].count]
 		if _unit and _unit.faction == self.parent.info.player:
-			self.parent.interface.fromContent = (self.focused[1].count, self.focused[0].count)  # index of unit to move
+			self.parent.interface.currentSquare().unit = _unit 		# assign selected unit to current square, so it can be moved like any other
 			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
+
 
 
 	def draw(self):
@@ -1422,6 +1423,7 @@ class ActionMenu():
 			self.contents[butNr][2] = pygame.Rect(_butLocation, self.location[1] + 4, 62, 52)
 		self.focusedArray = [0 for x in range(len(self.contents))]
 		self.active = True          # currently only used in content!
+
 
 
 	def create(self):
