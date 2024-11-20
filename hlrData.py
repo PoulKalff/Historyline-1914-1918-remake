@@ -923,8 +923,7 @@ class Content():
 			for x in range(2):
 				if not _delivered and not self.units[x][y]:
 					_delivered = True
-					self.units[x][y] =_unit
-
+					self.units[x][y] = _unit
 
 
 class Weapon():
@@ -1259,7 +1258,7 @@ class ContentMenu():
 
 	def endMenu(self):
 		_unit = self.content.units[self.focused[1].count][self.focused[0].count]
-		if _unit and _unit.faction == self.parent.info.player:
+		if _unit and _unit.faction == self.parent.info.player and not _unit.moved:
 			self.parent.interface.currentSquare().unit = _unit 		# assign selected unit to current square, so it can be moved like any other
 			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
 
@@ -1270,7 +1269,18 @@ class ContentMenu():
 		for y in range(9):
 			for x in range(2):
 				if self.content.units[x][y]:
-					_frame.blit(self.content.units[x][y].contentIcon, [38 + (y * 50), 545 + (x * 50)])
+					unit = self.content.units[x][y]
+					if unit.moved:						# show recolored icon if it has moved
+						tempIcon = unit.rawIcon.copy()
+						arr = pygame.surfarray.pixels3d(tempIcon)
+						for i in range(48):
+							for j in range(48): # loop over the 2d array
+								arr[i, j][1] = arr[i, j][0]
+								arr[i, j][2] = arr[i, j][0]
+						blitIcon = tempIcon.copy()
+						_frame.blit(blitIcon, [38 + (y * 50), 545 + (x * 50)])
+					else:
+						_frame.blit(unit.contentIcon, [38 + (y * 50), 545 + (x * 50)])
 		# draw info for highlighted unit, if any
 		focusX = self.focused[0].count
 		focusY = self.focused[1].count

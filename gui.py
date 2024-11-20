@@ -59,7 +59,7 @@ class GUI():
 
 	def resetUnits(self):
 		""" Resets all map icons to faction colour and moved state. Must be called at the beginning of each round"""
-		for unit in self.parent.ownUnits:
+		for unit in self.parent.getAllUnits():
 			unit.mapIcon = unit.allIcons[unit.currentRotation]
 			unit.moved = False
 		self.generateMap()
@@ -238,13 +238,17 @@ class GUI():
 
 
 
-	def getMovableSquares(self, hexSquare):
+	def getMovableSquares(self, hexSquare, unit = False):
 		""" calculates a list of all hex squares that a unit on hexSquare can move to """
 		depotsInRange = []
-		movingUnit = hexSquare.unit
+		movingUnit = unit if unit else hexSquare.unit 	# if unit is in depot, it is not on hexSquare
 		self.movingFrom = hexSquare
 		xFrom, yFrom = self.movingFrom.position
 		withinRange = [(xFrom, yFrom)]	# coord of self
+
+
+
+
 		for iteration in range(movingUnit.speed):
 			for coord in set(withinRange):
 				neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
@@ -293,17 +297,16 @@ class GUI():
 
 
 
-	def markMovableSquares(self, _square = None):
+	def markMovableSquares(self, curSquare, unit = None):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
 			Must be called each time player selects move """
-		curSquare = _square if _square else self.currentSquare()
-		movableSquares = self.getMovableSquares(curSquare)
+		movableSquares = self.getMovableSquares(curSquare, unit)
 		xFrom, yFrom = curSquare.position
-		movingUnit = curSquare.unit
+		movingUnit = unit if unit else curSquare.unit
 		# mark squares not possible to move to 
 		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
-				if self.mainMap[x][y].fogofwar != 1 and (x,y) not in movableSquares:
+				if self.mainMap[x][y].fogofwar != 1 and (x, y) not in movableSquares:
 					self.mainMap[x][y].fogofwar = 3
 		# mark inacessible and too far paths
 		for square in movableSquares:
@@ -321,6 +324,8 @@ class GUI():
 			Must be called each time player selects attack
 			If check is True, returns True or False, indicating whether any units are in range """  			#  <----- no?? Not done yet? 
 		attackingFrom = _square if _square else self.currentSquare()
+		if not attackingFrom.unit:
+			return []
 		x, y = attackingFrom.position
 		withinRange = [(x,y)]	# coord of self
 		_allMin = []
@@ -447,7 +452,7 @@ class GUI():
 		""" generate the basic map to be used to draw main map and minimap """	
 		self.calculateFOW()
 		if action == 'move':
-			self.markMovableSquares()
+			self.markMovableSquares(self.currentSquare())
 		elif action == 'attack':
 			self.markAttackableSquares()
 		width = (self.parent.info.mapWidth * 142) - 46  # dunno why 46 must be subtracted?
@@ -765,11 +770,9 @@ class GUI():
 			if _unitMoved in fromHex.content.units[0]:
 				_index = fromHex.content.units[0].index(_unitMoved)
 				fromHex.content.units[0][_index] = False
-				print("Found in list 0!!!!!", fromHex.content.units)
 			elif _unitMoved in fromHex.content.units[1]:
 				_index = fromHex.content.units[1].index(_unitMoved)
 				fromHex.content.units[1][_index] = False
-				print("Found in list 1!!!!!", fromHex.content.units)
 		self.parent.mode = "normal"
 		self.generateMap()
 		for coord in movePath:
@@ -820,28 +823,24 @@ class GUI():
 					elif rotation == 5:			# right up
 						frameCoord[0] = int(frameCoord[0] + 8.875)
 						frameCoord[1] -= 5
+					_unitMoved.currentRotation = rotation
 			pixelCoordXfrom = pixelCoordXto
 			pixelCoordYfrom = pixelCoordYto
-		# change status and colour to show that unit has moved
-		_unitMoved.markAsMoved()
-
-
-
-
-
-		
 		# check if target has content
 		_delivered = False
 		if toHex.content and _unitMoved.weight + toHex.content.storageActual() <= toHex.content.storageMax:			# if enough room, depot/HQ entered
-			toHex.content.addUnit(_unitMoved)
 			# change ownership and flag of Hex
 			if toHex.owner != self.parent.info.player:
 				toHex.owner = self.parent.info.player
 				toHex.updateDepotColours(toHex.owner)
 				self.showCapture(self.parent.info.player, toHex)
+			_unitMoved.markAsMoved()
+			toHex.content.addUnit(_unitMoved)
 		elif toHex.unit and _unitMoved.weight + toHex.unit.content.storageActual() <= toHex.unit.content.storageMax:			# if enough room, unit entered
+			_unitMoved.markAsMoved()
 			toHex.unit.content.addUnit(_unitMoved)
 		else:
+			_unitMoved.markAsMoved()
 			toHex.unit = _unitMoved
 		# generate and display new map with unit
 		self.generateMap()

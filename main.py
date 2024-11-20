@@ -46,7 +46,7 @@ class Main():
 		self.running = True
 		self.interface = GUI(self)
 		self.computerPlayer = AI(self)
-		self.ownUnits = self.getAllUnits()
+		self.ownUnits = self.getAllUnits(self.info.player)
 		self.test = [0, 0]
 
 
@@ -161,17 +161,28 @@ class Main():
 
 
 
-
-	def getAllUnits(self, ownUnits = True):
-		""" Returns a list of all units of the side given, and updates their position on the map"""
+	def getAllUnits(self, oneSideOnly = False):
+		""" Returns a list of all units in the game, or if side is given, only one units of one side"""
 		_units = []
-		side = self.info.player if ownUnits else self.info.opponent
 		for _line in self.interface.mainMap:
 			for _hex in _line:
-				if _hex.unit and _hex.unit.faction == side:
+				if _hex.unit:
 					_hex.unit.position = _hex.position
 					_units.append(_hex.unit)
-		return _units
+				elif _hex.content:
+					for _unit in _hex.content.units[0]:
+						if _unit:
+							_unit.position = _hex.position
+							_units.append(_unit)
+					for _unit in _hex.content.units[1]:
+						if _unit:
+							_unit.position = _hex.position
+							_units.append(_unit)
+		# all units collected
+		if oneSideOnly:
+			return [x for x in _units if x.faction == oneSideOnly ]
+		else:
+			return _units
 
 
 
@@ -343,9 +354,10 @@ obj =  Main(args)
 #	- units must block adjacent hexes, ie. higher movement costs
 # - Develop opponenet AI
 
-# - Do not reset unit rotation on new round
-# - Set unit moved to depot as MOVED
+
 # - Announce that we are in a new round (what does original game do?)
+
+
 
 
 # --- BUGS --------------------------------------------------------------------------------------- 

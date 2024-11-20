@@ -41,14 +41,13 @@ class AI():
 		# get all possible moves
 		x, y = unitToMove.position
 		square = self.parent.interface.mainMap[x][y]
-		allPossibleMoves = self.parent.interface.markMovableSquares(square)
+		allPossibleMoves = self.parent.interface.markMovableSquares(square, unitToMove)
 		self.parent.interface.resetSquares()
 		allPossibleTargets = self.parent.interface.markAttackableSquares(square)
 		self.parent.interface.resetSquares()
 		if showCalculations:
 			print("      Moves available:", len(allPossibleMoves))
 			print("      Targets available:", len(allPossibleTargets))
-
 
 
 
