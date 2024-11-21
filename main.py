@@ -37,6 +37,7 @@ class Main():
 		self.display = pygame.display.set_mode((self.width, self.height))
 		self.mouseClick = pygame.time.Clock()
 		self.holdEscape = False
+		self.round = 1
 		self.mode = "normal"		# selection mode: normal, actionMenu, weaponMenu, selectMoveTo, moveTo, selectAttack, attack
 		self.initGame()
 		self.loop()
@@ -145,6 +146,22 @@ class Main():
 				moveFrom = self.interface.movingFrom.position
 				moveTo = cursorHex.position
 				movePath = self.interface.findPath(moveFrom, moveTo)
+
+
+		#		self.interface.movingFrom.unitToMove = self.interface.movingFrom.unit
+
+
+
+
+				# fromHex = self.interface.movingFrom
+				# print()
+				# print("fromHex.unit", 		fromHex.unit.name)
+				# print("fromHex.unitToMove", fromHex.unitToMove.name)
+				# print("fromHex.position", 	fromHex.position)
+				# print()
+				# print("CHECKITOUT")
+
+
 				self.interface.executeMove(movePath)
 				self.mode = "normal"
 			else:
@@ -169,6 +186,15 @@ class Main():
 				if _hex.unit:
 					_hex.unit.position = _hex.position
 					_units.append(_hex.unit)
+					if _hex.unit.content:
+						for _unit in _hex.unit.content.units[0]:
+							if _unit:
+								_unit.position = _hex.position
+								_units.append(_unit)
+						for _unit in _hex.unit.content.units[1]:
+							if _unit:
+								_unit.position = _hex.position
+								_units.append(_unit)
 				elif _hex.content:
 					for _unit in _hex.content.units[0]:
 						if _unit:
@@ -183,6 +209,29 @@ class Main():
 			return [x for x in _units if x.faction == oneSideOnly ]
 		else:
 			return _units
+
+
+
+	def handleChangeMode(self):
+		self.display.blit(self.interface.modeChange, [403, 500])
+		pygame.display.update()
+		_changeMode = True
+		while _changeMode:
+			for event in pygame.event.get():
+				# Keyboard
+				keysPressed = pygame.key.get_pressed()
+				if keysPressed[pygame.K_q] or keysPressed[pygame.K_ESCAPE]:
+					_changeMode = False
+					pygame.time.delay(150)
+				elif keysPressed[pygame.K_F1]:
+					self.round += 1
+					pygame.draw.rect(self.display, colors.historylineBrown, (405, 502, 317, 122))
+					_nextRoundText = font60.render('Round ' + str(self.round), True, colors.historylineLight) 
+					self.display.blit(_nextRoundText, [450, 540])
+					pygame.display.update()
+					pygame.time.delay(2000)
+					_changeMode = False
+					self.playerTurn = 2
 
 
 
@@ -242,19 +291,7 @@ class Main():
 				pygame.time.delay(150)
 				self.cmdArgs.editor.showMenus()
 		elif keysPressed[pygame.K_F1]:
-			self.display.blit(self.interface.modeChange, [403, 500])
-			pygame.display.update()
-			_changeMode = True
-			while _changeMode:
-				for event in pygame.event.get():
-					# Keyboard
-					keysPressed = pygame.key.get_pressed()
-					if keysPressed[pygame.K_q]:
-						_changeMode = False
-						pygame.time.delay(150)
-					elif keysPressed[pygame.K_F1]:
-						_changeMode = False
-						self.playerTurn = 2
+			self.handleChangeMode()
 		# ------------------------------------- test begin -------------------------------------
 		elif keysPressed[pygame.K_KP4]:
 			self.test[0] -= 1
@@ -337,7 +374,7 @@ if not os.path.exists(args.mapPath):
 	print("    These are the level files:")
 	levelFiles = os.listdir("levels")
 	for level in levelFiles:
-		print("      ", level)
+		print("      ", level[:-5])
 	print()
 	sys.exit()
 
@@ -354,9 +391,9 @@ obj =  Main(args)
 #	- units must block adjacent hexes, ie. higher movement costs
 # - Develop opponenet AI
 
-
-# - Announce that we are in a new round (what does original game do?)
-
+# - Content of supply truck should be moved to depot, if truck enters depot
+# - kan ikke tage depot fra supplycar
+# - genskrive del som er taget ud af artificial intelligence
 
 
 

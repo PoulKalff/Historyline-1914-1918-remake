@@ -882,6 +882,7 @@ class colors:
 	bi3 =               (68, 136, 77)
 	historylineDark =   (49, 48, 33)
 	historylineLight =  (107, 105, 90)
+	historylineBrown =  (72, 69, 66)	
 
 
 
@@ -924,6 +925,17 @@ class Content():
 				if not _delivered and not self.units[x][y]:
 					_delivered = True
 					self.units[x][y] = _unit
+
+	def removeUnit(self, _unit):
+		if _unit in self.units[0]:
+			_index = self.units[0].index(_unit)
+			self.units[0][_index] = False
+		elif _unit in self.units[1]:
+			_index = self.units[1].index(_unit)
+			self.units[1][_index] = False
+
+
+
 
 
 class Weapon():
@@ -1080,6 +1092,7 @@ class HexSquare():
 		self.seen = False                                       # has the square ever been visible?
 		self.infra = None                                           # one of 1) Road, 2) Path, 3) Railroad 4) Trenches  (overlay gfx)
 		self.unit = Unit(unit) if unit else None                        # any unit occupying the square, e.g. Infantry
+		self.unitToMove = None										# a unit that is being moved must be copied here. This because a moed unit can be contained in another
 		self.fogofwar = None                                    # one of 0) none, completely visible 1) Black, 2) Semi transparent (e.g. seen before, but not currently visible) 3) reddened, ie. marked as not reachable by current unit
 		self.position = pos
 		self.type = hexType
@@ -1259,7 +1272,8 @@ class ContentMenu():
 	def endMenu(self):
 		_unit = self.content.units[self.focused[1].count][self.focused[0].count]
 		if _unit and _unit.faction == self.parent.info.player and not _unit.moved:
-			self.parent.interface.currentSquare().unit = _unit 		# assign selected unit to current square, so it can be moved like any other
+			# get current hex, and move either hex.content og hex.unit.content.unit to MOVE
+			self.parent.interface.currentSquare().unitToMove = _unit
 			self.actionMenu.createSimple((self.location[0] + self.xPos + 60, self.location[1] + self.yPos - 40))
 
 

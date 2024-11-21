@@ -238,17 +238,12 @@ class GUI():
 
 
 
-	def getMovableSquares(self, hexSquare, unit = False):
+	def getMovableSquares(self, hexSquare, movingUnit):
 		""" calculates a list of all hex squares that a unit on hexSquare can move to """
 		depotsInRange = []
-		movingUnit = unit if unit else hexSquare.unit 	# if unit is in depot, it is not on hexSquare
 		self.movingFrom = hexSquare
 		xFrom, yFrom = self.movingFrom.position
 		withinRange = [(xFrom, yFrom)]	# coord of self
-
-
-
-
 		for iteration in range(movingUnit.speed):
 			for coord in set(withinRange):
 				neighbors = adjacentHexes(*coord, self.parent.info.mapWidth, self.parent.info.mapHeight)
@@ -297,12 +292,15 @@ class GUI():
 
 
 
-	def markMovableSquares(self, curSquare, unit = None):
+	def markMovableSquares(self, hexSquare):
 		""" prints an overlay on each hexSquare on the map that the current unit cannot move to.
 			Must be called each time player selects move """
-		movableSquares = self.getMovableSquares(curSquare, unit)
-		xFrom, yFrom = curSquare.position
-		movingUnit = unit if unit else curSquare.unit
+		if hexSquare.unit:
+			movingUnit = hexSquare.unit
+		else:
+			movingUnit = hexSquare.unitToMove
+		movableSquares = self.getMovableSquares(hexSquare, movingUnit)
+		xFrom, yFrom = hexSquare.position
 		# mark squares not possible to move to 
 		for x in range(self.parent.info.mapHeight):
 			for y in range(len(self.mainMap[x])):
@@ -762,17 +760,16 @@ class GUI():
 		xTo, yTo = movePath[-1]
 		fromHex = self.mainMap[xFrom][yFrom]
 		toHex = self.mainMap[xTo][yTo]
-		# remove unit from matrix and save it, display map without unit
-		_unitMoved = fromHex.unit
-		fromHex.unit = None
-		# also remove unit from depot, if hex is depot
-		if fromHex.content:
-			if _unitMoved in fromHex.content.units[0]:
-				_index = fromHex.content.units[0].index(_unitMoved)
-				fromHex.content.units[0][_index] = False
-			elif _unitMoved in fromHex.content.units[1]:
-				_index = fromHex.content.units[1].index(_unitMoved)
-				fromHex.content.units[1][_index] = False
+		if not fromHex.unitToMove:
+			fromHex.unitToMove = fromHex.unit
+		# remove unit from where it was moved (hex, depot or other unit.content)
+		_unitMoved = fromHex.unitToMove
+		if fromHex.unit and fromHex.unit != fromHex.unitToMove:
+			fromHex.unit.content.removeUnit(_unitMoved)
+		elif fromHex.content:
+			fromHex.content.removeUnit(_unitMoved)
+		else:
+			fromHex.unit = None
 		self.parent.mode = "normal"
 		self.generateMap()
 		for coord in movePath:
@@ -842,6 +839,7 @@ class GUI():
 		else:
 			_unitMoved.markAsMoved()
 			toHex.unit = _unitMoved
+		fromHex.unitToMove = None
 		# generate and display new map with unit
 		self.generateMap()
 		self.drawMap()
