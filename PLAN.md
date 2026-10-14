@@ -118,13 +118,18 @@ internal/assets/            go:embed of gfx/, faction recolouring and rotation c
 
 ### Phase 0 — Bootstrap
 
-- [ ] `go mod init`, add Ebitengine, add `.gitignore` entries for Go build output
-- [ ] Add a `Makefile`/`justfile` with `run`, `test`, `lint`, `build`, `wasm` targets
+- [x] `go mod init`, add Ebitengine, add `.gitignore` entries for Go build output (2026-10-14) —
+      module `github.com/CWBudde/Historyline-1914-1918-remake`, Ebitengine v2.10.5, a stub
+      `cmd/historyline` that opens an empty 1800 × 1000 window, binaries/wasm ignored
+- [x] Add a `Makefile`/`justfile` with `run`, `test`, `lint`, `build`, `wasm` targets (2026-10-14) —
+      `justfile` with those recipes plus `ci`; lint = `go vet` + golangci-lint v2 (`.golangci.yml`)
 - [ ] GitHub Actions: `go test ./...`, `golangci-lint`, a build matrix (linux/windows/macos) and a
-      WASM build
+      WASM build (2026-10-14) — partial: `.github/workflows/ci.yml` added and passes actionlint;
+      tick once the first run on GitHub is green
 - [ ] Clarify asset provenance. `gfx/` holds tiles and sprites modelled on (or taken from) the 1992
       Blue Byte original. Find out which, and record it in the README before any public release.
-- [ ] README section: how to run the Go version vs. the Python reference
+- [x] README section: how to run the Go version vs. the Python reference (2026-10-14) — README
+      lists the `just` recipes and the `python3 main.py <level>` options
 
 ### Phase 1 — Core model (no graphics)
 
